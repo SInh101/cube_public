@@ -1,2 +1,3 @@
-// Cube domain implementation starts in Milestone 1.
-export {};
+export { Cube } from './Cube';
+export { COLORS, FACES, MOVES } from './types';
+export type { Color, CubeState, Face, FaceState, Move } from './types';
