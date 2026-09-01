@@ -1,0 +1,272 @@
+# Rubik's Cube Web教材 開発学習手順書
+
+## 1. プロジェクト目的
+
+ルービックキューブを題材として、以下を学習する。
+
+- REST APIの設計・実装
+- HTTPメソッド、ステータスコード、リソース設計
+- TypeScript
+- Reactによるフロントエンド開発
+- REST APIとFrontendの連携
+- Webアプリケーションの状態管理
+- CRUD API
+- DBアクセス
+- テスト設計と実装
+- コードレビューを受けながら改善する開発サイクル
+
+完成するアプリケーションは、次の教材機能を持つ。
+
+- 3Dルービックキューブ表示
+- R / L / U / D / F / B 操作
+- 逆回転
+- 手順の入力と再生
+- プリセット手順の保存・編集・削除
+- 逆再生
+- 交換子 `[A, B] = A B A⁻¹ B⁻¹` の可視化
+- 3-cycleの可視化
+- 操作前後で変化したCubieの強調
+- 3-cycle、偶奇置換などの教材表示
+
+## 2. 技術スタック
+
+```text
+Frontend
+  React + TypeScript + Vite + Three.js
+  GitHub Pages
+
+REST API
+  TypeScript
+  Vercel Functions
+
+Database
+  Supabase PostgreSQL
+```
+
+推奨Monorepo構成：
+
+```text
+rubiks-learning/
+├── apps/
+│   ├── web/
+│   └── api/
+├── packages/
+│   ├── cube-core/
+│   └── api-contract/
+├── supabase/
+│   └── migrations/
+├── docs/
+│   └── report/
+└── .github/
+    └── workflows/
+```
+
+`cube-core` はCube数学を扱うTypeScriptライブラリとする。
+
+FrontendとREST APIの両方から利用できるが、REST APIの学習を損なわないよう、Frontendから直接Cube操作を完結させない。
+
+## 3. 学習対象とAgent担当の境界
+
+### 自力実装するもの
+
+- REST endpoint
+- HTTP methodの選択
+- request / response設計
+- status code
+- エラー処理
+- FrontendからのREST通信
+- React component
+- state管理
+- form
+- CRUD画面
+- loading / error表示
+- REST APIテストコード
+- DBを利用したPreset管理
+
+### Agentに任せるもの
+
+- Cube数学の正しさ
+- permutation / orientation
+- Move適用ロジック
+- commutator生成
+- 3-cycle解析
+- Three.jsの低レベル3D処理
+- 開発環境設定
+- CI
+- formatter / linter
+- テストケース設計
+- コードレビュー
+- アーキテクチャ違反検出
+
+## 4. 基本学習サイクル
+
+```text
+1. Agentが土台・仕様・テスト観点を準備
+        ↓
+2. 自力実装
+        ↓
+3. code-reviewerによるレビュー
+        ↓
+4. 自力修正
+        ↓
+5. architecture-guardianによる確認
+        ↓
+6. テスト
+        ↓
+7. docs/report/milestone_X.md と docs/explanation/milestone_X.md 作成
+        ↓
+8. 次Milestoneへ
+```
+
+Agentは原則として、自力実装フェーズ中に完成コードを提示しない。
+
+支援レベルは以下の順とする。
+
+1. 問題点の指摘
+2. 考え方
+3. 擬似コード
+4. 部分コード
+5. 明示的に要求された場合のみ完成例
+
+## 5. REST API学習方針
+
+Supabaseの自動REST APIをFrontendから直接利用しない。
+
+```text
+Browser
+   │
+   │ HTTP
+   ▼
+REST API
+   │
+   ▼
+Supabase
+```
+
+これにより以下を自分で設計する。
+
+- resource
+- URI
+- HTTP method
+- status code
+- validation
+- DTO
+- error response
+
+## 6. Cube Coreの位置付け
+
+Cube Coreは学習対象ではなく教材基盤とする。
+
+最低限次の型を提供する。
+
+```text
+Cube
+CubeState
+Cubie
+Move
+MoveSequence
+Orientation
+Permutation
+Commutator
+Cycle
+```
+
+例：
+
+```ts
+const cube = Cube.solved();
+cube.applyMove("R");
+const state = cube.getState();
+```
+
+REST APIからCube Coreをどう呼び出し、何をHTTPレスポンスとして返すかは自力で設計する。
+
+## 7. 3D Rendererの位置付け
+
+Three.jsそのものを深く学ぶことは今回の主目的としない。
+
+Agentが例えば次の程度のインターフェースを提供する。
+
+```tsx
+<CubeView
+  state={cubeState}
+  animation={animation}
+/>
+```
+
+自力で担当するもの：
+
+- APIからCubeState取得
+- React stateへの反映
+- Move操作
+- 再生制御
+- UI
+- エラー処理
+
+## 8. レビュー方針
+
+主な観点：
+
+- RESTとして自然か
+- FrontendとAPIの責務が分離されているか
+- domain modelがHTTP仕様に依存していないか
+- API handlerにCube数学が入り込んでいないか
+- DBアクセスが散らばっていないか
+- 型安全か
+- テスト可能か
+- 読みやすいか
+
+## 9. Milestone終了レポート
+
+各Milestone終了時に以下を作成する。
+
+```text
+docs/report/milestone_X.md
+```
+
+内容：
+
+- Milestoneの目的
+- 実装した機能
+- 自力実装の有無
+- 自力実装の規模（対象ファイル数・機能数・endpoint数など、そのMilestoneに適した数値）
+- 自力実装した対象
+- 自分で設計した部分
+- Agentが担当した部分
+- レビュー指摘
+- 修正内容
+- テスト結果
+- 理解できたこと
+- 理解が曖昧なこと
+- 次Milestoneへの課題
+
+自力実装がないMilestoneでも項目を省略せず、`なし（0件）` と明記する。まだ実装していない自力担当は、実装済みと誤認されないよう「未着手」または「学習確認のみ」と区別する。行数は整形や生成物で変動しやすいため、補助値に留め、原則としてファイル数・機能数・endpoint数で規模を示す。
+
+## 10. Codex実装解説
+
+Codexがコードまたは設定を追加・変更したMilestoneでは、終了時に次のファイルを作成または更新する。
+
+```text
+docs/explanation/milestone_X.md
+```
+
+この解説は学習者がCodexの実装を追跡できることを目的とし、以下を必須とする。
+
+- Codexが追加・変更したソース管理対象ファイルを漏れなく列挙する
+- 各ファイルについて「役割」と「コード要約」を記載する
+- lockfileなどソース管理する自動生成ファイルは、その旨と生成元を記載し、内容を逐語的には解説しない
+- `node_modules`、`dist`、coverageなどGit管理外の依存物・一時生成物は対象外とする
+- ディレクトリ維持用などコードを含まないファイルも役割を記載する
+- 学習者が自力実装したファイルは混在させず、必要な場合は参照だけにする
+- 後から同じMilestoneのCodex実装を修正した場合、その解説も同時に更新する
+
+記載形式：
+
+```markdown
+## `path/to/file`
+
+- 役割: このファイルが担う責務
+- コード要約: 主要な設定、処理の流れ、他ファイルとの関係
+```
+
+Codexによる実装がないMilestoneでもファイルを作成し、`Codex実装なし` と明記する。

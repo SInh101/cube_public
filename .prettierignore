@@ -1,0 +1,7 @@
+node_modules
+dist
+coverage
+package-lock.json
+AGENT_SKILLS.md
+LEARNING_GUIDE.md
+MILESTONES.md
