@@ -5,6 +5,15 @@
   "type": "module",
   "scripts": {
     "build": "tsc --noEmit",
+    "dev": "tsx watch src/local/startLocalServer.ts",
     "typecheck": "tsc --noEmit --pretty false"
+  },
+  "dependencies": {
+    "@rubiks-learning/api-contract": "0.0.0",
+    "@rubiks-learning/cube-core": "0.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "tsx": "^4.21.0"
   }
 }

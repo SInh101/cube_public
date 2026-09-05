@@ -93,11 +93,12 @@
 ## Skill 3 — test-designer
 
 ### 目的
-必要なテストケースを設計する。
+必要なテストケースを設計し、自動テストとして実装する。
 
 ### 原則
-原則としてテストコードそのものは書かない。
-テスト実装は学習者に任せる。
+Milestone 3以降は、Agentがテストケースの設計、テストコードの実装、実行結果の確認を担当する。
+テスト実装の依頼を、自力実装対象であるproduction codeをAgentが実装する許可として扱わない。
+テストは公開契約と観測可能な振る舞いを優先し、内部実装への過度な密結合を避ける。
 
 ### 分類
 - Happy path
@@ -198,7 +199,7 @@ Frontend ── REST API ── Database
 architecture-guardian
 
 test-designer
-    └── テスト観点
+    └── テスト設計・実装
 
 project-maintainer
     └── 開発基盤
@@ -207,7 +208,7 @@ project-maintainer
 ## 推奨Agent利用順
 
 ```text
-1. test-designer
+1. test-designer（テスト設計・実装）
       ↓
 2. 自力実装
       ↓

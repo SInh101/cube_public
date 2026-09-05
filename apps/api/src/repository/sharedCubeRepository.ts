@@ -1,0 +1,4 @@
+import { InMemoryCubeRepository } from './InMemoryCubeRepository.js';
+
+/** 各handlerで同じin-memory stateを参照する共有instance。 */
+export const cubeRepository = new InMemoryCubeRepository();

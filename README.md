@@ -1,6 +1,6 @@
 # Rubik's Cube Learning
 
-Rubik's Cubeを題材に、ReactとTypeScriptでREST API連携を学ぶためのモノレポです。現在はMilestone 0の開発基盤とHealth疎通だけを含みます。
+Rubik's Cubeを題材に、ReactとTypeScriptでREST API連携を学ぶためのモノレポです。Milestone 2までのCube CoreとローカルCube REST APIを含みます。
 
 ## 構成
 
@@ -24,12 +24,14 @@ Node.js 20.19以上を用意し、ルートで次を実行します。
 npm install
 ```
 
-Vercel CLIでAPIを起動し、別のターミナルでFrontendを起動します。
+Milestone 2～8では、process内の一時的なCube stateをrequest間で維持するローカルAPIを起動します。別のターミナルでFrontendを起動します。
 
 ```sh
-npx vercel dev apps/api
+npm run dev:api
 npm run dev:web
 ```
+
+Cube APIのVercel公開は、永続repositoryを導入するMilestone 9まで延期します。ローカルAPIのstateはprocessを停止すると消えます。
 
 APIのVercel projectはOutput Directoryとして`public`を使用します。`public/index.html`はVercel CLIが空ディレクトリエラーにしないための最小ページで、REST APIは引き続き`api`ディレクトリのFunctionsとして動作します。
 
@@ -55,7 +57,7 @@ Health APIは `200` と `{ "status": "ok" }` を返し、FrontendにはAPI statu
 ## デプロイ
 
 - GitHub Pages: repository variable `VITE_API_BASE_URL` にVercel APIのURLを設定し、PagesのsourceをGitHub Actionsにします。
-- Vercel: `apps/api` をRoot Directoryとしてプロジェクトを作成します。
+- Vercel: Milestone 8まではHealth APIだけを対象とし、stateを持つCube APIの公開は永続repositoryを導入するMilestone 9まで延期します。
 - Supabase: 後続MilestoneでAPI側に `SUPABASE_URL` と `SUPABASE_SERVICE_ROLE_KEY` を設定します。サービスロールキーをFrontendへ公開しないでください。
 
 ## 学習範囲

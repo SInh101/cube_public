@@ -1,4 +1,4 @@
-import type { Color, CubeState, Face, FaceState, Move } from './types';
+import type { Color, CubeState, Face, FaceState, Move } from './types.js';
 
 type Axis = 'x' | 'y' | 'z';
 type Coordinate = -1 | 0 | 1;

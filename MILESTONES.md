@@ -1,5 +1,9 @@
 # Rubik's Cube Web教材 開発マイルストーン
 
+## Milestone 3以降のテスト方針
+
+Milestone 3以降は、必要なテストパターンの設計、テストコードの実装、実行確認をAgentが担当する。各Milestoneで自力実装に指定されたproduction codeは引き続き学習者が担当し、テスト担当はその境界を越えて完成実装や修正を行わない。
+
 ## Milestone 0 — Project Bootstrap
 
 ### Agent
@@ -90,6 +94,7 @@ CubeにMoveを適用するREST APIを追加する。
 
 ### Agent
 Cube Coreのみ担当。
+Move REST APIのテストパターン設計、テストコード実装、実行確認を担当する。
 
 ### 完了条件
 HTTP経由で `R U R' U'` を順番に適用できる。
@@ -99,10 +104,10 @@ HTTP経由で `R U R' U'` を順番に適用できる。
 ## Milestone 4 — REST API Test
 
 ### Agent
-`test-designer` がテストケースを設計する。
+`test-designer` がテストケースを設計し、テストコードを実装・実行する。
 
 ### 自力
-テストコードを書く。
+各テストの目的、入力、期待結果、失敗時に示す契約違反を説明する。
 
 最低限：
 

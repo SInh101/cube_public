@@ -80,7 +80,6 @@ FrontendとREST APIの両方から利用できるが、REST APIの学習を損�
 - form
 - CRUD画面
 - loading / error表示
-- REST APIテストコード
 - DBを利用したPreset管理
 
 ### Agentに任せるもの
@@ -95,13 +94,14 @@ FrontendとREST APIの両方から利用できるが、REST APIの学習を損�
 - CI
 - formatter / linter
 - テストケース設計
+- Milestone 3以降の自動テストコード実装と実行
 - コードレビュー
 - アーキテクチャ違反検出
 
 ## 4. 基本学習サイクル
 
 ```text
-1. Agentが土台・仕様・テスト観点を準備
+1. Agentが土台・仕様・テスト観点・自動テストを準備
         ↓
 2. 自力実装
         ↓
@@ -119,6 +119,8 @@ FrontendとREST APIの両方から利用できるが、REST APIの学習を損�
 ```
 
 Agentは原則として、自力実装フェーズ中に完成コードを提示しない。
+
+Milestone 3以降のテストコードはAgentの担当とする。これはproduction codeの自力実装境界を変更せず、Agentはテストを通すために自力実装部分を無断で実装・修正しない。
 
 支援レベルは以下の順とする。
 

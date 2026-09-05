@@ -1,5 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "outputDirectory": "public"
+  "outputDirectory": "public",
+  "rewrites": [
+    {
+      "source": "/api/cubes/:cubeId/reset",
+      "destination": "/api/cubes?cubeId=:cubeId&operation=reset"
+    },
+    {
+      "source": "/api/cubes/:cubeId",
+      "destination": "/api/cubes?cubeId=:cubeId"
+    }
+  ]
 }

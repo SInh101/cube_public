@@ -25,7 +25,7 @@ Milestone 1でCodexが追加・変更したソース管理対象ファイルの�
 ## `packages/cube-core/src/Cube.ts`
 
 - 役割: Cubeの生成、初期化、状態snapshot、Move適用を実装するdomain本体。
-- コード要約: 54枚のStickerを色、`-1/0/1`の3次元座標、外向き法線で保持する。各Moveは対象axis／layerを選び、外側から見た時計回りの整数回転を座標と法線へ適用する。逆Moveは3 quarter turns、2回転は2 quarter turnsへ正規化する。公開状態への変換時に各面を表示順へsortし、内部参照を漏らさない9色tupleを返す。
+- コード要約: 54枚のStickerを色、`-1/0/1`の3次元座標、外向き法線で保持する。各Moveは対象axis／layerを選び、外側から見た時計回りの整数回転を座標と法線へ適用する。逆Moveは3 quarter turns、2回転は2 quarter turnsへ正規化する。公開状態への変換時に各面を表示順へsortし、内部参照を漏らさない9色tupleを返す。API workspaceのNodeNext解決でも参照できるよう、内部型importにESM実行時拡張子`.js`を指定する。
 
 ## `packages/cube-core/src/index.ts`
 

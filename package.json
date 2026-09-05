@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
+    "dev:api": "npm run dev --workspace @rubiks-learning/api",
     "dev:web": "npm run dev --workspace @rubiks-learning/web",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
