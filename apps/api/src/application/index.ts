@@ -4,3 +4,4 @@ export { createCube } from './createCube.js';
 export { CubeNotFoundError } from './CubeNotFoundError.js';
 export { resetCube } from './resetCube.js';
 export { getCube } from './getCube.js';
+export { applyMoveToCube } from './applyMoveToCube.js';

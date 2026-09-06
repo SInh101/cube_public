@@ -4,6 +4,10 @@
 
 Milestone 3以降は、必要なテストパターンの設計、テストコードの実装、実行確認をAgentが担当する。各Milestoneで自力実装に指定されたproduction codeは引き続き学習者が担当し、テスト担当はその境界を越えて完成実装や修正を行わない。
 
+## Milestone 3以降のエラー設計方針
+
+HTTP status、machine-readable error code、公開message、validation分類はAgentが設計する。error class、入力validation、例外処理、HTTP error responseへの変換を行うproduction codeは学習者が自力実装する。エラー設計の担当変更は、Agentにproduction実装を許可するものではない。
+
 ## Milestone 0 — Project Bootstrap
 
 ### Agent

@@ -71,6 +71,10 @@
 - error response
 - validation
 
+### Error設計の担当境界
+
+Milestone 3以降は、status、machine-readable error code、公開message、validation分類をAgentが設計する。production code上のerror class、validation、catch、HTTP response変換は学習者が自力実装する。明示依頼がない限り、レビュー時にもAgentはエラー実装を直接修正しない。
+
 ### Frontend観点
 - component responsibility
 - state

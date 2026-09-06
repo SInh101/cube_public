@@ -4,6 +4,9 @@ export const API_ERROR_CODES = [
   'JSON_NOT_CORRECT',
   'METHOD_NOT_ALLOWED',
   'INTERNAL_SERVER_ERROR',
+  'REQUEST_NOT_CORRECT',
+  'MOVE_NOT_CORRECT',
+  'UNSUPPORTED_MEDIA_TYPE',
 ] as const;
 
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];

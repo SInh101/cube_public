@@ -31,3 +31,7 @@ export interface CubeStateResponseDto {
     };
   };
 }
+
+export interface MoveRequestDto {
+  readonly move: string;
+}

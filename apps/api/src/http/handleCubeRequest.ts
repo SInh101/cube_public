@@ -6,12 +6,14 @@ import {
   getCube,
   resetCube,
 } from '../application/index.js';
+import { handleApplyMoveRequest } from './handlers/handleApplyMoveRequest.js';
 import { isUuid } from '../validation/isUuid.js';
 
 type CubeRoute =
   | { readonly kind: 'collection' }
   | { readonly kind: 'resource'; readonly cubeId: string }
   | { readonly kind: 'reset'; readonly cubeId: string }
+  | { readonly kind: 'move'; readonly cubeId: string }
   | { readonly kind: 'unknown' };
 
 /** Cube APIの全URIを単一のVercel Function内で振り分ける。 */
@@ -44,6 +46,10 @@ export async function handleCubeRequest(request: Request): Promise<Response> {
   }
 
   try {
+    if (route.kind === 'move') {
+      return await handleApplyMoveRequest(request, cubeId);
+    }
+
     const dto =
       route.kind === 'resource'
         ? await getCube(cubeId)
@@ -81,11 +87,11 @@ function resolveRoute(url: URL): CubeRoute {
       : { kind: 'resource', cubeId };
   }
 
-  if (segments.length === 4 && segments[3] === 'reset') {
+  if (segments.length === 4) {
     const cubeId = segments[2];
-    return cubeId === undefined
-      ? { kind: 'unknown' }
-      : { kind: 'reset', cubeId };
+    if (cubeId === undefined) return { kind: 'unknown' };
+    if (segments[3] === 'reset') return { kind: 'reset', cubeId };
+    if (segments[3] === 'moves') return { kind: 'move', cubeId };
   }
 
   return { kind: 'unknown' };
@@ -95,7 +101,8 @@ function acceptsMethod(route: CubeRoute, method: string): boolean {
   return (
     (route.kind === 'collection' && method === 'POST') ||
     (route.kind === 'resource' && method === 'GET') ||
-    (route.kind === 'reset' && method === 'PUT')
+    (route.kind === 'reset' && method === 'PUT') ||
+    (route.kind === 'move' && method === 'POST')
   );
 }
 

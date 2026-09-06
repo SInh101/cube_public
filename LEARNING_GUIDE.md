@@ -122,6 +122,8 @@ Agentは原則として、自力実装フェーズ中に完成コードを提示
 
 Milestone 3以降のテストコードはAgentの担当とする。これはproduction codeの自力実装境界を変更せず、Agentはテストを通すために自力実装部分を無断で実装・修正しない。
 
+Milestone 3以降のエラー契約はAgentが設計する。Agentの担当はHTTP status、error code、公開message、validation分類までとし、error class、validation処理、例外処理、Error DTOを返すproduction codeは学習者が自力実装する。
+
 支援レベルは以下の順とする。
 
 1. 問題点の指摘
