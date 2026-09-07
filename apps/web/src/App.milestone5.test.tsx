@@ -7,6 +7,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from './App';
 
 vi.mock('./components', () => ({
+  ANIMATION_SPEEDS: {
+    fast: { label: 'Fast', durationMs: 120 },
+    standard: { label: 'Standard', durationMs: 240 },
+    slow: { label: 'Slow', durationMs: 600 },
+  },
+  AnimationSpeedControl: () => null,
   CubeView: ({ state }: { state: CubeStateResponseDto['state'] }) => (
     <div data-testid="cube-view">{JSON.stringify(state)}</div>
   ),

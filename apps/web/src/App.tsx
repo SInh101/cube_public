@@ -5,8 +5,11 @@ import type {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
+  ANIMATION_SPEEDS,
+  AnimationSpeedControl,
   CubeView,
   FaceControlPanel,
+  type AnimationSpeed,
   type CubeMove,
   type FacePreview,
 } from './components';
@@ -27,6 +30,8 @@ export function App() {
   const [moveError, setMoveError] = useState(false);
   const [lastMove, setLastMove] = useState<CubeMove | null>(null);
   const [animationId, setAnimationId] = useState(0);
+  const [animationSpeed, setAnimationSpeed] =
+    useState<AnimationSpeed>('standard');
   const [facePreview, setFacePreview] = useState<FacePreview | null>(null);
 
   useEffect(() => {
@@ -110,8 +115,15 @@ export function App() {
   }, [applyMove]);
 
   const cubeAnimation = useMemo(
-    () => (lastMove === null ? undefined : { id: animationId, move: lastMove }),
-    [animationId, lastMove],
+    () =>
+      lastMove === null
+        ? undefined
+        : {
+            id: animationId,
+            move: lastMove,
+            durationMs: ANIMATION_SPEEDS[animationSpeed].durationMs,
+          },
+    [animationId, animationSpeed, lastMove],
   );
 
   return (
@@ -127,11 +139,17 @@ export function App() {
               animation={cubeAnimation}
               preview={facePreview}
             />
-            <FaceControlPanel
-              state={cubeState}
-              onMove={(move) => void applyMove(move)}
-              onPreviewChange={setFacePreview}
-            />
+            <div className="cube-controls">
+              <AnimationSpeedControl
+                value={animationSpeed}
+                onChange={setAnimationSpeed}
+              />
+              <FaceControlPanel
+                state={cubeState}
+                onMove={(move) => void applyMove(move)}
+                onPreviewChange={setFacePreview}
+              />
+            </div>
           </div>
           {moveError && <p role="alert">Error applying move.</p>}
         </>

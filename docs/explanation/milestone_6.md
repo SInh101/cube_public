@@ -101,3 +101,14 @@ Milestone 6の操作UIは学習者の自力実装範囲である。現段階で�
 
 - desktopでは立体Viewの右側に操作盤を配置し、狭い画面では従来どおり下へ折り返すresponsive layoutにした。
 - main領域の最大幅を広げ、横方向の画面領域を利用する。
+
+### `apps/web/src/components/AnimationSpeedControl.tsx`
+
+- Move animationの速度をFast（120ms）、Standard（240ms）、Slow（600ms）から選ぶGUIを提供する。
+- 速度の名前とdurationを`ANIMATION_SPEEDS`へ集約し、表示とanimation設定で同じ定義を使う。
+
+### 操作方式の将来切替
+
+- HTTP通信とCubeState更新は`App`の`applyMove`、現在の操作方式は`FaceControlPanel`へ分離されている。
+- `cube-controls`を操作UIの置換領域としたため、将来は共通の`onMove`を渡す別操作componentとの切替をここへ追加できる。
+- previewは面GUI固有の任意表示情報であり、keyboardや将来の別操作方式が必ず実装する契約にはしていない。

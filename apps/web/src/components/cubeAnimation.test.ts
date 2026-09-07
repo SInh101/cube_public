@@ -43,10 +43,12 @@ describe('Cube move animation', () => {
   );
 
   it.each([Math.PI / 12, -Math.PI / 12])(
-    'M6-AN-04: Ghostは正位置から指定方向へだけ揺れて正位置へ戻る (%f)',
+    'M6-AN-04: Ghostは正位置から指定方向へだけ進み、周期末にリセットする (%f)',
     (targetAngle) => {
       expect(previewRotationAt(targetAngle, 0)).toBeCloseTo(0);
-      expect(previewRotationAt(targetAngle, 360)).toBeCloseTo(targetAngle);
+      expect(Math.abs(previewRotationAt(targetAngle, 719))).toBeGreaterThan(
+        Math.abs(previewRotationAt(targetAngle, 360)),
+      );
       expect(previewRotationAt(targetAngle, 720)).toBeCloseTo(0);
 
       for (const elapsed of [90, 180, 270, 450, 540, 630]) {

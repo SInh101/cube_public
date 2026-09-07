@@ -44,5 +44,6 @@ Milestone 6実装後はM6-01〜06を含む全テストが成功し、buttonとke
 
 ## M6.1 追加調整テスト
 
-- M6-AN-04: Ghostは通常方向・逆方向の双方で、正位置から指定方向へだけ進み、半周期で最大角度、1周期で正位置へ戻る。
+- M6-AN-04: Ghostは通常方向・逆方向の双方で、正位置から指定方向へ単調に進み、1周期で正位置へ瞬時にリセットする。
 - animation ID、単一Box Ghost、固定中心ラベル、responsive layoutは描画構造と実ブラウザで確認する。
+- M6-07: GUIで選んだ速度のdurationが次のMove animationへ渡る。

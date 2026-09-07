@@ -13,8 +13,45 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from './App';
 
 vi.mock('./components', () => ({
-  CubeView: ({ state }: { state: CubeStateResponseDto['state'] }) => (
-    <div data-testid="cube-view">{JSON.stringify(state)}</div>
+  ANIMATION_SPEEDS: {
+    fast: { label: 'Fast', durationMs: 120 },
+    standard: { label: 'Standard', durationMs: 240 },
+    slow: { label: 'Slow', durationMs: 600 },
+  },
+  AnimationSpeedControl: ({
+    value,
+    onChange,
+  }: {
+    value: string;
+    onChange: (value: 'fast' | 'standard' | 'slow') => void;
+  }) => (
+    <label>
+      Animation speed
+      <select
+        value={value}
+        onChange={(event) =>
+          onChange(event.target.value as 'fast' | 'standard' | 'slow')
+        }
+      >
+        <option value="fast">Fast</option>
+        <option value="standard">Standard</option>
+        <option value="slow">Slow</option>
+      </select>
+    </label>
+  ),
+  CubeView: ({
+    state,
+    animation,
+  }: {
+    state: CubeStateResponseDto['state'];
+    animation?: { durationMs?: number };
+  }) => (
+    <div
+      data-testid="cube-view"
+      data-animation-duration={animation?.durationMs}
+    >
+      {JSON.stringify(state)}
+    </div>
   ),
   FaceControlPanel: ({ onMove }: { onMove: (move: string) => void }) => (
     <div>
@@ -126,6 +163,23 @@ describe('Milestone 6 interactive Cube UI', () => {
     expect(await screen.findByRole('alert')).toBeTruthy();
     expect(screen.getByTestId('cube-view').textContent).toBe(
       JSON.stringify(INITIAL_STATE),
+    );
+  });
+
+  it('M6-07: GUIで選んだ速度を次のMove animationへ反映する', async () => {
+    stubInitialLoad(MOVED_STATE);
+    render(<App />);
+    await screen.findByTestId('cube-view');
+
+    fireEvent.change(screen.getByLabelText('Animation speed'), {
+      target: { value: 'slow' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'R clockwise' }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId('cube-view').dataset.animationDuration).toBe(
+        '600',
+      ),
     );
   });
 });

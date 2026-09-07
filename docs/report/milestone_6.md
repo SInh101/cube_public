@@ -109,4 +109,12 @@
 - 広い画面では操作盤を立体Viewの右へ配置し、狭い画面では縦配置に戻るようにした。
 - U/F/Rの文字を回転group外の中心面に配置し、Move animationの影響を受けないようにした。
 
-検証結果: Vitest 187件、formatter、ESLint、TypeScript、production buildがすべて成功した。Viteの500 kB超chunk警告は既知であり、build自体は成功している。
+検証結果: Vitest 188件、formatter、ESLint、TypeScript、production buildがすべて成功した。Viteの500 kB超chunk警告は既知であり、build自体は成功している。
+
+## M6.1 Ghost・速度設定の再調整
+
+- Ghostを往復運動から「0→指定角度→瞬時に0へリセット」する反復へ変更し、逆方向の動作に見える区間をなくした。
+- Fast（120ms）、Standard（240ms）、Slow（600ms）のMove animation速度設定を追加した。
+- 速度設定は表示層だけの値で、API requestやCubeStateには影響しない。
+- 操作UI、共通Move処理、animation設定が分離されており、将来の操作方式切替を追加可能であることを確認した。
+- 再検証ではVitest 188件、formatter、ESLint、TypeScript、production buildがすべて成功した。
