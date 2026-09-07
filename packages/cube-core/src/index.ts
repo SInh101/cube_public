@@ -1,4 +1,6 @@
 export { Cube } from './Cube.js';
+export { Commutator } from './Commutator.js';
+export type { CommutatorBoundary, CommutatorPart } from './Commutator.js';
 export {
   InvalidMoveSequenceError,
   invertSequence,
