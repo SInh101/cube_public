@@ -4,11 +4,16 @@ import type {
 } from '@rubiks-learning/api-contract';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { CubeView, type CubeMove } from './components';
+import {
+  CubeView,
+  FaceControlPanel,
+  type CubeMove,
+  type FacePreview,
+} from './components';
+import './components/face-controls.css';
 
 type LoadStatus = 'loading' | 'ready' | 'error';
 type FaceMove = 'R' | 'L' | 'U' | 'D' | 'F' | 'B';
-type MoveCommand = FaceMove | `${FaceMove}'`;
 
 const FACE_MOVES = ['R', 'L', 'U', 'D', 'F', 'B'] as const;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
@@ -21,6 +26,7 @@ export function App() {
   >(null);
   const [moveError, setMoveError] = useState(false);
   const [lastMove, setLastMove] = useState<CubeMove | null>(null);
+  const [facePreview, setFacePreview] = useState<FacePreview | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -61,9 +67,10 @@ export function App() {
   }, []);
 
   const applyMove = useCallback(
-    async (move: MoveCommand): Promise<void> => {
+    async (move: CubeMove): Promise<void> => {
       if (cubeId === null) return;
 
+      setFacePreview(null);
       setMoveError(false);
       try {
         const response = await fetch(
@@ -92,7 +99,7 @@ export function App() {
       const face = event.key.toUpperCase();
       if (!isFaceMove(face)) return;
 
-      const move: MoveCommand = event.shiftKey ? `${face}'` : face;
+      const move: CubeMove = event.shiftKey ? `${face}'` : face;
       void applyMove(move);
     }
 
@@ -112,18 +119,16 @@ export function App() {
       {status === 'error' && <p role="alert">Error loading cube.</p>}
       {status === 'ready' && cubeState !== null && (
         <>
-          <CubeView state={cubeState} animation={cubeAnimation} />
-          <div aria-label="Cube moves" role="group">
-            {FACE_MOVES.map((move) => (
-              <button
-                key={move}
-                type="button"
-                onClick={() => void applyMove(move)}
-              >
-                {move}
-              </button>
-            ))}
-          </div>
+          <CubeView
+            state={cubeState}
+            animation={cubeAnimation}
+            preview={facePreview}
+          />
+          <FaceControlPanel
+            state={cubeState}
+            onMove={(move) => void applyMove(move)}
+            onPreviewChange={setFacePreview}
+          />
           {moveError && <p role="alert">Error applying move.</p>}
         </>
       )}

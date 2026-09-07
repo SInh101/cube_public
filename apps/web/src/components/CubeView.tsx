@@ -9,6 +9,7 @@ import {
   type CubeMove,
   type CubeViewState,
 } from './cubeViewModel';
+import type { FacePreview } from './FaceControl';
 import './cube-view.css';
 
 export interface CubeViewProps {
@@ -17,6 +18,7 @@ export interface CubeViewProps {
     readonly move: CubeMove;
     readonly durationMs?: number;
   };
+  readonly preview?: FacePreview | null;
 }
 
 const STICKER_COLORS = {
@@ -31,7 +33,7 @@ const STICKER_COLORS = {
 const INTERNAL_FACE_COLOR = 0x111827;
 
 /** CubeStateを表示する、API通信や操作状態を持たないThree.js viewer。 */
-export function CubeView({ state, animation }: CubeViewProps) {
+export function CubeView({ state, animation, preview }: CubeViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,10 +54,18 @@ export function CubeView({ state, animation }: CubeViewProps) {
 
     const stationaryGroup = new THREE.Group();
     const turningGroup = new THREE.Group();
+    const ghostGroup = new THREE.Group();
     const moveAnimation =
       animation === undefined ? undefined : createMoveAnimation(animation.move);
+    const previewAnimation =
+      preview === null || preview === undefined
+        ? undefined
+        : createMoveAnimation(
+            preview.direction === 'cw' ? preview.face : `${preview.face}'`,
+          );
     const geometry = new THREE.BoxGeometry(0.94, 0.94, 0.94);
     const materials: THREE.MeshStandardMaterial[] = [];
+    const ghostMaterials: THREE.MeshStandardMaterial[] = [];
 
     for (const cubie of createCubieViewModels(state)) {
       const cubieMaterials = CUBE_FACE_DIRECTIONS.map((direction) => {
@@ -67,6 +77,12 @@ export function CubeView({ state, animation }: CubeViewProps) {
               : STICKER_COLORS[sticker],
           roughness: 0.72,
           metalness: 0,
+          emissive:
+            previewAnimation !== undefined &&
+            isCubieInMoveLayer(cubie.position, previewAnimation)
+              ? 0xffffff
+              : 0x000000,
+          emissiveIntensity: 0.18,
         });
         materials.push(material);
         return material;
@@ -81,9 +97,29 @@ export function CubeView({ state, animation }: CubeViewProps) {
       } else {
         stationaryGroup.add(mesh);
       }
+
+      if (
+        previewAnimation !== undefined &&
+        isCubieInMoveLayer(cubie.position, previewAnimation)
+      ) {
+        const previewMaterials = cubieMaterials.map((material) => {
+          const ghostMaterial = material.clone();
+          ghostMaterial.transparent = true;
+          ghostMaterial.opacity = 0.22;
+          ghostMaterial.depthWrite = false;
+          ghostMaterial.emissive.setHex(0xffffff);
+          ghostMaterial.emissiveIntensity = 0.25;
+          ghostMaterials.push(ghostMaterial);
+          return ghostMaterial;
+        });
+        const ghost = new THREE.Mesh(geometry, previewMaterials);
+        ghost.position.copy(mesh.position);
+        ghost.scale.setScalar(1.035);
+        ghostGroup.add(ghost);
+      }
     }
 
-    scene.add(stationaryGroup, turningGroup);
+    scene.add(stationaryGroup, turningGroup, ghostGroup);
     scene.add(new THREE.HemisphereLight(0xffffff, 0x334155, 2.4));
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.8);
     keyLight.position.set(4, 6, 5);
@@ -99,20 +135,32 @@ export function CubeView({ state, animation }: CubeViewProps) {
     };
 
     let animationFrame: number | undefined;
-    if (moveAnimation === undefined) {
+    if (moveAnimation === undefined && previewAnimation === undefined) {
       render();
     } else {
       const duration = animation?.durationMs ?? 240;
       const startedAt = performance.now();
-      turningGroup.rotation[moveAnimation.axis] = -moveAnimation.angle;
+      if (moveAnimation !== undefined) {
+        turningGroup.rotation[moveAnimation.axis] = -moveAnimation.angle;
+      }
 
       const animate = (now: number) => {
         const progress = Math.min((now - startedAt) / duration, 1);
-        const easedProgress = 1 - Math.pow(1 - progress, 3);
-        turningGroup.rotation[moveAnimation.axis] =
-          -moveAnimation.angle * (1 - easedProgress);
+        if (moveAnimation !== undefined) {
+          const easedProgress = 1 - Math.pow(1 - progress, 3);
+          turningGroup.rotation[moveAnimation.axis] =
+            -moveAnimation.angle * (1 - easedProgress);
+        }
+        if (previewAnimation !== undefined) {
+          const previewAngle = THREE.MathUtils.degToRad(12);
+          const direction = Math.sign(previewAnimation.angle);
+          ghostGroup.rotation[previewAnimation.axis] =
+            Math.sin((now - startedAt) / 140) * previewAngle * direction;
+        }
         render();
-        if (progress < 1) animationFrame = requestAnimationFrame(animate);
+        if (progress < 1 || previewAnimation !== undefined) {
+          animationFrame = requestAnimationFrame(animate);
+        }
       };
       animationFrame = requestAnimationFrame(animate);
     }
@@ -123,10 +171,11 @@ export function CubeView({ state, animation }: CubeViewProps) {
       if (animationFrame !== undefined) cancelAnimationFrame(animationFrame);
       geometry.dispose();
       for (const material of materials) material.dispose();
+      for (const material of ghostMaterials) material.dispose();
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [state, animation]);
+  }, [state, animation, preview]);
 
   return <div ref={containerRef} className="cube-view" />;
 }

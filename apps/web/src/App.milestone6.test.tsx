@@ -16,6 +16,24 @@ vi.mock('./components', () => ({
   CubeView: ({ state }: { state: CubeStateResponseDto['state'] }) => (
     <div data-testid="cube-view">{JSON.stringify(state)}</div>
   ),
+  FaceControlPanel: ({ onMove }: { onMove: (move: string) => void }) => (
+    <div>
+      {['R', 'L', 'U', 'D', 'F', 'B'].flatMap((face) => [
+        <button
+          key={`${face}-ccw`}
+          type="button"
+          aria-label={`${face} counter-clockwise`}
+          onClick={() => onMove(`${face}'`)}
+        />,
+        <button
+          key={`${face}-cw`}
+          type="button"
+          aria-label={`${face} clockwise`}
+          onClick={() => onMove(face)}
+        />,
+      ])}
+    </div>
+  ),
 }));
 
 const CUBE_ID = '00000000-0000-4000-8000-000000000006';
@@ -37,7 +55,12 @@ describe('Milestone 6 interactive Cube UI', () => {
 
       await screen.findByTestId('cube-view');
 
-      expect(screen.getByRole('button', { name: move })).toBeTruthy();
+      expect(
+        screen.getByRole('button', { name: `${move} clockwise` }),
+      ).toBeTruthy();
+      expect(
+        screen.getByRole('button', { name: `${move} counter-clockwise` }),
+      ).toBeTruthy();
     },
   );
 
@@ -46,7 +69,7 @@ describe('Milestone 6 interactive Cube UI', () => {
     render(<App />);
     await screen.findByTestId('cube-view');
 
-    fireEvent.click(screen.getByRole('button', { name: 'R' }));
+    fireEvent.click(screen.getByRole('button', { name: 'R clockwise' }));
 
     await expectMoveRequest(fetchMock, 'R');
     await waitFor(() =>
@@ -98,7 +121,7 @@ describe('Milestone 6 interactive Cube UI', () => {
     render(<App />);
     await screen.findByTestId('cube-view');
 
-    fireEvent.click(screen.getByRole('button', { name: 'R' }));
+    fireEvent.click(screen.getByRole('button', { name: 'R clockwise' }));
 
     expect(await screen.findByRole('alert')).toBeTruthy();
     expect(screen.getByTestId('cube-view').textContent).toBe(

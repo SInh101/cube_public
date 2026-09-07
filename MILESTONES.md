@@ -205,7 +205,8 @@ Frontendに以下を追加。
 - Reset
 
 ### Agent
-CubeView側のアニメーション機構を補助。
+CubeView側のアニメーション機構を補助する。
+`isAnimating`、アニメーション完了通知、実回転中の操作disableを実装し、Frontendの再生state machineから利用できる境界を提供する。
 
 ### 学習対象
 - UI state machine

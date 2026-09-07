@@ -10,6 +10,7 @@ vi.mock('./components', () => ({
   CubeView: ({ state }: { state: CubeStateResponseDto['state'] }) => (
     <div data-testid="cube-view">{JSON.stringify(state)}</div>
   ),
+  FaceControlPanel: () => null,
 }));
 
 const CUBE_ID = '00000000-0000-4000-8000-000000000001';

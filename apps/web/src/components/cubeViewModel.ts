@@ -25,6 +25,23 @@ export interface CubeMoveAnimation {
   readonly angle: number;
 }
 
+interface CubeFaceConfig {
+  readonly axis: CubeMoveAnimation['axis'];
+  readonly layer: CubeMoveAnimation['layer'];
+  readonly quarterTurn: number;
+}
+
+export const CUBE_FACE_CONFIG: Readonly<
+  Record<CubeFaceDirection, CubeFaceConfig>
+> = {
+  R: { axis: 'x', layer: 1, quarterTurn: -Math.PI / 2 },
+  L: { axis: 'x', layer: -1, quarterTurn: Math.PI / 2 },
+  U: { axis: 'y', layer: 1, quarterTurn: -Math.PI / 2 },
+  D: { axis: 'y', layer: -1, quarterTurn: Math.PI / 2 },
+  F: { axis: 'z', layer: 1, quarterTurn: -Math.PI / 2 },
+  B: { axis: 'z', layer: -1, quarterTurn: Math.PI / 2 },
+};
+
 /** APIのface配列を、Three.jsで描画する26個のcubieへ変換する。 */
 export function createCubieViewModels(
   state: CubeViewState,
@@ -57,18 +74,7 @@ export function createCubieViewModels(
 /** Moveを、回転対象layerとThree.jsの回転軸・角度へ変換する。 */
 export function createMoveAnimation(move: CubeMove): CubeMoveAnimation {
   const face = move[0] as CubeFaceDirection;
-  const faceSettings: Record<
-    CubeFaceDirection,
-    Omit<CubeMoveAnimation, 'angle'> & { readonly quarterTurn: number }
-  > = {
-    R: { axis: 'x', layer: 1, quarterTurn: -Math.PI / 2 },
-    L: { axis: 'x', layer: -1, quarterTurn: Math.PI / 2 },
-    U: { axis: 'y', layer: 1, quarterTurn: -Math.PI / 2 },
-    D: { axis: 'y', layer: -1, quarterTurn: Math.PI / 2 },
-    F: { axis: 'z', layer: 1, quarterTurn: -Math.PI / 2 },
-    B: { axis: 'z', layer: -1, quarterTurn: Math.PI / 2 },
-  };
-  const setting = faceSettings[face];
+  const setting = CUBE_FACE_CONFIG[face];
   const multiplier = move.endsWith('2') ? 2 : move.endsWith("'") ? -1 : 1;
 
   return {

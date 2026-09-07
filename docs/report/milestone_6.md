@@ -14,6 +14,8 @@
 - Move API失敗時の既存表示維持とerror表示
 - keyboard listenerのcleanup
 - 全18 Moveに対応するlayer回転animation
+- CSS製の6面layer GUIと各面のCW／CCW操作
+- GUI hover／focus時の対象layer highlightと半透明ghost animation
 
 ## 自力実装の有無と規模
 
@@ -36,6 +38,7 @@
 
 - Milestone 6のテスト設計と自動テスト
 - Moveごとの3D layer animationとanimation変換テスト
+- M6.1のFaceControl、FaceControlPanel、highlight／ghost表示とGUIテスト
 - 自力実装用workbookとCodex実装解説
 - 初期実装レビュー
 - 明示依頼に基づくAppの修正
@@ -51,6 +54,8 @@
 - Shift付きkeyをprime Moveへ変換
 - FrontendからCube Coreへの型依存を削除し、Milestone内で必要なMoveだけを限定型で表現
 - error時に現在のCubeStateを維持
+- 面ごとの軸／layer設定を共通定数へ抽出し、実回転とpreviewで共有
+- animation完了待ちと操作disableをMilestone 8のAgent担当へ移動
 
 ## コードレビュー結果
 
@@ -58,6 +63,8 @@
 - 関数名は動詞始まりで、`applyMove`、`handleKeyDown`、`isFaceMove`の役割が明確
 - 対応Moveの定義をbutton生成とvalidationで共有している
 - buttonには`type="button"`、操作groupにはaccessibility labelがある
+- GUIは6面を共通FaceControlから生成し、面ごとのコピー実装がない
+- CW／CCW buttonは面と方向を含むaccessible nameを持つ
 
 ## アーキテクチャレビュー結果
 
@@ -69,11 +76,12 @@
 
 ## テスト結果
 
-- Vitest: 176件成功
+- Vitest: 185件成功
 - Milestone 6: button、通常key、Shift key、対応外key、state同期、error時のstate維持に成功
 - formatter、ESLint、TypeScript、build: 成功
 - 実ブラウザ: buttonとkeyboardの両方でCubeを混ぜ、揃えられることを確認
 - Animation: 全6 face、prime、2回転の軸／layer／方向を自動テストで確認
+- M6.1: 6面×CW／CCW、Singmaster変換、preview開始／解除、現在のsticker色反映を自動テストで確認
 - buildは成功したが、Three.jsを含むchunkが500 kBを超える警告あり
 
 ## 理解できたこと

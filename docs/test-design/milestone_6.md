@@ -32,3 +32,12 @@ Milestone 6実装後はM6-01〜06を含む全テストが成功し、buttonとke
 - M6-AN-01: R／L／U／D／F／Bを正しい回転軸と外側layerへ対応づける
 - M6-AN-02: prime Moveを通常Moveと反対方向へ回転する
 - M6-AN-03: `2`付きMoveを180度回転する
+
+## M6.1 面操作GUI追加テスト
+
+- M6-GUI-01: 6面それぞれにCW／CCW操作を表示する
+- M6-GUI-02: CWを通常Move、CCWをprime Moveへ変換する
+- M6-GUI-03: GUIのhover／focusからだけpreviewを開始し、解除時に消す
+- M6-GUI-04: API由来の現在のCubeStateをCSS layerのsticker色へ反映する
+- highlightとghostは既存の軸／layer設定を共有し、CubeStateを変更しない
+- animation完了待ちと操作disableはMilestone 8のAgentテストへ移す
