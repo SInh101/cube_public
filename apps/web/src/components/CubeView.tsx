@@ -24,6 +24,13 @@ export interface CubeViewProps {
   readonly onAnimationComplete?: (animationId: number) => void;
   readonly highlightedCubieIds?: readonly string[];
   readonly dimUnhighlighted?: boolean;
+  readonly cubieMarkers?: readonly CubeViewMarker[];
+}
+
+export interface CubeViewMarker {
+  readonly cubieId: string;
+  readonly label: string;
+  readonly color?: string;
 }
 
 const STICKER_COLORS = {
@@ -45,6 +52,7 @@ export function CubeView({
   onAnimationComplete,
   highlightedCubieIds,
   dimUnhighlighted = false,
+  cubieMarkers,
 }: CubeViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const lastPlayedAnimationId = useRef<number | null>(null);
@@ -86,6 +94,9 @@ export function CubeView({
     const disposableMaterials: THREE.Material[] = [];
     const disposableTextures: THREE.Texture[] = [];
     const highlightedIds = new Set(highlightedCubieIds);
+    const markerByCubieId = new Map(
+      cubieMarkers?.map((marker) => [marker.cubieId, marker]),
+    );
 
     for (const cubie of createCubieViewModels(state)) {
       const hasHighlightSelection = highlightedIds.size > 0;
@@ -117,13 +128,20 @@ export function CubeView({
       });
       const mesh = new THREE.Mesh(geometry, cubieMaterials);
       mesh.position.set(...cubie.position);
-      if (
+      const targetGroup =
         moveAnimation !== undefined &&
         isCubieInMoveLayer(cubie.position, moveAnimation)
-      ) {
-        turningGroup.add(mesh);
-      } else {
-        stationaryGroup.add(mesh);
+          ? turningGroup
+          : stationaryGroup;
+      targetGroup.add(mesh);
+
+      const marker = markerByCubieId.get(cubie.id);
+      if (marker !== undefined) {
+        const markerSprite = createMarkerSprite(marker);
+        markerSprite.sprite.position.copy(mesh.position);
+        targetGroup.add(markerSprite.sprite);
+        disposableMaterials.push(markerSprite.material);
+        disposableTextures.push(markerSprite.texture);
       }
     }
 
@@ -225,6 +243,7 @@ export function CubeView({
     onAnimationComplete,
     highlightedCubieIds,
     dimUnhighlighted,
+    cubieMarkers,
   ]);
 
   return <div ref={containerRef} className="cube-view" />;
@@ -236,6 +255,43 @@ function createGhostGeometry(axis: 'x' | 'y' | 'z'): THREE.BoxGeometry {
   if (axis === 'x') return new THREE.BoxGeometry(thickness, length, length);
   if (axis === 'y') return new THREE.BoxGeometry(length, thickness, length);
   return new THREE.BoxGeometry(length, length, thickness);
+}
+
+function createMarkerSprite(marker: CubeViewMarker): {
+  readonly sprite: THREE.Sprite;
+  readonly material: THREE.SpriteMaterial;
+  readonly texture: THREE.CanvasTexture;
+} {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const context = canvas.getContext('2d');
+  if (context === null) throw new Error('Canvas 2D context is unavailable');
+  context.beginPath();
+  context.arc(64, 64, 54, 0, Math.PI * 2);
+  context.fillStyle = marker.color ?? '#facc15';
+  context.fill();
+  context.lineWidth = 8;
+  context.strokeStyle = '#111827';
+  context.stroke();
+  context.fillStyle = '#111827';
+  context.font = '800 64px system-ui, sans-serif';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.fillText(marker.label, 64, 68);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+  });
+  const sprite = new THREE.Sprite(material);
+  sprite.scale.set(0.5, 0.5, 0.5);
+  sprite.renderOrder = 4;
+  return { sprite, material, texture };
 }
 
 function createCenterLabels(): {

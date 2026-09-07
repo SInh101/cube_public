@@ -1,5 +1,6 @@
 export { CubeView } from './CubeView';
 export type { CubeViewProps } from './CubeView';
+export type { CubeViewMarker } from './CubeView';
 export {
   ANIMATION_DURATION_STEP_MS,
   AnimationSpeedControl,
