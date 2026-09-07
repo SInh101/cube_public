@@ -39,6 +39,7 @@ export function App() {
   const [preparedMoves, setPreparedMoves] = useState<readonly CubeMove[]>([]);
   const [isSequenceLoading, setIsSequenceLoading] = useState(false);
   const [sequenceError, setSequenceError] = useState<string>();
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -80,7 +81,7 @@ export function App() {
 
   const applyMove = useCallback(
     async (move: CubeMove): Promise<void> => {
-      if (cubeId === null) return;
+      if (cubeId === null || isAnimating) return;
 
       setFacePreview(null);
       setMoveError(false);
@@ -100,11 +101,12 @@ export function App() {
         setCubeState(dto.state);
         setLastMove(move);
         setAnimationId((current) => current + 1);
+        setIsAnimating(true);
       } catch {
         setMoveError(true);
       }
     },
-    [cubeId],
+    [cubeId, isAnimating],
   );
 
   useEffect(() => {
@@ -130,6 +132,12 @@ export function App() {
             durationMs: animationDurationMs,
           },
     [animationDurationMs, animationId, lastMove],
+  );
+  const handleAnimationComplete = useCallback(
+    (completedId: number) => {
+      if (completedId === animationId) setIsAnimating(false);
+    },
+    [animationId],
   );
 
   const validateMoveSequence = useCallback(async (): Promise<void> => {
@@ -166,6 +174,7 @@ export function App() {
               state={cubeState}
               animation={cubeAnimation}
               preview={facePreview}
+              onAnimationComplete={handleAnimationComplete}
             />
             <div className="cube-controls">
               <AnimationSpeedControl
@@ -176,11 +185,13 @@ export function App() {
                 state={cubeState}
                 onMove={(move) => void applyMove(move)}
                 onPreviewChange={setFacePreview}
+                disabled={isAnimating}
               />
               <MoveSequenceControl
                 sequenceInput={sequenceInput}
                 preparedMoves={preparedMoves}
                 isLoading={isSequenceLoading}
+                disabled={isAnimating}
                 errorMessage={sequenceError}
                 onSequenceInputChange={(value) => {
                   setSequenceInput(value);

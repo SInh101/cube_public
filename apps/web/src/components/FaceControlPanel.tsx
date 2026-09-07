@@ -9,6 +9,7 @@ export interface FaceControlPanelProps {
   readonly state: CubeViewState;
   readonly onMove: (move: CubeMove) => void;
   readonly onPreviewChange: (preview: FacePreview | null) => void;
+  readonly disabled?: boolean;
 }
 
 const PANEL_FACES: readonly CubeFaceDirection[] = [
@@ -24,6 +25,7 @@ export function FaceControlPanel({
   state,
   onMove,
   onPreviewChange,
+  disabled = false,
 }: FaceControlPanelProps) {
   return (
     <div className="face-control-panel" aria-label="Cube face controls">
@@ -34,6 +36,7 @@ export function FaceControlPanel({
           colors={state.faces[face]}
           onMove={onMove}
           onPreviewChange={onPreviewChange}
+          disabled={disabled}
         />
       ))}
     </div>

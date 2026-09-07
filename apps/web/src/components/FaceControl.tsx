@@ -15,6 +15,7 @@ export interface FaceControlProps {
   readonly colors: FaceStateDto;
   readonly onMove: (move: CubeMove) => void;
   readonly onPreviewChange: (preview: FacePreview | null) => void;
+  readonly disabled?: boolean;
 }
 
 const STICKER_COLORS: Record<CubeColorDto, string> = {
@@ -31,6 +32,7 @@ export function FaceControl({
   colors,
   onMove,
   onPreviewChange,
+  disabled = false,
 }: FaceControlProps) {
   const preview = (direction: PreviewDirection) =>
     onPreviewChange({ face, direction });
@@ -43,6 +45,7 @@ export function FaceControl({
     >
       <button
         type="button"
+        disabled={disabled}
         className="face-control__turn"
         aria-label={`${face} counter-clockwise`}
         onClick={() => {
@@ -71,6 +74,7 @@ export function FaceControl({
       </div>
       <button
         type="button"
+        disabled={disabled}
         className="face-control__turn"
         aria-label={`${face} clockwise`}
         onClick={() => {

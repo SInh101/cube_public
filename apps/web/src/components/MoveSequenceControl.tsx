@@ -5,6 +5,7 @@ export interface MoveSequenceControlProps {
   readonly sequenceInput: string;
   readonly preparedMoves: readonly CubeMove[];
   readonly isLoading: boolean;
+  readonly disabled?: boolean;
   readonly errorMessage?: string;
   readonly onSequenceInputChange: (value: string) => void;
   readonly onPrepare: () => void;
@@ -20,6 +21,7 @@ export function MoveSequenceControl({
   sequenceInput,
   preparedMoves,
   isLoading,
+  disabled = false,
   errorMessage,
   onSequenceInputChange,
   onPrepare,
@@ -39,11 +41,11 @@ export function MoveSequenceControl({
           id="move-sequence-input"
           rows={3}
           value={sequenceInput}
-          disabled={isLoading}
+          disabled={isLoading || disabled}
           placeholder="R U R' U'"
           onChange={(event) => onSequenceInputChange(event.target.value)}
         />
-        <button type="submit" disabled={isLoading}>
+        <button type="submit" disabled={isLoading || disabled}>
           {isLoading ? 'Preparing…' : 'Prepare moves'}
         </button>
       </form>
@@ -58,7 +60,7 @@ export function MoveSequenceControl({
               <li key={`${index}-${move}`}>
                 <button
                   type="button"
-                  disabled={isLoading}
+                  disabled={isLoading || disabled}
                   aria-label={`Apply move ${index + 1}: ${move}`}
                   onClick={() => onApplyMove(move)}
                 >

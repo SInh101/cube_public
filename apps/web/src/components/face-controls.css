@@ -141,6 +141,13 @@
   outline-offset: 0.12rem;
 }
 
+.face-control__turn:disabled {
+  color: #94a3b8;
+  background: #e2e8f0;
+  cursor: not-allowed;
+  outline: none;
+}
+
 @media (max-width: 70rem) {
   .cube-workspace {
     grid-template-columns: 1fr;

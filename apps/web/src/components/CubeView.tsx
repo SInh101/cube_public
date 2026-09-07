@@ -21,6 +21,7 @@ export interface CubeViewProps {
     readonly durationMs?: number;
   };
   readonly preview?: FacePreview | null;
+  readonly onAnimationComplete?: (animationId: number) => void;
 }
 
 const STICKER_COLORS = {
@@ -35,7 +36,12 @@ const STICKER_COLORS = {
 const INTERNAL_FACE_COLOR = 0x111827;
 
 /** CubeStateを表示する、API通信や操作状態を持たないThree.js viewer。 */
-export function CubeView({ state, animation, preview }: CubeViewProps) {
+export function CubeView({
+  state,
+  animation,
+  preview,
+  onAnimationComplete,
+}: CubeViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const lastPlayedAnimationId = useRef<number | null>(null);
 
@@ -61,6 +67,7 @@ export function CubeView({ state, animation, preview }: CubeViewProps) {
     const shouldPlayMove =
       animation !== undefined && animation.id !== lastPlayedAnimationId.current;
     if (shouldPlayMove) lastPlayedAnimationId.current = animation.id;
+    const moveAnimationId = shouldPlayMove ? animation.id : undefined;
     const moveAnimation = shouldPlayMove
       ? createMoveAnimation(animation.move)
       : undefined;
@@ -145,6 +152,7 @@ export function CubeView({ state, animation, preview }: CubeViewProps) {
     };
 
     let animationFrame: number | undefined;
+    let completionNotified = false;
     if (moveAnimation === undefined && previewAnimation === undefined) {
       render();
     } else {
@@ -160,6 +168,14 @@ export function CubeView({ state, animation, preview }: CubeViewProps) {
           const easedProgress = 1 - Math.pow(1 - progress, 3);
           turningGroup.rotation[moveAnimation.axis] =
             -moveAnimation.angle * (1 - easedProgress);
+          if (
+            progress === 1 &&
+            !completionNotified &&
+            moveAnimationId !== undefined
+          ) {
+            completionNotified = true;
+            onAnimationComplete?.(moveAnimationId);
+          }
         }
         if (previewAnimation !== undefined) {
           const previewAngle = THREE.MathUtils.degToRad(12);
@@ -189,7 +205,7 @@ export function CubeView({ state, animation, preview }: CubeViewProps) {
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [state, animation, preview]);
+  }, [state, animation, preview, onAnimationComplete]);
 
   return <div ref={containerRef} className="cube-view" />;
 }
