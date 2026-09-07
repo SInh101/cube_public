@@ -6,6 +6,7 @@ import {
   createCubieViewModels,
   createMoveAnimation,
   isCubieInMoveLayer,
+  previewRotationAt,
   type CubeMove,
   type CubeViewState,
 } from './cubeViewModel';
@@ -15,6 +16,7 @@ import './cube-view.css';
 export interface CubeViewProps {
   readonly state: CubeViewState;
   readonly animation?: {
+    readonly id: number;
     readonly move: CubeMove;
     readonly durationMs?: number;
   };
@@ -35,6 +37,7 @@ const INTERNAL_FACE_COLOR = 0x111827;
 /** CubeStateを表示する、API通信や操作状態を持たないThree.js viewer。 */
 export function CubeView({ state, animation, preview }: CubeViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastPlayedAnimationId = useRef<number | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -55,8 +58,12 @@ export function CubeView({ state, animation, preview }: CubeViewProps) {
     const stationaryGroup = new THREE.Group();
     const turningGroup = new THREE.Group();
     const ghostGroup = new THREE.Group();
-    const moveAnimation =
-      animation === undefined ? undefined : createMoveAnimation(animation.move);
+    const shouldPlayMove =
+      animation !== undefined && animation.id !== lastPlayedAnimationId.current;
+    if (shouldPlayMove) lastPlayedAnimationId.current = animation.id;
+    const moveAnimation = shouldPlayMove
+      ? createMoveAnimation(animation.move)
+      : undefined;
     const previewAnimation =
       preview === null || preview === undefined
         ? undefined
@@ -64,8 +71,9 @@ export function CubeView({ state, animation, preview }: CubeViewProps) {
             preview.direction === 'cw' ? preview.face : `${preview.face}'`,
           );
     const geometry = new THREE.BoxGeometry(0.94, 0.94, 0.94);
-    const materials: THREE.MeshStandardMaterial[] = [];
-    const ghostMaterials: THREE.MeshStandardMaterial[] = [];
+    const disposableGeometries: THREE.BufferGeometry[] = [geometry];
+    const disposableMaterials: THREE.Material[] = [];
+    const disposableTextures: THREE.Texture[] = [];
 
     for (const cubie of createCubieViewModels(state)) {
       const cubieMaterials = CUBE_FACE_DIRECTIONS.map((direction) => {
@@ -84,7 +92,7 @@ export function CubeView({ state, animation, preview }: CubeViewProps) {
               : 0x000000,
           emissiveIntensity: 0.18,
         });
-        materials.push(material);
+        disposableMaterials.push(material);
         return material;
       });
       const mesh = new THREE.Mesh(geometry, cubieMaterials);
@@ -97,27 +105,29 @@ export function CubeView({ state, animation, preview }: CubeViewProps) {
       } else {
         stationaryGroup.add(mesh);
       }
-
-      if (
-        previewAnimation !== undefined &&
-        isCubieInMoveLayer(cubie.position, previewAnimation)
-      ) {
-        const previewMaterials = cubieMaterials.map((material) => {
-          const ghostMaterial = material.clone();
-          ghostMaterial.transparent = true;
-          ghostMaterial.opacity = 0.22;
-          ghostMaterial.depthWrite = false;
-          ghostMaterial.emissive.setHex(0xffffff);
-          ghostMaterial.emissiveIntensity = 0.25;
-          ghostMaterials.push(ghostMaterial);
-          return ghostMaterial;
-        });
-        const ghost = new THREE.Mesh(geometry, previewMaterials);
-        ghost.position.copy(mesh.position);
-        ghost.scale.setScalar(1.035);
-        ghostGroup.add(ghost);
-      }
     }
+
+    if (previewAnimation !== undefined) {
+      const ghostGeometry = createGhostGeometry(previewAnimation.axis);
+      const ghostMaterial = new THREE.MeshBasicMaterial({
+        color: 0x93c5fd,
+        transparent: true,
+        opacity: 0.24,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      const ghost = new THREE.Mesh(ghostGeometry, ghostMaterial);
+      ghost.position[previewAnimation.axis] = previewAnimation.layer;
+      ghostGroup.add(ghost);
+      disposableGeometries.push(ghostGeometry);
+      disposableMaterials.push(ghostMaterial);
+    }
+
+    const centerLabels = createCenterLabels();
+    scene.add(centerLabels.group);
+    disposableGeometries.push(...centerLabels.geometries);
+    disposableMaterials.push(...centerLabels.materials);
+    disposableTextures.push(...centerLabels.textures);
 
     scene.add(stationaryGroup, turningGroup, ghostGroup);
     scene.add(new THREE.HemisphereLight(0xffffff, 0x334155, 2.4));
@@ -154,8 +164,10 @@ export function CubeView({ state, animation, preview }: CubeViewProps) {
         if (previewAnimation !== undefined) {
           const previewAngle = THREE.MathUtils.degToRad(12);
           const direction = Math.sign(previewAnimation.angle);
-          ghostGroup.rotation[previewAnimation.axis] =
-            Math.sin((now - startedAt) / 140) * previewAngle * direction;
+          ghostGroup.rotation[previewAnimation.axis] = previewRotationAt(
+            previewAngle * direction,
+            now - startedAt,
+          );
         }
         render();
         if (progress < 1 || previewAnimation !== undefined) {
@@ -169,13 +181,74 @@ export function CubeView({ state, animation, preview }: CubeViewProps) {
     return () => {
       window.removeEventListener('resize', render);
       if (animationFrame !== undefined) cancelAnimationFrame(animationFrame);
-      geometry.dispose();
-      for (const material of materials) material.dispose();
-      for (const material of ghostMaterials) material.dispose();
+      for (const disposableGeometry of disposableGeometries) {
+        disposableGeometry.dispose();
+      }
+      for (const material of disposableMaterials) material.dispose();
+      for (const texture of disposableTextures) texture.dispose();
       renderer.dispose();
       renderer.domElement.remove();
     };
   }, [state, animation, preview]);
 
   return <div ref={containerRef} className="cube-view" />;
+}
+
+function createGhostGeometry(axis: 'x' | 'y' | 'z'): THREE.BoxGeometry {
+  const thickness = 1.03;
+  const length = 3.04;
+  if (axis === 'x') return new THREE.BoxGeometry(thickness, length, length);
+  if (axis === 'y') return new THREE.BoxGeometry(length, thickness, length);
+  return new THREE.BoxGeometry(length, length, thickness);
+}
+
+function createCenterLabels(): {
+  readonly group: THREE.Group;
+  readonly geometries: readonly THREE.PlaneGeometry[];
+  readonly materials: readonly THREE.MeshBasicMaterial[];
+  readonly textures: readonly THREE.CanvasTexture[];
+} {
+  const group = new THREE.Group();
+  const geometries: THREE.PlaneGeometry[] = [];
+  const materials: THREE.MeshBasicMaterial[] = [];
+  const textures: THREE.CanvasTexture[] = [];
+  const labels = [
+    { text: 'U', position: [0, 1.476, 0], rotation: [-Math.PI / 2, 0, 0] },
+    { text: 'F', position: [0, 0, 1.476], rotation: [0, 0, 0] },
+    { text: 'R', position: [1.476, 0, 0], rotation: [0, Math.PI / 2, 0] },
+  ] as const;
+
+  for (const label of labels) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const context = canvas.getContext('2d');
+    if (context === null) continue;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = '#111827';
+    context.font = '800 76px system-ui, sans-serif';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText(label.text, canvas.width / 2, canvas.height / 2 + 3);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    const geometry = new THREE.PlaneGeometry(0.58, 0.58);
+    const material = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(label.position[0], label.position[1], label.position[2]);
+    mesh.rotation.set(label.rotation[0], label.rotation[1], label.rotation[2]);
+    mesh.renderOrder = 3;
+    group.add(mesh);
+    geometries.push(geometry);
+    materials.push(material);
+    textures.push(texture);
+  }
+
+  return { group, geometries, materials, textures };
 }

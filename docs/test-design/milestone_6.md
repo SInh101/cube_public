@@ -41,3 +41,8 @@ Milestone 6実装後はM6-01〜06を含む全テストが成功し、buttonとke
 - M6-GUI-04: API由来の現在のCubeStateをCSS layerのsticker色へ反映する
 - highlightとghostは既存の軸／layer設定を共有し、CubeStateを変更しない
 - animation完了待ちと操作disableはMilestone 8のAgentテストへ移す
+
+## M6.1 追加調整テスト
+
+- M6-AN-04: Ghostは通常方向・逆方向の双方で、正位置から指定方向へだけ進み、半周期で最大角度、1周期で正位置へ戻る。
+- animation ID、単一Box Ghost、固定中心ラベル、responsive layoutは描画構造と実ブラウザで確認する。

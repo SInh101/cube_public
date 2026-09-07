@@ -26,6 +26,7 @@ export function App() {
   >(null);
   const [moveError, setMoveError] = useState(false);
   const [lastMove, setLastMove] = useState<CubeMove | null>(null);
+  const [animationId, setAnimationId] = useState(0);
   const [facePreview, setFacePreview] = useState<FacePreview | null>(null);
 
   useEffect(() => {
@@ -87,6 +88,7 @@ export function App() {
         const dto = (await response.json()) as CubeStateResponseDto;
         setCubeState(dto.state);
         setLastMove(move);
+        setAnimationId((current) => current + 1);
       } catch {
         setMoveError(true);
       }
@@ -108,8 +110,8 @@ export function App() {
   }, [applyMove]);
 
   const cubeAnimation = useMemo(
-    () => (lastMove === null ? undefined : { move: lastMove }),
-    [lastMove],
+    () => (lastMove === null ? undefined : { id: animationId, move: lastMove }),
+    [animationId, lastMove],
   );
 
   return (
@@ -119,16 +121,18 @@ export function App() {
       {status === 'error' && <p role="alert">Error loading cube.</p>}
       {status === 'ready' && cubeState !== null && (
         <>
-          <CubeView
-            state={cubeState}
-            animation={cubeAnimation}
-            preview={facePreview}
-          />
-          <FaceControlPanel
-            state={cubeState}
-            onMove={(move) => void applyMove(move)}
-            onPreviewChange={setFacePreview}
-          />
+          <div className="cube-workspace">
+            <CubeView
+              state={cubeState}
+              animation={cubeAnimation}
+              preview={facePreview}
+            />
+            <FaceControlPanel
+              state={cubeState}
+              onMove={(move) => void applyMove(move)}
+              onPreviewChange={setFacePreview}
+            />
+          </div>
           {moveError && <p role="alert">Error applying move.</p>}
         </>
       )}

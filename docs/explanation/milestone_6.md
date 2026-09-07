@@ -78,3 +78,26 @@ Milestone 6の操作UIは学習者の自力実装範囲である。現段階で�
 
 - 役割: Milestone 6でCodexが追加・変更したファイルを追跡する本ファイル。
 - コード要約: Agent担当のテストおよび教材文書を記録する。
+
+## M6.1 追加調整
+
+### `apps/web/src/App.tsx`
+
+- Move成功ごとに単調増加するanimation IDを発行する。直前と同じMoveでも新しい操作は再生し、hover/focusによる再描画では過去のMoveを再生しない。
+- `CubeView`と`FaceControlPanel`を`cube-workspace`でまとめ、広い画面では立体表示の右に操作盤を置ける構造にした。
+
+### `apps/web/src/components/CubeView.tsx`
+
+- 最後に再生したanimation IDを保持し、preview変更と直前Move animationの重複を防ぐ。
+- Ghostをcubieの複製ではなく、対象layer全体を覆う半透明の単一Boxとして描画する。これによりパーツ間の段差や継ぎ目を表示しない。
+- U/F/Rの中心ラベルを回転groupの外側に置く。中心パーツの表面に沿う位置と向きで描画し、各layerの回転には追従させない。
+- 追加したtexture、geometry、materialもeffect終了時に破棄する。
+
+### `apps/web/src/components/cubeViewModel.ts`
+
+- `previewRotationAt`はGhostを正位置から指定方向へ動かし、反対方向を通らず正位置へ戻す角度を返す。
+
+### `apps/web/src/components/face-controls.css` / `apps/web/src/styles.css`
+
+- desktopでは立体Viewの右側に操作盤を配置し、狭い画面では従来どおり下へ折り返すresponsive layoutにした。
+- main領域の最大幅を広げ、横方向の画面領域を利用する。

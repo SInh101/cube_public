@@ -100,3 +100,13 @@
 - 複数Moveを表す文字列の構文を理解する
 - sequenceのparseとinverseをCube Coreで扱う
 - 単一Move APIと複数Move再生の責務を分離する
+
+## M6.1 追加調整
+
+- Move animationを操作単位のIDで識別し、hover/focus時に直前のanimationがGhostと重複して再生される問題を解消した。
+- Ghostは正位置から選択方向へだけ12度動いて正位置へ戻る。反対方向へは越えない。
+- Ghostを対象layerと同寸法の単一Boxに変更し、cubie間の段差をなくした。
+- 広い画面では操作盤を立体Viewの右へ配置し、狭い画面では縦配置に戻るようにした。
+- U/F/Rの文字を回転group外の中心面に配置し、Move animationの影響を受けないようにした。
+
+検証結果: Vitest 187件、formatter、ESLint、TypeScript、production buildがすべて成功した。Viteの500 kB超chunk警告は既知であり、build自体は成功している。

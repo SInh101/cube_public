@@ -92,6 +92,17 @@ export function isCubieInMoveLayer(
   return position[axisIndex] === animation.layer;
 }
 
+/** Ghostを正位置から指定方向へだけ揺らし、1周期後に正位置へ戻す。 */
+export function previewRotationAt(
+  targetAngle: number,
+  elapsedMs: number,
+  durationMs = 720,
+): number {
+  const phase = ((elapsedMs % durationMs) / durationMs) * Math.PI * 2;
+  const outwardProgress = (1 - Math.cos(phase)) / 2;
+  return outwardProgress * targetAngle;
+}
+
 function faceIndex(row: number, column: number): number {
   return row * 3 + column;
 }

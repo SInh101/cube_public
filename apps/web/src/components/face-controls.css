@@ -1,3 +1,10 @@
+.cube-workspace {
+  display: grid;
+  grid-template-columns: minmax(20rem, 36rem) minmax(30rem, 1fr);
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 4rem);
+}
+
 .face-control-panel {
   display: grid;
   grid-template-columns: repeat(4, minmax(9rem, 1fr));
@@ -6,8 +13,7 @@
     'l f r b'
     '. d . .';
   gap: 0.75rem;
-  width: min(100%, 58rem);
-  margin-top: 1.25rem;
+  width: 100%;
 }
 
 .face-control[data-face='U'] {
@@ -82,8 +88,13 @@
   outline-offset: 0.12rem;
 }
 
-@media (max-width: 48rem) {
+@media (max-width: 70rem) {
+  .cube-workspace {
+    grid-template-columns: 1fr;
+  }
+
   .face-control-panel {
+    max-width: 58rem;
     grid-template-columns: repeat(2, minmax(8rem, 1fr));
     grid-template-areas:
       'u d'
