@@ -4,12 +4,19 @@ import * as THREE from 'three';
 import {
   CUBE_FACE_DIRECTIONS,
   createCubieViewModels,
+  createMoveAnimation,
+  isCubieInMoveLayer,
+  type CubeMove,
   type CubeViewState,
 } from './cubeViewModel';
 import './cube-view.css';
 
 export interface CubeViewProps {
   readonly state: CubeViewState;
+  readonly animation?: {
+    readonly move: CubeMove;
+    readonly durationMs?: number;
+  };
 }
 
 const STICKER_COLORS = {
@@ -24,7 +31,7 @@ const STICKER_COLORS = {
 const INTERNAL_FACE_COLOR = 0x111827;
 
 /** CubeStateを表示する、API通信や操作状態を持たないThree.js viewer。 */
-export function CubeView({ state }: CubeViewProps) {
+export function CubeView({ state, animation }: CubeViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,7 +50,10 @@ export function CubeView({ state }: CubeViewProps) {
     renderer.domElement.setAttribute('aria-label', '3D Rubik’s Cube');
     renderer.domElement.setAttribute('role', 'img');
 
-    const cubeGroup = new THREE.Group();
+    const stationaryGroup = new THREE.Group();
+    const turningGroup = new THREE.Group();
+    const moveAnimation =
+      animation === undefined ? undefined : createMoveAnimation(animation.move);
     const geometry = new THREE.BoxGeometry(0.94, 0.94, 0.94);
     const materials: THREE.MeshStandardMaterial[] = [];
 
@@ -63,10 +73,17 @@ export function CubeView({ state }: CubeViewProps) {
       });
       const mesh = new THREE.Mesh(geometry, cubieMaterials);
       mesh.position.set(...cubie.position);
-      cubeGroup.add(mesh);
+      if (
+        moveAnimation !== undefined &&
+        isCubieInMoveLayer(cubie.position, moveAnimation)
+      ) {
+        turningGroup.add(mesh);
+      } else {
+        stationaryGroup.add(mesh);
+      }
     }
 
-    scene.add(cubeGroup);
+    scene.add(stationaryGroup, turningGroup);
     scene.add(new THREE.HemisphereLight(0xffffff, 0x334155, 2.4));
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.8);
     keyLight.position.set(4, 6, 5);
@@ -81,17 +98,35 @@ export function CubeView({ state }: CubeViewProps) {
       renderer.render(scene, camera);
     };
 
-    render();
+    let animationFrame: number | undefined;
+    if (moveAnimation === undefined) {
+      render();
+    } else {
+      const duration = animation?.durationMs ?? 240;
+      const startedAt = performance.now();
+      turningGroup.rotation[moveAnimation.axis] = -moveAnimation.angle;
+
+      const animate = (now: number) => {
+        const progress = Math.min((now - startedAt) / duration, 1);
+        const easedProgress = 1 - Math.pow(1 - progress, 3);
+        turningGroup.rotation[moveAnimation.axis] =
+          -moveAnimation.angle * (1 - easedProgress);
+        render();
+        if (progress < 1) animationFrame = requestAnimationFrame(animate);
+      };
+      animationFrame = requestAnimationFrame(animate);
+    }
     window.addEventListener('resize', render);
 
     return () => {
       window.removeEventListener('resize', render);
+      if (animationFrame !== undefined) cancelAnimationFrame(animationFrame);
       geometry.dispose();
       for (const material of materials) material.dispose();
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [state]);
+  }, [state, animation]);
 
   return <div ref={containerRef} className="cube-view" />;
 }

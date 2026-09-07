@@ -16,6 +16,14 @@ export interface CubieViewModel {
 }
 
 export type CubeViewState = CubeStateResponseDto['state'];
+export type CubeMove =
+  CubeFaceDirection | `${CubeFaceDirection}'` | `${CubeFaceDirection}2`;
+
+export interface CubeMoveAnimation {
+  readonly axis: 'x' | 'y' | 'z';
+  readonly layer: -1 | 1;
+  readonly angle: number;
+}
 
 /** APIのface配列を、Three.jsで描画する26個のcubieへ変換する。 */
 export function createCubieViewModels(
@@ -44,6 +52,38 @@ export function createCubieViewModels(
   }
 
   return cubies;
+}
+
+/** Moveを、回転対象layerとThree.jsの回転軸・角度へ変換する。 */
+export function createMoveAnimation(move: CubeMove): CubeMoveAnimation {
+  const face = move[0] as CubeFaceDirection;
+  const faceSettings: Record<
+    CubeFaceDirection,
+    Omit<CubeMoveAnimation, 'angle'> & { readonly quarterTurn: number }
+  > = {
+    R: { axis: 'x', layer: 1, quarterTurn: -Math.PI / 2 },
+    L: { axis: 'x', layer: -1, quarterTurn: Math.PI / 2 },
+    U: { axis: 'y', layer: 1, quarterTurn: -Math.PI / 2 },
+    D: { axis: 'y', layer: -1, quarterTurn: Math.PI / 2 },
+    F: { axis: 'z', layer: 1, quarterTurn: -Math.PI / 2 },
+    B: { axis: 'z', layer: -1, quarterTurn: Math.PI / 2 },
+  };
+  const setting = faceSettings[face];
+  const multiplier = move.endsWith('2') ? 2 : move.endsWith("'") ? -1 : 1;
+
+  return {
+    axis: setting.axis,
+    layer: setting.layer,
+    angle: setting.quarterTurn * multiplier,
+  };
+}
+
+export function isCubieInMoveLayer(
+  position: CubiePosition,
+  animation: CubeMoveAnimation,
+): boolean {
+  const axisIndex = animation.axis === 'x' ? 0 : animation.axis === 'y' ? 1 : 2;
+  return position[axisIndex] === animation.layer;
 }
 
 function faceIndex(row: number, column: number): number {

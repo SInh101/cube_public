@@ -2,9 +2,9 @@ import type {
   CreateCubeResponseDto,
   CubeStateResponseDto,
 } from '@rubiks-learning/api-contract';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { CubeView } from './components';
+import { CubeView, type CubeMove } from './components';
 
 type LoadStatus = 'loading' | 'ready' | 'error';
 type FaceMove = 'R' | 'L' | 'U' | 'D' | 'F' | 'B';
@@ -20,6 +20,7 @@ export function App() {
     CubeStateResponseDto['state'] | null
   >(null);
   const [moveError, setMoveError] = useState(false);
+  const [lastMove, setLastMove] = useState<CubeMove | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -78,6 +79,7 @@ export function App() {
         }
         const dto = (await response.json()) as CubeStateResponseDto;
         setCubeState(dto.state);
+        setLastMove(move);
       } catch {
         setMoveError(true);
       }
@@ -98,6 +100,11 @@ export function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [applyMove]);
 
+  const cubeAnimation = useMemo(
+    () => (lastMove === null ? undefined : { move: lastMove }),
+    [lastMove],
+  );
+
   return (
     <main>
       <h1>Rubik&apos;s Cube Learning</h1>
@@ -105,7 +112,7 @@ export function App() {
       {status === 'error' && <p role="alert">Error loading cube.</p>}
       {status === 'ready' && cubeState !== null && (
         <>
-          <CubeView state={cubeState} />
+          <CubeView state={cubeState} animation={cubeAnimation} />
           <div aria-label="Cube moves" role="group">
             {FACE_MOVES.map((move) => (
               <button

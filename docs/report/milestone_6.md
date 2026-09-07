@@ -13,6 +13,7 @@
 - Move API成功時のCubeState更新
 - Move API失敗時の既存表示維持とerror表示
 - keyboard listenerのcleanup
+- 全18 Moveに対応するlayer回転animation
 
 ## 自力実装の有無と規模
 
@@ -34,6 +35,7 @@
 ## Agentが担当した部分
 
 - Milestone 6のテスト設計と自動テスト
+- Moveごとの3D layer animationとanimation変換テスト
 - 自力実装用workbookとCodex実装解説
 - 初期実装レビュー
 - 明示依頼に基づくAppの修正
@@ -63,14 +65,15 @@
 - CubeViewは引き続き描画専用で、eventやfetchを持たない
 - AppがUI event、HTTP通信、React state同期を担当する
 - Milestone 7のsequence parser、手順入力、再生制御を先取りしていない
-- 3D回転補間animationは完了条件ではないため未実装
+- animationは描画層だけに置き、Appから直前のMoveをpropsで渡すため、HTTP／UI責務を侵食していない
 
 ## テスト結果
 
-- Vitest: 158件成功
+- Vitest: 176件成功
 - Milestone 6: button、通常key、Shift key、対応外key、state同期、error時のstate維持に成功
 - formatter、ESLint、TypeScript、build: 成功
 - 実ブラウザ: buttonとkeyboardの両方でCubeを混ぜ、揃えられることを確認
+- Animation: 全6 face、prime、2回転の軸／layer／方向を自動テストで確認
 - buildは成功したが、Three.jsを含むchunkが500 kBを超える警告あり
 
 ## 理解できたこと
@@ -82,7 +85,7 @@
 
 ## 理解が曖昧なこと
 
-なし。回転補間animationは必要になった時点で描画層へ追加する。
+なし。
 
 ## 次Milestoneへの課題
 

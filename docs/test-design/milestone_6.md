@@ -26,3 +26,9 @@ Appの初期POST／GETはmockし、操作後の`POST /api/cubes/{cubeId}/moves`�
 ## 実装後の結果
 
 Milestone 6実装後はM6-01〜06を含む全テストが成功し、buttonとkeyboardによる実ブラウザ操作も確認した。
+
+## Animation追加テスト
+
+- M6-AN-01: R／L／U／D／F／Bを正しい回転軸と外側layerへ対応づける
+- M6-AN-02: prime Moveを通常Moveと反対方向へ回転する
+- M6-AN-03: `2`付きMoveを180度回転する
