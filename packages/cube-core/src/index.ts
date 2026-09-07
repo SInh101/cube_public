@@ -1,6 +1,13 @@
 export { Cube } from './Cube.js';
 export { Commutator } from './Commutator.js';
 export type { CommutatorBoundary, CommutatorPart } from './Commutator.js';
+export { analyzeCubieChanges, snapshotCubies } from './CubieAnalysis.js';
+export type {
+  CubieChange,
+  CubieKind,
+  CubiePosition,
+  CubieSnapshot,
+} from './CubieAnalysis.js';
 export {
   InvalidMoveSequenceError,
   invertSequence,

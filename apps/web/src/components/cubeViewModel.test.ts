@@ -37,6 +37,14 @@ describe('createCubieViewModels', () => {
 
     expect(frontTopLeft?.stickers.F).toBe('blue');
   });
+
+  it('M12-3D-01: sticker色から向きに依存しないcubie IDを作る', () => {
+    const frontTopRight = createCubieViewModels(solvedState()).find(
+      ({ position }) =>
+        position[0] === 1 && position[1] === 1 && position[2] === 1,
+    );
+    expect(frontTopRight?.id).toBe('green-red-white');
+  });
 });
 
 function solvedState(): CubeViewState {

@@ -22,6 +22,8 @@ export interface CubeViewProps {
   };
   readonly preview?: FacePreview | null;
   readonly onAnimationComplete?: (animationId: number) => void;
+  readonly highlightedCubieIds?: readonly string[];
+  readonly dimUnhighlighted?: boolean;
 }
 
 const STICKER_COLORS = {
@@ -41,6 +43,8 @@ export function CubeView({
   animation,
   preview,
   onAnimationComplete,
+  highlightedCubieIds,
+  dimUnhighlighted = false,
 }: CubeViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const lastPlayedAnimationId = useRef<number | null>(null);
@@ -81,8 +85,13 @@ export function CubeView({
     const disposableGeometries: THREE.BufferGeometry[] = [geometry];
     const disposableMaterials: THREE.Material[] = [];
     const disposableTextures: THREE.Texture[] = [];
+    const highlightedIds = new Set(highlightedCubieIds);
 
     for (const cubie of createCubieViewModels(state)) {
+      const hasHighlightSelection = highlightedIds.size > 0;
+      const isHighlighted = highlightedIds.has(cubie.id);
+      const shouldDim =
+        dimUnhighlighted && hasHighlightSelection && !isHighlighted;
       const cubieMaterials = CUBE_FACE_DIRECTIONS.map((direction) => {
         const sticker = cubie.stickers[direction];
         const material = new THREE.MeshStandardMaterial({
@@ -93,11 +102,15 @@ export function CubeView({
           roughness: 0.72,
           metalness: 0,
           emissive:
-            previewAnimation !== undefined &&
-            isCubieInMoveLayer(cubie.position, previewAnimation)
+            isHighlighted ||
+            (previewAnimation !== undefined &&
+              isCubieInMoveLayer(cubie.position, previewAnimation))
               ? 0xffffff
               : 0x000000,
-          emissiveIntensity: 0.18,
+          emissiveIntensity: isHighlighted ? 0.32 : 0.18,
+          transparent: shouldDim,
+          opacity: shouldDim ? 0.18 : 1,
+          depthWrite: !shouldDim,
         });
         disposableMaterials.push(material);
         return material;
@@ -205,7 +218,14 @@ export function CubeView({
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [state, animation, preview, onAnimationComplete]);
+  }, [
+    state,
+    animation,
+    preview,
+    onAnimationComplete,
+    highlightedCubieIds,
+    dimUnhighlighted,
+  ]);
 
   return <div ref={containerRef} className="cube-view" />;
 }

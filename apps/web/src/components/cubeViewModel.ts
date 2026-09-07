@@ -9,6 +9,7 @@ export type CubeFaceDirection = (typeof CUBE_FACE_DIRECTIONS)[number];
 export type CubiePosition = readonly [x: number, y: number, z: number];
 
 export interface CubieViewModel {
+  readonly id: string;
   readonly position: CubiePosition;
   readonly stickers: Readonly<
     Record<CubeFaceDirection, CubeColorDto | undefined>
@@ -53,16 +54,21 @@ export function createCubieViewModels(
       for (let z = -1; z <= 1; z += 1) {
         if (x === 0 && y === 0 && z === 0) continue;
 
+        const stickers = {
+          R: x === 1 ? state.faces.R[faceIndex(1 - y, 1 - z)] : undefined,
+          L: x === -1 ? state.faces.L[faceIndex(1 - y, z + 1)] : undefined,
+          U: y === 1 ? state.faces.U[faceIndex(z + 1, x + 1)] : undefined,
+          D: y === -1 ? state.faces.D[faceIndex(1 - z, x + 1)] : undefined,
+          F: z === 1 ? state.faces.F[faceIndex(1 - y, x + 1)] : undefined,
+          B: z === -1 ? state.faces.B[faceIndex(1 - y, 1 - x)] : undefined,
+        };
         cubies.push({
+          id: Object.values(stickers)
+            .filter((color) => color !== undefined)
+            .sort()
+            .join('-'),
           position: [x, y, z],
-          stickers: {
-            R: x === 1 ? state.faces.R[faceIndex(1 - y, 1 - z)] : undefined,
-            L: x === -1 ? state.faces.L[faceIndex(1 - y, z + 1)] : undefined,
-            U: y === 1 ? state.faces.U[faceIndex(z + 1, x + 1)] : undefined,
-            D: y === -1 ? state.faces.D[faceIndex(1 - z, x + 1)] : undefined,
-            F: z === 1 ? state.faces.F[faceIndex(1 - y, x + 1)] : undefined,
-            B: z === -1 ? state.faces.B[faceIndex(1 - y, 1 - x)] : undefined,
-          },
+          stickers,
         });
       }
     }
