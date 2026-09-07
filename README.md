@@ -58,7 +58,7 @@ Health APIは `200` と `{ "status": "ok" }` を返し、FrontendにはAPI statu
 
 - GitHub Pages: repository variable `VITE_API_BASE_URL` にVercel APIのURLを設定し、PagesのsourceをGitHub Actionsにします。
 - Vercel: Milestone 8まではHealth APIだけを対象とし、stateを持つCube APIの公開は永続repositoryを導入するMilestone 9まで延期します。
-- Supabase: 後続MilestoneでAPI側に `SUPABASE_URL` と `SUPABASE_SERVICE_ROLE_KEY` を設定します。サービスロールキーをFrontendへ公開しないでください。
+- Supabase: API側に `SUPABASE_URL` と `SUPABASE_SERVICE_ROLE_KEY` を設定し、`supabase/migrations`を適用します。サービスロールキーをFrontendへ公開しないでください。Preset CRUDとrepository接続はMilestone 9の自力実装です。
 
 ## 学習範囲
 
