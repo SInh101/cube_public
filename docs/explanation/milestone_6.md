@@ -104,8 +104,13 @@ Milestone 6の操作UIは学習者の自力実装範囲である。現段階で�
 
 ### `apps/web/src/components/AnimationSpeedControl.tsx`
 
-- Move animationの速度をFast（120ms）、Standard（240ms）、Slow（600ms）から選ぶGUIを提供する。
-- 速度の名前とdurationを`ANIMATION_SPEEDS`へ集約し、表示とanimation設定で同じ定義を使う。
+- Move animationのdurationを50〜2000ms、10ms刻みで変更できるsliderと数値入力を提供する。
+- sliderと数値入力は同じ値へ連動し、範囲外の数値は最小値または最大値へ補正する。
+
+### `apps/web/src/components/AnimationSpeedControl.test.tsx`
+
+- 役割: 速度設定GUIの連動と入力範囲を検証する。
+- コード要約: sliderと数値入力が同じ値を示すこと、および50〜2000msへの補正をテストする。
 
 ### 操作方式の将来切替
 

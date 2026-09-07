@@ -47,3 +47,5 @@ Milestone 6実装後はM6-01〜06を含む全テストが成功し、buttonとke
 - M6-AN-04: Ghostは通常方向・逆方向の双方で、正位置から指定方向へ単調に進み、1周期で正位置へ瞬時にリセットする。
 - animation ID、単一Box Ghost、固定中心ラベル、responsive layoutは描画構造と実ブラウザで確認する。
 - M6-07: GUIで選んだ速度のdurationが次のMove animationへ渡る。
+- M6-SP-01: sliderと数値入力が同じdurationを表示する。
+- M6-SP-02: 数値入力を50〜2000msの範囲へ補正する。

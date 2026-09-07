@@ -13,30 +13,21 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from './App';
 
 vi.mock('./components', () => ({
-  ANIMATION_SPEEDS: {
-    fast: { label: 'Fast', durationMs: 120 },
-    standard: { label: 'Standard', durationMs: 240 },
-    slow: { label: 'Slow', durationMs: 600 },
-  },
+  DEFAULT_ANIMATION_DURATION_MS: 240,
   AnimationSpeedControl: ({
     value,
     onChange,
   }: {
-    value: string;
-    onChange: (value: 'fast' | 'standard' | 'slow') => void;
+    value: number;
+    onChange: (value: number) => void;
   }) => (
     <label>
-      Animation speed
-      <select
+      Animation duration in milliseconds
+      <input
+        type="number"
         value={value}
-        onChange={(event) =>
-          onChange(event.target.value as 'fast' | 'standard' | 'slow')
-        }
-      >
-        <option value="fast">Fast</option>
-        <option value="standard">Standard</option>
-        <option value="slow">Slow</option>
-      </select>
+        onChange={(event) => onChange(Number(event.target.value))}
+      />
     </label>
   ),
   CubeView: ({
@@ -171,14 +162,17 @@ describe('Milestone 6 interactive Cube UI', () => {
     render(<App />);
     await screen.findByTestId('cube-view');
 
-    fireEvent.change(screen.getByLabelText('Animation speed'), {
-      target: { value: 'slow' },
-    });
+    fireEvent.change(
+      screen.getByLabelText('Animation duration in milliseconds'),
+      {
+        target: { value: '730' },
+      },
+    );
     fireEvent.click(screen.getByRole('button', { name: 'R clockwise' }));
 
     await waitFor(() =>
       expect(screen.getByTestId('cube-view').dataset.animationDuration).toBe(
-        '600',
+        '730',
       ),
     );
   });

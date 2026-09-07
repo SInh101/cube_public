@@ -5,11 +5,10 @@ import type {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
-  ANIMATION_SPEEDS,
   AnimationSpeedControl,
   CubeView,
+  DEFAULT_ANIMATION_DURATION_MS,
   FaceControlPanel,
-  type AnimationSpeed,
   type CubeMove,
   type FacePreview,
 } from './components';
@@ -30,8 +29,9 @@ export function App() {
   const [moveError, setMoveError] = useState(false);
   const [lastMove, setLastMove] = useState<CubeMove | null>(null);
   const [animationId, setAnimationId] = useState(0);
-  const [animationSpeed, setAnimationSpeed] =
-    useState<AnimationSpeed>('standard');
+  const [animationDurationMs, setAnimationDurationMs] = useState(
+    DEFAULT_ANIMATION_DURATION_MS,
+  );
   const [facePreview, setFacePreview] = useState<FacePreview | null>(null);
 
   useEffect(() => {
@@ -121,9 +121,9 @@ export function App() {
         : {
             id: animationId,
             move: lastMove,
-            durationMs: ANIMATION_SPEEDS[animationSpeed].durationMs,
+            durationMs: animationDurationMs,
           },
-    [animationId, animationSpeed, lastMove],
+    [animationDurationMs, animationId, lastMove],
   );
 
   return (
@@ -141,8 +141,8 @@ export function App() {
             />
             <div className="cube-controls">
               <AnimationSpeedControl
-                value={animationSpeed}
-                onChange={setAnimationSpeed}
+                value={animationDurationMs}
+                onChange={setAnimationDurationMs}
               />
               <FaceControlPanel
                 state={cubeState}
