@@ -59,6 +59,7 @@ M11以降がCube操作を拡張しても、Presetは文字列Move sequenceとRES
 
 - `apps/web/src/components/face-controls.css`: desktopではworkspaceをviewport内へ収め、左のCube Viewを表示したまま`.cube-controls`だけを縦scrollさせる。70rem以下では高さ制限と内部scrollを解除し、一列のpage scrollへ戻す。
 - `apps/web/src/components/workspaceLayout.test.ts`: desktopの右カラムscrollとresponsive解除規則が失われないことを検証する。
+- `apps/web/src/styles.css`: desktopのrootをviewport高へ固定し、mainを見出し＋残り領域のgridにすることでページ全体の微小scrollを除去する。狭幅では通常のpage scrollを維持する。
 
 ## 複数回再生の修正
 

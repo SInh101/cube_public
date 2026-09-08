@@ -3,8 +3,7 @@
   grid-template-columns: minmax(20rem, 36rem) minmax(30rem, 1fr);
   align-items: start;
   gap: clamp(1.5rem, 4vw, 4rem);
-  height: calc(100dvh - 8rem);
-  min-height: 32rem;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -195,6 +194,13 @@
     padding-right: 0;
   }
 
+  .cube-reset-control {
+    position: static;
+    justify-self: stretch;
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+
   .face-control-panel {
     max-width: 58rem;
     grid-template-columns: repeat(2, minmax(8rem, 1fr));
@@ -206,6 +212,17 @@
 }
 
 @media (max-width: 30rem) {
+  .face-control-panel {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'u'
+      'd'
+      'l'
+      'r'
+      'f'
+      'b';
+  }
+
   .animation-speed-control {
     grid-template-columns: 1fr;
   }
