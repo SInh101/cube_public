@@ -55,6 +55,11 @@ App ── playback要求 ── PresetPanel
 
 M11以降がCube操作を拡張しても、Presetは文字列Move sequenceとREST DTOだけを公開する。Preset UIからCube CoreやSupabaseへ直接依存してはならない。
 
+## Workspace layout
+
+- `apps/web/src/components/face-controls.css`: desktopではworkspaceをviewport内へ収め、左のCube Viewを表示したまま`.cube-controls`だけを縦scrollさせる。70rem以下では高さ制限と内部scrollを解除し、一列のpage scrollへ戻す。
+- `apps/web/src/components/workspaceLayout.test.ts`: desktopの右カラムscrollとresponsive解除規則が失われないことを検証する。
+
 ## 複数回再生の修正
 
 旧方式は`pendingPresetPlayback`を立て、`currentIndex === 0`になるまでeffectで待っていた。この待機要求が完走位置で残ると、Resetによって0へ戻った時点で遅延再生される問題があった。現在は待機stateを廃止し、`start(moves)`が新しいsequence、index 0、playingを同時に設定する。再生・animation中はPreset操作をdisableし、重複要求をqueueしない。

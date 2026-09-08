@@ -17,7 +17,7 @@ Milestone 9のPreset REST APIとMilestone 8のPlaybackを再利用し、Frontend
 ## テスト結果
 
 - Test Files: 26 passed
-- Tests: 256 passed / 0 todo
+- Tests: 258 passed / 0 todo
 - TypeScript、ESLint、Prettier、production build: 成功
 
 buildには既存の500 kB超chunk警告があるが、機能・型・テストの失敗ではない。

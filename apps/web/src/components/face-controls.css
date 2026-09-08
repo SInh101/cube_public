@@ -1,14 +1,22 @@
 .cube-workspace {
   display: grid;
   grid-template-columns: minmax(20rem, 36rem) minmax(30rem, 1fr);
-  align-items: center;
+  align-items: start;
   gap: clamp(1.5rem, 4vw, 4rem);
+  height: calc(100dvh - 8rem);
+  min-height: 32rem;
+  overflow: hidden;
 }
 
 .cube-controls {
   display: grid;
   gap: 1rem;
   min-width: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 0.5rem;
+  scrollbar-gutter: stable;
 }
 
 .cube-reset-control {
@@ -176,6 +184,15 @@
 @media (max-width: 70rem) {
   .cube-workspace {
     grid-template-columns: 1fr;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .cube-controls {
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 0;
   }
 
   .face-control-panel {
