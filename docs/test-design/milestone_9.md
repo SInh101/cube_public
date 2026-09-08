@@ -9,7 +9,7 @@
 - `updated_at` trigger
 - RLS有効化とBrowser向けpolicy不在
 
-## Agent実装予定
+## Agent実装済み
 
 - Happy path: create/list/get/update/delete
 - Boundary: 空moves、name 1文字・100文字
@@ -20,4 +20,4 @@
 - Routing: local serverとVercel entryが同じhandlerを利用
 - Architecture: FrontendやHTTP handlerがSupabaseへ直接依存しない
 
-`milestone9.preset.todo.test.ts`の8件はAgentの実装backlogであり、自力実装待ちではない。REST契約確定後に観測可能な振る舞いを検証する実テストへ置き換える。
+旧`milestone9.preset.todo.test.ts`は`milestone9.preset.test.ts`へ置換済み。外部Supabaseへの実接続だけはcredentialを必要とするため、repository adapter testと手動確認に分離する。

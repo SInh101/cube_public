@@ -66,3 +66,57 @@ Frontend（Milestone 10）
 ## 後続Milestoneへの影響
 
 Milestone 10はPreset REST DTOにのみ依存する。DB column名、Supabase response型、service role keyをFrontend契約に含めてはならない。将来schemaを変更してもREST DTOを維持できる境界を守る。
+
+## CRUD実装ファイル
+
+### `packages/api-contract/src/presets.ts` / `index.ts`
+
+- 役割: create/update request、単体/list responseの共有DTOを公開する。
+- コード要約: DBのsnake_case timestampを公開せず、`createdAt`と`updatedAt`へ統一する。
+- 設計理由: Milestone 10をSupabase row形式から分離するため。
+- テスト: HTTP contract testがresponse形状を利用する。
+
+### `apps/api/src/application/PresetService.ts` / `PresetErrors.ts`
+
+- 役割: CRUD use case、trim、name長、Move文法、not-foundを管理する。
+- コード要約: `parseSequence`でmovesを正規化してからrepositoryへ渡し、DB recordをDTOへ変換する。
+- 設計理由: HTTP handlerとSupabase adapterへvalidationを重複させないため。
+- テスト: Preset REST contract testが全use caseと異常系を経由する。
+
+### `apps/api/src/repository/PresetRepository.ts`
+
+- 役割: applicationが必要とする永続化操作を定義する。
+- 設計理由: Supabase SDK・PostgRESTと業務処理を分離し、test/localで差し替えるため。
+- テスト: in-memory repositoryを使うHTTP contract testがinterface利用を保証する。
+
+### `apps/api/src/repository/InMemoryPresetRepository.ts`
+
+- 役割: test/local fallback用のprocess内repository。
+- コード要約: UUIDとtimestampを生成し、MapでCRUDする。
+- 設計理由: credentialなしでもREST契約を実行できる。process再起動を越える永続化は保証しない。
+- テスト: `milestone9.preset.test.ts`。
+
+### `apps/api/src/repository/SupabasePresetRepository.ts`
+
+- 役割: PostgREST経由で`presets` tableをCRUDする本番adapter。
+- コード要約: service role headersを付け、snake_case rowをrepository recordへ変換する。
+- 設計理由: SDK依存を増やさず標準`fetch`だけでVercel Functionsから利用できる。
+- テスト: `SupabasePresetRepository.test.ts`がURL、秘密header、row変換を検証する。
+
+### `apps/api/src/repository/sharedPresetRepository.ts` / `index.ts`
+
+- 役割: 環境変数が揃えばSupabase、なければin-memory実装を選び、repository公開口を形成する。
+- 設計理由: productionとcredentialなしlocal/testで同じhandlerを使用するため。
+
+### `apps/api/src/http/handlePresetRequest.ts`
+
+- 役割: collection/resource URI、HTTP method、JSON、UUID、公開error responseを処理する。
+- コード要約: POST/GET/PUT/PATCH/DELETEを`PresetService`へ委譲し、201/200/204、400/404/405/500へ変換する。
+- 設計理由: handlerにはDB操作やMove文法を置かず、HTTP固有処理だけに限定する。
+- テスト: `milestone9.preset.test.ts`がCRUD、validation、404を検証する。
+
+### routing files
+
+- `apps/api/api/presets.ts`: Vercel Function entry。
+- `apps/api/vercel.json`: `/api/presets/{presetId}`を単一entryへrewriteする。
+- `apps/api/src/local/localServer.ts`: local HTTP serverから同じhandlerを呼び、PATCH/DELETE CORSを許可する。

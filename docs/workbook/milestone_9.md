@@ -16,7 +16,7 @@ Milestone 9以降は自力実装枠を設けず、設計、production code、テ
 - CRUD/persistenceのテスト項目
 - server専用Supabase環境変数
 
-## Agent実装予定
+## Agent実装済み
 
 - Preset DTOと公開error契約
 - create/list/get/update/deleteの5 REST操作
@@ -24,9 +24,9 @@ Milestone 9以降は自力実装枠を設けず、設計、production code、テ
 - application service
 - repository interface
 - Supabase repositoryとclient生成
-- local/test用repository
+- local/test用in-memory repository
 - local serverとVercel Functionsのrouting
-- integration testと永続化確認手順
+- CRUD contract testとSupabase adapter test
 
 ## DB model
 
@@ -47,12 +47,12 @@ RLSは有効化し、Browser向けpolicyは作成しない。service role keyを
 
 ## 実装順
 
-1. REST契約、DTO、error codeを確定する。
-2. repository interfaceとin-memory実装でHTTP/application testを完成させる。
-3. Supabase clientとrepositoryを実装する。
-4. migrationを実環境へ適用し、process再起動を越える永続化を確認する。
-5. Vercel routingと環境変数を設定する。
-6. 全品質ゲートと詳細解説を完成させる。
+1. ~~REST契約、DTO、error codeを確定する。~~
+2. ~~repository interfaceとin-memory実装でHTTP/application testを完成させる。~~
+3. ~~Supabase PostgREST repositoryを実装する。~~
+4. migrationを実Supabase環境へ適用し、process再起動を越える永続化を確認する。
+5. ~~local/Vercel routingと環境変数を設定する。~~
+6. ~~全品質ゲートと詳細解説を完成させる。~~
 
 ## 後続Milestoneとの境界
 

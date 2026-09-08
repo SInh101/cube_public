@@ -2,6 +2,7 @@ import { createServer, type IncomingMessage, type Server } from 'node:http';
 
 import { handleCubeRequest } from '../http/handleCubeRequest.js';
 import { handleMoveSequenceRequest } from '../http/handlers/handleMoveSequenceRequest.js';
+import { handlePresetRequest } from '../http/handlePresetRequest.js';
 
 /** Milestone 2～8向けの、process内repositoryを維持するローカルHTTP server。 */
 export function createLocalApiServer(): Server {
@@ -20,7 +21,10 @@ export function createLocalApiServer(): Server {
           ? Response.json({ status: 'ok' }, { status: 200 })
           : pathname === '/api/move-sequences'
             ? await handleMoveSequenceRequest(request)
-            : await handleCubeRequest(request);
+            : pathname === '/api/presets' ||
+                pathname.startsWith('/api/presets/')
+              ? await handlePresetRequest(request)
+              : await handleCubeRequest(request);
       const headers = Object.fromEntries(response.headers.entries());
       const body = Buffer.from(await response.arrayBuffer());
 
@@ -90,7 +94,7 @@ async function readBody(incoming: IncomingMessage): Promise<Buffer> {
 function corsHeaders(): Record<string, string> {
   return {
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET, POST, PUT, OPTIONS',
+    'access-control-allow-methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
     'access-control-allow-headers': 'content-type',
   };
 }

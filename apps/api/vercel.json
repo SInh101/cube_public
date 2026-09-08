@@ -4,6 +4,10 @@
   "outputDirectory": "public",
   "rewrites": [
     {
+      "source": "/api/presets/:presetId",
+      "destination": "/api/presets?presetId=:presetId"
+    },
+    {
       "source": "/api/cubes/:cubeId/reset",
       "destination": "/api/cubes?cubeId=:cubeId&operation=reset"
     },
