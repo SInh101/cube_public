@@ -29,4 +29,18 @@ describe('desktop workspace layout', () => {
     );
     expect(globalStyles).toMatch(/main\s*\{[^}]*height:\s*100dvh/su);
   });
+  it('keeps each face card inside a single-column control panel', () => {
+    expect(styles).toMatch(
+      /\.face-control\s*\{[^}]*box-sizing:\s*border-box;[^}]*width:\s*100%;[^}]*min-width:\s*0;/su,
+    );
+    expect(styles).toMatch(
+      /@media \(max-width:\s*30rem\)[\s\S]*?\.face-control\s*\{[^}]*grid-template-columns:\s*2rem minmax\(0, 1fr\) 2rem;/u,
+    );
+  });
+
+  it('divides every face icon into nine equal cells', () => {
+    expect(styles).toMatch(
+      /\.face-control__layer\s*\{[^}]*grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\);[^}]*grid-template-rows:\s*repeat\(3, minmax\(0, 1fr\)\);/su,
+    );
+  });
 });
