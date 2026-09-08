@@ -10,6 +10,7 @@
 - State transition: hook単体のpause、forward/reverse、完了時idle遷移
 - M8-PB-01〜06 App/UI統合: 各操作からhook、Move・Reset REST、animation完了通知への接続
 - PlaybackControls: 現在位置表示、callback、animation中もPauseだけ利用可能
+- Regression: Move Sequenceなどの編集可能要素でkeydownしてもCube Moveを送らない
 
 ## 追加確認候補
 

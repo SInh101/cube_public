@@ -156,6 +156,8 @@ export function App() {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent): void {
+      if (isEditableTarget(event.target)) return;
+
       const face = event.key.toUpperCase();
       if (!isFaceMove(face)) return;
 
@@ -283,4 +285,14 @@ export function App() {
 
 function isFaceMove(value: string): value is FaceMove {
   return (FACE_MOVES as readonly string[]).includes(value);
+}
+
+function isEditableTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  return (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement ||
+    target.isContentEditable
+  );
 }

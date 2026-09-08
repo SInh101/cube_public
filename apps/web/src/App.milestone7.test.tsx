@@ -35,7 +35,7 @@ vi.mock('./components', () => ({
     onApplyMove: (move: string) => void;
   }) => (
     <div>
-      <input
+      <textarea
         aria-label="Sequence"
         value={sequenceInput}
         onChange={(event) => onSequenceInputChange(event.target.value)}
@@ -83,7 +83,11 @@ describe('Milestone 7 App integration', () => {
     render(<App />);
     await screen.findByTestId('cube-view');
 
-    fireEvent.change(screen.getByLabelText('Sequence'), {
+    const sequenceInput = screen.getByLabelText('Sequence');
+    fireEvent.keyDown(sequenceInput, { key: 'r' });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    fireEvent.change(sequenceInput, {
       target: { value: 'R U' },
     });
     expect(fetchMock).toHaveBeenCalledTimes(2);
