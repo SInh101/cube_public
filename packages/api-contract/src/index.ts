@@ -4,8 +4,12 @@ export type {
   CubeColorDto,
   CubeStateResponseDto,
   FaceStateDto,
-  MoveRequestDto,
 } from './cubes.js';
+export type { MoveDto, MoveRequestDto } from './moves.js';
+export type {
+  MoveSequenceRequestDto,
+  MoveSequenceResponseDto,
+} from './moveSequences.js';
 export type {
   ApiErrorCode,
   ErrorDetailDto,

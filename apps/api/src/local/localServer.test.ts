@@ -47,4 +47,17 @@ describe('local API server over HTTP', () => {
       state: { faces: expect.any(Object) },
     });
   });
+
+  it('MoveSequence endpointへ実HTTP requestを転送する', async () => {
+    const response = await fetch(`${baseUrl}/api/move-sequences`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ sequence: "R U R' U'" }),
+    });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      moves: ['R', 'U', "R'", "U'"],
+    });
+  });
 });

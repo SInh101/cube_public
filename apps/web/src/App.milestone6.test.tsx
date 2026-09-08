@@ -62,6 +62,7 @@ vi.mock('./components', () => ({
       ])}
     </div>
   ),
+  MoveSequenceControl: () => null,
 }));
 
 const CUBE_ID = '00000000-0000-4000-8000-000000000006';

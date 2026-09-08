@@ -8,5 +8,7 @@ export {
   MIN_ANIMATION_DURATION_MS,
 } from './AnimationSpeedControl';
 export { FaceControlPanel } from './FaceControlPanel';
+export { MoveSequenceControl } from './MoveSequenceControl';
+export type { MoveSequenceControlProps } from './MoveSequenceControl';
 export type { FacePreview } from './FaceControl';
 export type { CubeFaceDirection, CubeMove } from './cubeViewModel';

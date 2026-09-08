@@ -1,6 +1,7 @@
 import type {
   CreateCubeResponseDto,
   CubeStateResponseDto,
+  MoveSequenceResponseDto,
 } from '@rubiks-learning/api-contract';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -9,6 +10,7 @@ import {
   CubeView,
   DEFAULT_ANIMATION_DURATION_MS,
   FaceControlPanel,
+  MoveSequenceControl,
   type CubeMove,
   type FacePreview,
 } from './components';
@@ -33,6 +35,10 @@ export function App() {
     DEFAULT_ANIMATION_DURATION_MS,
   );
   const [facePreview, setFacePreview] = useState<FacePreview | null>(null);
+  const [sequenceInput, setSequenceInput] = useState('');
+  const [preparedMoves, setPreparedMoves] = useState<readonly CubeMove[]>([]);
+  const [isSequenceLoading, setIsSequenceLoading] = useState(false);
+  const [sequenceError, setSequenceError] = useState<string>();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -126,6 +132,28 @@ export function App() {
     [animationDurationMs, animationId, lastMove],
   );
 
+  const validateMoveSequence = useCallback(async (): Promise<void> => {
+    setIsSequenceLoading(true);
+    setSequenceError(undefined);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/move-sequences`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sequence: sequenceInput }),
+      });
+      if (!response.ok) {
+        throw new Error(`Move sequence validation failed: ${response.status}`);
+      }
+      const dto = (await response.json()) as MoveSequenceResponseDto;
+      setPreparedMoves(dto.moves);
+    } catch {
+      setPreparedMoves([]);
+      setSequenceError('Could not prepare move sequence.');
+    } finally {
+      setIsSequenceLoading(false);
+    }
+  }, [sequenceInput]);
+
   return (
     <main>
       <h1>Rubik&apos;s Cube Learning</h1>
@@ -148,6 +176,18 @@ export function App() {
                 state={cubeState}
                 onMove={(move) => void applyMove(move)}
                 onPreviewChange={setFacePreview}
+              />
+              <MoveSequenceControl
+                sequenceInput={sequenceInput}
+                preparedMoves={preparedMoves}
+                isLoading={isSequenceLoading}
+                errorMessage={sequenceError}
+                onSequenceInputChange={(value) => {
+                  setSequenceInput(value);
+                  setSequenceError(undefined);
+                }}
+                onPrepare={() => void validateMoveSequence()}
+                onApplyMove={(move) => void applyMove(move)}
               />
             </div>
           </div>
