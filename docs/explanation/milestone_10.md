@@ -40,7 +40,7 @@ App ── playback要求 ── PresetPanel
 - コード要約: Preset Play時に`/api/move-sequences`で再検証し、通常はそのまま、逆再生は逆順・inverseへ変換して既存`usePlayback.play`を起動する。`sequenceRevision`により同じPresetも再実行できる。
 - 設計理由: Preset用の別animation loopを作らず、M8の完了通知・速度・操作disableを再利用するため。
 - エラー処理: 不正または取得不能なsequenceはPlaybackを開始せず既存sequence error領域へ表示する。
-- テスト: M5〜M8 App回帰テストとM10 component/hook testで境界を確認する。
+- テスト: M5〜M8 App回帰テストとM10 component/hook testで境界を確認する。同じPresetの通常再生2回・逆再生2回を連続して完了できる回帰テストを含む。
 
 ## テスト・文書ファイル
 

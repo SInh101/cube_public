@@ -11,3 +11,6 @@
 - Architecture: Browserから呼ぶ先はREST APIだけ
 
 8件のpending契約は`PresetManager.test.tsx`と`usePresets.test.tsx`の実テストへ置換した。既存Milestone 5〜9の回帰テストも同時に実行する。
+
+- Regression: 同一Presetを完走後に再選択すると`sequenceRevision`で位置を先頭へ戻す
+- Regression: 通常再生と逆再生をそれぞれ複数回利用できる

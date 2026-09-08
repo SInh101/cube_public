@@ -100,7 +100,43 @@ vi.mock('./components', () => ({
     </div>
   ),
   PresetManager: () => null,
-  PresetPanel: () => null,
+  PresetPanel: ({
+    onPlay,
+    onReversePlay,
+  }: {
+    onPlay: (preset: {
+      id: string;
+      name: string;
+      moves: string;
+      createdAt: string;
+      updatedAt: string;
+    }) => void;
+    onReversePlay: (preset: {
+      id: string;
+      name: string;
+      moves: string;
+      createdAt: string;
+      updatedAt: string;
+    }) => void;
+  }) => {
+    const preset = {
+      id: '00000000-0000-4000-8000-000000000010',
+      name: 'Test preset',
+      moves: 'R',
+      createdAt: '2026-01-01',
+      updatedAt: '2026-01-01',
+    };
+    return (
+      <>
+        <button type="button" onClick={() => onPlay(preset)}>
+          Play preset
+        </button>
+        <button type="button" onClick={() => onReversePlay(preset)}>
+          Reverse preset
+        </button>
+      </>
+    );
+  },
 }));
 
 const CUBE_ID = '00000000-0000-4000-8000-000000000008';
@@ -253,6 +289,30 @@ describe('Milestone 8 animation boundary', () => {
       ),
     );
   });
+
+  it('同じPresetを通常・逆方向とも複数回再生できる', async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(response({ cubeId: CUBE_ID }, 201))
+      .mockResolvedValueOnce(response({ cubeId: CUBE_ID, state: STATE }))
+      .mockImplementation((_, init) => {
+        const body =
+          typeof init?.body === 'string' ? JSON.parse(init.body) : {};
+        return Promise.resolve(
+          body.sequence === 'R'
+            ? response({ sequence: 'R', moves: ['R'] })
+            : response({ cubeId: CUBE_ID, state: STATE }),
+        );
+      });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<App />);
+
+    await screen.findByRole('button', { name: 'Play preset' });
+    await playPresetAndComplete('Play preset', 1, 'R', fetchMock);
+    await playPresetAndComplete('Play preset', 2, 'R', fetchMock);
+    await playPresetAndComplete('Reverse preset', 3, "R'", fetchMock);
+    await playPresetAndComplete('Reverse preset', 4, "R'", fetchMock);
+  });
 });
 
 function solvedState(): CubeStateResponseDto['state'] {
@@ -286,4 +346,23 @@ async function completeAnimation(animationId: number): Promise<void> {
     expect(button.getAttribute('data-animation-id')).toBe(String(animationId)),
   );
   fireEvent.click(button);
+}
+
+async function playPresetAndComplete(
+  buttonName: string,
+  animationId: number,
+  expectedMove: string,
+  fetchMock: ReturnType<typeof vi.fn>,
+): Promise<void> {
+  fireEvent.click(screen.getByRole('button', { name: buttonName }));
+  await waitFor(() =>
+    expect(lastRequestBody(fetchMock)).toEqual({ move: expectedMove }),
+  );
+  await completeAnimation(animationId);
+  await waitFor(() =>
+    expect(screen.getByRole('button', { name: 'R move' })).toHaveProperty(
+      'disabled',
+      false,
+    ),
+  );
 }

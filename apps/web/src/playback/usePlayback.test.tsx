@@ -147,4 +147,30 @@ describe('usePlayback', () => {
     expect(result.current.state.direction).toBe('forward');
     expect(result.current.state.status).toBe('idle');
   });
+
+  it('同じsequenceでもrevision更新後は先頭から再実行できる', async () => {
+    const applyMove = vi.fn().mockResolvedValue(undefined);
+    const resetCube = vi.fn().mockResolvedValue(undefined);
+    const options = { revision: 0 };
+    const { result, rerender } = renderHook(() =>
+      usePlayback({
+        moves: ['R'],
+        sequenceRevision: options.revision,
+        isAnimating: false,
+        applyMove,
+        resetCube,
+      }),
+    );
+
+    act(() => result.current.play());
+    await waitFor(() => expect(applyMove).toHaveBeenCalledTimes(1));
+    act(() => result.current.handleAnimationComplete(1));
+    expect(result.current.state.currentIndex).toBe(1);
+
+    options.revision += 1;
+    rerender();
+    await waitFor(() => expect(result.current.state.currentIndex).toBe(0));
+    act(() => result.current.play());
+    await waitFor(() => expect(applyMove).toHaveBeenCalledTimes(2));
+  });
 });
