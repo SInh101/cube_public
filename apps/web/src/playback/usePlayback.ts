@@ -15,6 +15,7 @@ export interface UsePlaybackOptions {
 /** PlaybackControlsとAppが利用する操作境界。 */
 export interface UsePlaybackResult {
   readonly state: PlaybackState;
+  readonly start: (moves: readonly CubeMove[]) => void;
   readonly play: () => void;
   readonly pause: () => void;
   readonly next: () => void;
@@ -108,6 +109,14 @@ export function usePlayback({
     );
   }, []);
 
+  const start = useCallback((nextMoves: readonly CubeMove[]): void => {
+    pendingTargetIndex.current = undefined;
+    setState({
+      ...createInitialState(nextMoves),
+      status: nextMoves.length === 0 ? 'idle' : 'playing',
+    });
+  }, []);
+
   const pause = useCallback((): void => {
     setState((current) =>
       current.status === 'playing' ? { ...current, status: 'paused' } : current,
@@ -178,6 +187,7 @@ export function usePlayback({
 
   return {
     state,
+    start,
     play,
     pause,
     next,

@@ -103,6 +103,7 @@ vi.mock('./components', () => ({
   PresetPanel: ({
     onPlay,
     onReversePlay,
+    disabled,
   }: {
     onPlay: (preset: {
       id: string;
@@ -118,6 +119,7 @@ vi.mock('./components', () => ({
       createdAt: string;
       updatedAt: string;
     }) => void;
+    disabled?: boolean;
   }) => {
     const preset = {
       id: '00000000-0000-4000-8000-000000000010',
@@ -128,10 +130,18 @@ vi.mock('./components', () => ({
     };
     return (
       <>
-        <button type="button" onClick={() => onPlay(preset)}>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onPlay(preset)}
+        >
           Play preset
         </button>
-        <button type="button" onClick={() => onReversePlay(preset)}>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onReversePlay(preset)}
+        >
           Reverse preset
         </button>
       </>

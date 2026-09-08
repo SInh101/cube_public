@@ -44,8 +44,6 @@ export function App() {
   const [isSequenceLoading, setIsSequenceLoading] = useState(false);
   const [sequenceError, setSequenceError] = useState<string>();
   const [isAnimating, setIsAnimating] = useState(false);
-  const [pendingPresetPlayback, setPendingPresetPlayback] = useState(false);
-  const [sequenceRevision, setSequenceRevision] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -144,6 +142,7 @@ export function App() {
 
   const {
     state: playbackState,
+    start: startPlayback,
     play,
     pause,
     next,
@@ -156,7 +155,6 @@ export function App() {
     isAnimating,
     applyMove,
     resetCube,
-    sequenceRevision,
   });
 
   useEffect(() => {
@@ -210,7 +208,6 @@ export function App() {
       }
       const dto = (await response.json()) as MoveSequenceResponseDto;
       setPreparedMoves(dto.moves);
-      setSequenceRevision((current) => current + 1);
     } catch {
       setPreparedMoves([]);
       setSequenceError('Could not prepare move sequence.');
@@ -221,6 +218,7 @@ export function App() {
 
   const preparePresetPlayback = useCallback(
     async (preset: PresetResponseDto, reverse: boolean): Promise<void> => {
+      if (isAnimating || playbackState.status === 'playing') return;
       setSequenceInput(preset.moves);
       setSequenceError(undefined);
       try {
@@ -231,26 +229,15 @@ export function App() {
         });
         if (!response.ok) throw new Error('Preset sequence is invalid');
         const dto = (await response.json()) as MoveSequenceResponseDto;
-        setPreparedMoves(reverse ? invertMoves(dto.moves) : dto.moves);
-        setSequenceRevision((current) => current + 1);
-        setPendingPresetPlayback(dto.moves.length > 0);
+        const moves = reverse ? invertMoves(dto.moves) : dto.moves;
+        setPreparedMoves(moves);
+        startPlayback(moves);
       } catch {
         setSequenceError('Could not prepare preset playback.');
       }
     },
-    [],
+    [isAnimating, playbackState.status, startPlayback],
   );
-
-  useEffect(() => {
-    if (
-      !pendingPresetPlayback ||
-      playbackState.currentIndex !== 0 ||
-      !haveSameMoves(playbackState.moves, preparedMoves)
-    )
-      return;
-    setPendingPresetPlayback(false);
-    play();
-  }, [pendingPresetPlayback, play, playbackState, preparedMoves]);
 
   return (
     <main>
@@ -315,6 +302,7 @@ export function App() {
               />
               <PresetPanel
                 apiBaseUrl={API_BASE_URL}
+                disabled={isAnimating || playbackState.status === 'playing'}
                 onPlay={(preset) => void preparePresetPlayback(preset, false)}
                 onReversePlay={(preset) =>
                   void preparePresetPlayback(preset, true)
@@ -339,16 +327,6 @@ function invertMoves(moves: readonly CubeMove[]): readonly CubeMove[] {
           ? (move[0] as CubeMove)
           : (`${move}'` as CubeMove),
     );
-}
-
-function haveSameMoves(
-  left: readonly CubeMove[],
-  right: readonly CubeMove[],
-): boolean {
-  return (
-    left.length === right.length &&
-    left.every((move, index) => move === right[index])
-  );
 }
 
 function isFaceMove(value: string): value is FaceMove {

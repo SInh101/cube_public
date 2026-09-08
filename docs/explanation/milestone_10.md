@@ -37,7 +37,7 @@ App ── playback要求 ── PresetPanel
 ## `apps/web/src/App.tsx`
 
 - 役割: Presetのmovesを既存Move sequence検証とPlaybackへ接続する。
-- コード要約: Preset Play時に`/api/move-sequences`で再検証し、通常はそのまま、逆再生は逆順・inverseへ変換して既存`usePlayback.play`を起動する。`sequenceRevision`により同じPresetも再実行できる。
+- コード要約: Preset Play時に`/api/move-sequences`で再検証し、通常はそのまま、逆再生は逆順・inverseへ変換する。検証後は`usePlayback.start(moves)`で位置初期化と再生開始を原子的に行う。同じPresetも完走後に繰り返し実行できる。
 - 設計理由: Preset用の別animation loopを作らず、M8の完了通知・速度・操作disableを再利用するため。
 - エラー処理: 不正または取得不能なsequenceはPlaybackを開始せず既存sequence error領域へ表示する。
 - テスト: M5〜M8 App回帰テストとM10 component/hook testで境界を確認する。同じPresetの通常再生2回・逆再生2回を連続して完了できる回帰テストを含む。
@@ -54,3 +54,7 @@ App ── playback要求 ── PresetPanel
 ## 後続Milestoneへの影響
 
 M11以降がCube操作を拡張しても、Presetは文字列Move sequenceとREST DTOだけを公開する。Preset UIからCube CoreやSupabaseへ直接依存してはならない。
+
+## 複数回再生の修正
+
+旧方式は`pendingPresetPlayback`を立て、`currentIndex === 0`になるまでeffectで待っていた。この待機要求が完走位置で残ると、Resetによって0へ戻った時点で遅延再生される問題があった。現在は待機stateを廃止し、`start(moves)`が新しいsequence、index 0、playingを同時に設定する。再生・animation中はPreset操作をdisableし、重複要求をqueueしない。

@@ -9,6 +9,7 @@ export interface PresetManagerProps {
   readonly presets: readonly PresetResponseDto[];
   readonly status: PresetStatus;
   readonly error?: string;
+  readonly disabled?: boolean;
   readonly onCreate: (input: { name: string; moves: string }) => void;
   readonly onUpdate: (id: string, input: UpdatePresetRequestDto) => void;
   readonly onDelete: (id: string) => void;
@@ -19,6 +20,7 @@ export function PresetManager({
   presets,
   status,
   error,
+  disabled = false,
   onCreate,
   onUpdate,
   onDelete,
@@ -27,7 +29,7 @@ export function PresetManager({
 }: PresetManagerProps) {
   const [name, setName] = useState('');
   const [moves, setMoves] = useState('');
-  const busy = status === 'loading' || status === 'saving';
+  const busy = disabled || status === 'loading' || status === 'saving';
   return (
     <section className="preset-manager" aria-labelledby="preset-title">
       <h2 id="preset-title">Presets</h2>

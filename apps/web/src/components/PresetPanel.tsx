@@ -5,11 +5,13 @@ export interface PresetPanelProps {
   readonly apiBaseUrl: string;
   readonly onPlay: (preset: PresetResponseDto) => void;
   readonly onReversePlay: (preset: PresetResponseDto) => void;
+  readonly disabled?: boolean;
 }
 export function PresetPanel({
   apiBaseUrl,
   onPlay,
   onReversePlay,
+  disabled = false,
 }: PresetPanelProps) {
   const presets = usePresets(apiBaseUrl);
   return (
@@ -17,6 +19,7 @@ export function PresetPanel({
       presets={presets.presets}
       status={presets.status}
       error={presets.error}
+      disabled={disabled}
       onCreate={(input) => void presets.create(input)}
       onUpdate={(id, input) => void presets.update(id, input)}
       onDelete={(id) => void presets.remove(id)}

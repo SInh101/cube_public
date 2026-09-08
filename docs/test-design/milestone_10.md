@@ -14,3 +14,4 @@
 
 - Regression: 同一Presetを完走後に再選択すると`sequenceRevision`で位置を先頭へ戻す
 - Regression: 通常再生と逆再生をそれぞれ複数回利用できる
+- Regression: 再生要求を待機させず、後のResetを契機に遅延再生しない
