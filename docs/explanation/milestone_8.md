@@ -43,7 +43,8 @@
 ## Playback自力実装用ひな形
 
 - `apps/web/src/playback/playbackTypes.ts`: 再生方向、状態、sequence位置の型境界を定義する。
-- `apps/web/src/playback/usePlayback.ts`: state machineへ渡す値と、UIへ返す6操作のinterfaceを定義する。関数本体は自力実装のため未記述。
+- `apps/web/src/playback/usePlayback.ts`: state machineへ渡す値と、UIへ返す6操作のinterfaceを定義する。明示依頼によりPlayとNextを実装し、Move送信と位置更新をanimation完了通知で分離する。残る4操作は未実装。
+- `apps/web/src/playback/usePlayback.test.tsx`: Playが完了通知ごとに一手ずつ進むことと、Nextが一手だけ進んで自動再生しないことを検証する。
 - `apps/web/src/playback/index.ts`: playback型の公開口。
 - `apps/web/src/components/PlaybackControls.tsx`: UI propsを定義する。描画本体は自力実装のため`null`を返すひな形。
 - `apps/web/src/components/index.ts`: `PlaybackControls`とprops型を公開する。
