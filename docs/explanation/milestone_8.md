@@ -40,6 +40,14 @@
 - 役割: Move sequence UI単体の無効化契約を検証する。
 - コード要約: 外部`disabled`指定時に入力、prepare、各Moveボタンがすべて無効になることを検証する。
 
+## Playback自力実装用ひな形
+
+- `apps/web/src/playback/playbackTypes.ts`: 再生方向、状態、sequence位置の型境界を定義する。
+- `apps/web/src/playback/usePlayback.ts`: state machineへ渡す値と、UIへ返す6操作のinterfaceを定義する。関数本体は自力実装のため未記述。
+- `apps/web/src/playback/index.ts`: playback型の公開口。
+- `apps/web/src/components/PlaybackControls.tsx`: UI propsを定義する。描画本体は自力実装のため`null`を返すひな形。
+- `apps/web/src/components/index.ts`: `PlaybackControls`とprops型を公開する。
+
 ## 文書
 
 - `docs/workbook/milestone_8.md`: 自力実装の規模、操作、animation境界の利用方法を示す。

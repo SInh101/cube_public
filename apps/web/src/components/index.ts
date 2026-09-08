@@ -10,5 +10,7 @@ export {
 export { FaceControlPanel } from './FaceControlPanel';
 export { MoveSequenceControl } from './MoveSequenceControl';
 export type { MoveSequenceControlProps } from './MoveSequenceControl';
+export { PlaybackControls } from './PlaybackControls';
+export type { PlaybackControlsProps } from './PlaybackControls';
 export type { FacePreview } from './FaceControl';
 export type { CubeFaceDirection, CubeMove } from './cubeViewModel';

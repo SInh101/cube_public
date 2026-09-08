@@ -15,7 +15,26 @@
 - sequenceと現在位置のstate管理
 - timerまたはanimation完了通知を使った逐次実行
 
-規模: UI操作6件、state machine 1件。対象ファイル数は設計後に記録する。
+規模: UI操作6件、state machine 1件。主な自力実装対象は新規2ファイル、接続1ファイル。
+
+## 配置済みひな形
+
+- `apps/web/src/playback/playbackTypes.ts`: 再生方向・状態・現在位置を表す型
+- `apps/web/src/playback/usePlayback.ts`: Playback state machineと6操作の境界。関数本体が自力実装対象
+- `apps/web/src/playback/index.ts`: playback型の公開口
+- `apps/web/src/components/PlaybackControls.tsx`: 6操作を表示するcomponent。描画本体が自力実装対象
+- `apps/web/src/App.tsx`: `usePlayback`と`PlaybackControls`を既存sequence・Move・animation完了通知へ接続する場所
+
+`playbackTypes.ts`とprops/interfaceはAgentが用意した設計境界であり、自力実装数には含めない。自力実装の主対象は`usePlayback.ts`、`PlaybackControls.tsx`、`App.tsx`の接続部分である。
+
+## 実装順序
+
+1. `usePlayback.ts`でstate初期値とNext/Pauseを作る。
+2. animation完了通知を使い、Playの逐次実行を作る。
+3. PreviousとReverse Playで必要なinverse変換を接続する。
+4. Resetを既存Cube reset endpointと接続する。
+5. `PlaybackControls.tsx`に6操作と現在位置を表示する。
+6. `App.tsx`でprepared moves、`applyMove`、animation完了通知、操作disableを接続する。
 
 ## 利用できる境界
 

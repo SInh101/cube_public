@@ -14,7 +14,7 @@ Frontend の Playback state machine を自力実装できるよう、1手ごと�
 
 ## 自力実装
 
-未着手。Playback state machine 1件と、Play / Pause / Next / Previous / Reverse Play / Reset の6操作が対象。
+未着手。Playback state machine 1件と、Play / Pause / Next / Previous / Reverse Play / Reset の6操作が対象。型・props・ファイル配置のひな形は準備済み。
 
 ## 完了状態
 
