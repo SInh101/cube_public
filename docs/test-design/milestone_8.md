@@ -4,6 +4,7 @@
 
 - M8-AN-01: animation開始後は操作不能になり、同時Move requestを送らない
 - M8-AN-01: 完了通知後に操作を再開する
+- M8-AN-02: 実回転中はSequence入力・prepare・一手適用もdisableする
 
 ## 自力実装待ち
 

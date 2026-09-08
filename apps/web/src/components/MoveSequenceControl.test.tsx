@@ -51,6 +51,18 @@ describe('MoveSequenceControl', () => {
     );
     expect(screen.getByRole('alert').textContent).toBe('Invalid sequence');
   });
+
+  it('M8-AN-02: 実回転中のdisabledを入力と操作へ反映する', () => {
+    renderControl({ preparedMoves: ['R'], disabled: true });
+
+    expect(screen.getByLabelText('Sequence')).toHaveProperty('disabled', true);
+    expect(
+      screen.getByRole('button', { name: 'Prepare moves' }),
+    ).toHaveProperty('disabled', true);
+    expect(
+      screen.getByRole('button', { name: 'Apply move 1: R' }),
+    ).toHaveProperty('disabled', true);
+  });
 });
 
 function renderControl(

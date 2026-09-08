@@ -2,23 +2,30 @@
 
 ## 目的
 
-FrontendのPlayback state machineが一手ごとの描画完了を待てる境界を作る。
+Frontend の Playback state machine を自力実装できるよう、1手ごとの描画完了を検知する境界を用意する。
 
 ## Agent担当
 
-- `isAnimating`
-- animation完了通知
-- 実回転中の既存操作disable
-- 自動testとPlayback pending test
+- `CubeView`からのanimation完了通知
+- `App`の`isAnimating`境界
+- 実回転中の面操作・Move sequence操作・keyboard操作の無効化
+- 実装済み境界のテストとPlayback用pending test
+- Milestone 7のMove sequence機能を維持したままMilestone 8へ統合
 
 ## 自力実装
 
-未着手。UI操作6件、Playback state machine 1件。
+未着手。Playback state machine 1件と、Play / Pause / Next / Previous / Reverse Play / Reset の6操作が対象。
 
-## 完了状況
+## 完了状態
 
-Agent担当は完了。Milestone全体はPlayback UI/state machineが未着手のため未完了。
+Agent担当は完了。Milestone全体はPlayback UI/state machineが自力実装範囲のため未完了。
 
 ## テスト結果
 
-Vitest 199件成功・6件todo、TypeScript、ESLint、Prettier、production buildが成功した。todoは自力実装待ちのPlayback 6操作である。
+- Test Files: 19 passed
+- Tests: 221 passed / 6 todo
+- TypeScript: 成功
+- ESLint: 成功
+- Prettier: 対象ファイル整形済み
+
+6件のtodoは、自力実装するPlayback操作の受け入れ条件である。

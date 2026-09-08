@@ -39,7 +39,11 @@ vi.mock('./components', () => ({
       R move
     </button>
   ),
-  MoveSequenceControl: () => null,
+  MoveSequenceControl: ({ disabled }: { disabled?: boolean }) => (
+    <button type="button" disabled={disabled}>
+      Sequence move
+    </button>
+  ),
 }));
 
 const CUBE_ID = '00000000-0000-4000-8000-000000000008';
@@ -61,14 +65,19 @@ describe('Milestone 8 animation boundary', () => {
     render(<App />);
 
     const moveButton = await screen.findByRole('button', { name: 'R move' });
+    const sequenceButton = screen.getByRole('button', {
+      name: 'Sequence move',
+    });
     fireEvent.click(moveButton);
     await waitFor(() => expect(moveButton).toHaveProperty('disabled', true));
+    expect(sequenceButton).toHaveProperty('disabled', true);
 
     fireEvent.click(moveButton);
     expect(fetchMock).toHaveBeenCalledTimes(3);
 
     fireEvent.click(screen.getByRole('button', { name: 'Complete animation' }));
     await waitFor(() => expect(moveButton).toHaveProperty('disabled', false));
+    expect(sequenceButton).toHaveProperty('disabled', false);
   });
 
   it.todo('M8-PB-01: Playでsequenceを先頭から順に再生する');
