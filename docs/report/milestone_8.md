@@ -14,18 +14,18 @@ Frontend の Playback state machine を自力実装できるよう、1手ごと�
 
 ## 自力実装
 
-進行中。明示依頼を受けて`usePlayback`のPlay / Pause / Next / Previous / Reverse Play / ResetをAgentが実装した。Appへの接続とPlayback UIは未着手。
+完了。明示依頼を受けて`usePlayback`の6操作、Playback UI、Appと既存Move・Reset REST endpointおよびanimation完了通知の接続をAgentが実装した。
 
 ## 完了状態
 
-Agent担当は完了。Milestone全体はPlayback UI/state machineが自力実装範囲のため未完了。
+Milestone 8の機能条件は完了。自力実装予定だった範囲は、学習者による途中実装と、その後の明示依頼に基づくAgent実装で完成した。
 
 ## テスト結果
 
-- Test Files: 20 passed
-- Tests: 227 passed / 6 todo
+- Test Files: 21 passed
+- Tests: 230 passed / 0 todo
 - TypeScript: 成功
 - ESLint: 成功
 - Prettier: 対象ファイル整形済み
 
-6件のtodoは、自力実装するPlayback操作の受け入れ条件である。
+Playback hook、UI、App/REST/animation統合のテストはすべて実装済みである。

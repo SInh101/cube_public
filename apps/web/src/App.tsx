@@ -11,10 +11,12 @@ import {
   DEFAULT_ANIMATION_DURATION_MS,
   FaceControlPanel,
   MoveSequenceControl,
+  PlaybackControls,
   type CubeMove,
   type FacePreview,
 } from './components';
 import './components/face-controls.css';
+import { usePlayback } from './playback/usePlayback';
 
 type LoadStatus = 'loading' | 'ready' | 'error';
 type FaceMove = 'R' | 'L' | 'U' | 'D' | 'F' | 'B';
@@ -81,7 +83,8 @@ export function App() {
 
   const applyMove = useCallback(
     async (move: CubeMove): Promise<void> => {
-      if (cubeId === null || isAnimating) return;
+      if (cubeId === null) throw new Error('Cube is not ready');
+      if (isAnimating) throw new Error('Cube is animating');
 
       setFacePreview(null);
       setMoveError(false);
@@ -102,12 +105,54 @@ export function App() {
         setLastMove(move);
         setAnimationId((current) => current + 1);
         setIsAnimating(true);
-      } catch {
+      } catch (error: unknown) {
         setMoveError(true);
+        throw error;
       }
     },
     [cubeId, isAnimating],
   );
+
+  const resetCube = useCallback(async (): Promise<void> => {
+    if (cubeId === null || isAnimating) return;
+
+    setMoveError(false);
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/cubes/${cubeId}/reset`,
+        { method: 'PUT' },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Cube reset failed: ${response.status}`);
+      }
+
+      const dto = (await response.json()) as CubeStateResponseDto;
+
+      setCubeState(dto.state);
+      setLastMove(null);
+    } catch (error: unknown) {
+      setMoveError(true);
+      throw error;
+    }
+  }, [cubeId, isAnimating]);
+
+  const {
+    state: playbackState,
+    play,
+    pause,
+    next,
+    previous,
+    reversePlay,
+    reset,
+    handleAnimationComplete: completePlaybackAnimation,
+  } = usePlayback({
+    moves: preparedMoves,
+    isAnimating,
+    applyMove,
+    resetCube,
+  });
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent): void {
@@ -115,7 +160,7 @@ export function App() {
       if (!isFaceMove(face)) return;
 
       const move: CubeMove = event.shiftKey ? `${face}'` : face;
-      void applyMove(move);
+      void applyMove(move).catch(() => undefined);
     }
 
     window.addEventListener('keydown', handleKeyDown);
@@ -133,11 +178,15 @@ export function App() {
           },
     [animationDurationMs, animationId, lastMove],
   );
+
   const handleAnimationComplete = useCallback(
     (completedId: number) => {
-      if (completedId === animationId) setIsAnimating(false);
+      if (completedId !== animationId) return;
+
+      setIsAnimating(false);
+      completePlaybackAnimation(completedId);
     },
-    [animationId],
+    [animationId, completePlaybackAnimation],
   );
 
   const validateMoveSequence = useCallback(async (): Promise<void> => {
@@ -183,7 +232,7 @@ export function App() {
               />
               <FaceControlPanel
                 state={cubeState}
-                onMove={(move) => void applyMove(move)}
+                onMove={(move) => void applyMove(move).catch(() => undefined)}
                 onPreviewChange={setFacePreview}
                 disabled={isAnimating}
               />
@@ -198,7 +247,22 @@ export function App() {
                   setSequenceError(undefined);
                 }}
                 onPrepare={() => void validateMoveSequence()}
-                onApplyMove={(move) => void applyMove(move)}
+                onApplyMove={(move) =>
+                  void applyMove(move).catch(() => undefined)
+                }
+              />
+              <PlaybackControls
+                currentIndex={playbackState.currentIndex}
+                moveCount={playbackState.moves.length}
+                status={playbackState.status}
+                direction={playbackState.direction}
+                disabled={isAnimating}
+                onPlay={play}
+                onPause={pause}
+                onNext={next}
+                onPrevious={previous}
+                onReversePlay={reversePlay}
+                onReset={reset}
               />
             </div>
           </div>

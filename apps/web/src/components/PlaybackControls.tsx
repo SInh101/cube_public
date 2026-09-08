@@ -1,4 +1,5 @@
 import type { PlaybackDirection, PlaybackStatus } from '../playback';
+import './playback-controls.css';
 
 /** AppまたはusePlaybackから受け取る表示・操作境界。 */
 export interface PlaybackControlsProps {
@@ -15,11 +16,75 @@ export interface PlaybackControlsProps {
   readonly onReset: () => void;
 }
 
-/**
- * TODO(M8 self): 6操作と現在位置を表示する。
- * 自力実装開始前に完成UIを提供しないため、現時点では描画しない。
- */
-export function PlaybackControls(props: PlaybackControlsProps) {
-  void props;
-  return null;
+/** Playbackの現在位置と6操作を表示する。 */
+export function PlaybackControls({
+  currentIndex,
+  moveCount,
+  status,
+  direction,
+  disabled = false,
+  onPlay,
+  onPause,
+  onNext,
+  onPrevious,
+  onReversePlay,
+  onReset,
+}: PlaybackControlsProps) {
+  const isPlaying = status === 'playing';
+  const atStart = currentIndex <= 0;
+  const atEnd = currentIndex >= moveCount;
+
+  return (
+    <section className="playback-controls" aria-labelledby="playback-title">
+      <div className="playback-controls__summary">
+        <h2 id="playback-title">Playback</h2>
+        <output aria-label="Playback position">
+          {currentIndex} / {moveCount}
+        </output>
+      </div>
+      <p className="playback-controls__status" aria-live="polite">
+        {status} · {direction}
+      </p>
+      <div className="playback-controls__actions">
+        <button
+          type="button"
+          disabled={disabled || isPlaying || atStart}
+          onClick={onPrevious}
+        >
+          Previous
+        </button>
+        <button
+          type="button"
+          disabled={disabled || isPlaying || atEnd}
+          onClick={onPlay}
+        >
+          Play
+        </button>
+        <button type="button" disabled={!isPlaying} onClick={onPause}>
+          Pause
+        </button>
+        <button
+          type="button"
+          disabled={disabled || isPlaying || atEnd}
+          onClick={onNext}
+        >
+          Next
+        </button>
+        <button
+          type="button"
+          disabled={disabled || isPlaying || atStart}
+          onClick={onReversePlay}
+        >
+          Reverse Play
+        </button>
+        <button
+          type="button"
+          disabled={disabled || isPlaying || atStart}
+          onClick={onReset}
+        >
+          Reset
+        </button>
+      </div>
+    </section>
+  );
 }

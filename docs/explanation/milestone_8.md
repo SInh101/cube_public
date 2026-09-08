@@ -23,7 +23,7 @@
 ## `apps/web/src/App.tsx`
 
 - 役割: M7のMove sequenceフローを保ちつつ、HTTP Moveと描画animationの境界を管理する。
-- コード要約: Move成功時に`isAnimating`を立て、対応するanimation IDの完了通知で解除する。実回転中のGUIとkeyboard Moveを拒否する。
+- コード要約: Move成功時に`isAnimating`を立て、対応するanimation IDの完了通知で解除して`usePlayback`へ通知する。PlaybackへMove・ResetのREST関数を注入し、通信失敗をhookへ伝播する。
 
 ## `apps/web/src/components/face-controls.css`
 
@@ -46,7 +46,9 @@
 - `apps/web/src/playback/usePlayback.ts`: 明示依頼によりPlayback state machineの6操作を実装する。Move送信時に完了後の`targetIndex`を保持し、animation完了通知でのみ位置を確定する。PreviousとReverse PlayはMoveをinverseに変換し、Resetは注入された`resetCube`を呼ぶ。
 - `apps/web/src/playback/usePlayback.test.tsx`: Play、Pause、Next、Previous、Reverse Play、Resetのhook単体契約を検証する。
 - `apps/web/src/playback/index.ts`: playback型の公開口。
-- `apps/web/src/components/PlaybackControls.tsx`: UI propsを定義する。描画本体は自力実装のため`null`を返すひな形。
+- `apps/web/src/components/PlaybackControls.tsx`: 現在位置・状態・方向と6操作を表示する。境界と再生状態に応じて操作をdisableし、実animation中もPauseだけは利用可能にする。
+- `apps/web/src/components/playback-controls.css`: Playback panelを既存操作盤に合わせて配置し、操作可能・不能状態とresponsive layoutを定義する。
+- `apps/web/src/components/PlaybackControls.test.tsx`: 表示、callback、animation中のPause可否を検証する。
 - `apps/web/src/components/index.ts`: `PlaybackControls`とprops型を公開する。
 
 ## 文書

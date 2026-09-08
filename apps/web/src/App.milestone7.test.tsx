@@ -55,6 +55,7 @@ vi.mock('./components', () => ({
       {errorMessage !== undefined && <p role="alert">{errorMessage}</p>}
     </div>
   ),
+  PlaybackControls: () => null,
 }));
 
 const CUBE_ID = '00000000-0000-4000-8000-000000000007';

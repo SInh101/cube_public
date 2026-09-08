@@ -67,7 +67,7 @@ export function usePlayback({
       } catch (error: unknown) {
         pendingTargetIndex.current = undefined;
         setState((current) => ({ ...current, status: 'paused' }));
-        throw error;
+        void error;
       }
     },
     [applyMove, isAnimating],
