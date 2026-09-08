@@ -2,6 +2,7 @@ import type {
   CreateCubeResponseDto,
   CubeStateResponseDto,
   MoveSequenceResponseDto,
+  PresetResponseDto,
 } from '@rubiks-learning/api-contract';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -12,6 +13,7 @@ import {
   FaceControlPanel,
   MoveSequenceControl,
   PlaybackControls,
+  PresetPanel,
   type CubeMove,
   type FacePreview,
 } from './components';
@@ -42,6 +44,8 @@ export function App() {
   const [isSequenceLoading, setIsSequenceLoading] = useState(false);
   const [sequenceError, setSequenceError] = useState<string>();
   const [isAnimating, setIsAnimating] = useState(false);
+  const [pendingPresetPlayback, setPendingPresetPlayback] = useState(false);
+  const [sequenceRevision, setSequenceRevision] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -152,6 +156,7 @@ export function App() {
     isAnimating,
     applyMove,
     resetCube,
+    sequenceRevision,
   });
 
   useEffect(() => {
@@ -205,6 +210,7 @@ export function App() {
       }
       const dto = (await response.json()) as MoveSequenceResponseDto;
       setPreparedMoves(dto.moves);
+      setSequenceRevision((current) => current + 1);
     } catch {
       setPreparedMoves([]);
       setSequenceError('Could not prepare move sequence.');
@@ -212,6 +218,39 @@ export function App() {
       setIsSequenceLoading(false);
     }
   }, [sequenceInput]);
+
+  const preparePresetPlayback = useCallback(
+    async (preset: PresetResponseDto, reverse: boolean): Promise<void> => {
+      setSequenceInput(preset.moves);
+      setSequenceError(undefined);
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/move-sequences`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ sequence: preset.moves }),
+        });
+        if (!response.ok) throw new Error('Preset sequence is invalid');
+        const dto = (await response.json()) as MoveSequenceResponseDto;
+        setPreparedMoves(reverse ? invertMoves(dto.moves) : dto.moves);
+        setSequenceRevision((current) => current + 1);
+        setPendingPresetPlayback(dto.moves.length > 0);
+      } catch {
+        setSequenceError('Could not prepare preset playback.');
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (
+      !pendingPresetPlayback ||
+      playbackState.currentIndex !== 0 ||
+      !haveSameMoves(playbackState.moves, preparedMoves)
+    )
+      return;
+    setPendingPresetPlayback(false);
+    play();
+  }, [pendingPresetPlayback, play, playbackState, preparedMoves]);
 
   return (
     <main>
@@ -274,12 +313,41 @@ export function App() {
                 onReversePlay={reversePlay}
                 onReset={reset}
               />
+              <PresetPanel
+                apiBaseUrl={API_BASE_URL}
+                onPlay={(preset) => void preparePresetPlayback(preset, false)}
+                onReversePlay={(preset) =>
+                  void preparePresetPlayback(preset, true)
+                }
+              />
             </div>
           </div>
           {moveError && <p role="alert">Error applying move.</p>}
         </>
       )}
     </main>
+  );
+}
+
+function invertMoves(moves: readonly CubeMove[]): readonly CubeMove[] {
+  return [...moves]
+    .reverse()
+    .map((move) =>
+      move.endsWith('2')
+        ? move
+        : move.endsWith("'")
+          ? (move[0] as CubeMove)
+          : (`${move}'` as CubeMove),
+    );
+}
+
+function haveSameMoves(
+  left: readonly CubeMove[],
+  right: readonly CubeMove[],
+): boolean {
+  return (
+    left.length === right.length &&
+    left.every((move, index) => move === right[index])
   );
 }
 

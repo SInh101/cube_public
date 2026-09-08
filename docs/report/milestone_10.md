@@ -8,16 +8,16 @@
 
 ## Agent production実装
 
-未着手。最低8機能（一覧、CRUD 4件、再生2件、通信状態）。
+完了。最低8機能（一覧、CRUD 4件、再生2件、通信状態）をhook、container、表示componentへ分離して実装した。
 
 ## 完了状況
 
-準備のみ完了。Milestone 9のPreset REST APIと、本MilestoneのFrontend production codeに依存する。
+Milestone 9のPreset REST APIとMilestone 8のPlaybackを再利用し、Frontend production codeと自動テストを完成した。
 
 ## テスト結果
 
-- Test Files: 24 passed / 1 skipped
-- Tests: 249 passed / 8 todo
-- TypeScript、ESLint、Prettier、production build: Milestone 9完了時に成功
+- Test Files: 26 passed
+- Tests: 254 passed / 0 todo
+- TypeScript、ESLint、Prettier、production build: 成功
 
-skipped扱いの1ファイルに、本MilestoneのAgent実装backlog 8件が含まれる。
+buildには既存の500 kB超chunk警告があるが、機能・型・テストの失敗ではない。

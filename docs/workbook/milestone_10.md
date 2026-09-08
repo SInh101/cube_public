@@ -6,14 +6,14 @@
 - UI、HTTP、Playbackの責務分離観点
 - Agent実装規模と完了確認
 
-## Agent実装予定
+## Agent実装済み
 
 - Preset一覧: 1画面機能
 - 新規登録、名前変更、手順変更、削除: 4 mutation
 - Play、Reverse Play: 2再生操作
 - loading/error表示: 1状態群
 
-規模: 最低8機能。component/file分割は設計後に記録する。
+規模: 一覧、CRUD 4 mutation、再生2操作、通信状態の最低8機能。Preset専用hook、container、表示componentへ分割した。
 
 ## 設計時の境界
 
@@ -24,4 +24,4 @@
 
 ## 完了確認
 
-M10-UI-01〜08を具体的な公開UIに合わせて実装済みtestへ変更し、全件成功させる。
+M10-UI-01〜08を実装済みtestへ変更し、全品質ゲートを成功させる。

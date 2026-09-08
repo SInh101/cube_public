@@ -10,4 +10,4 @@
 - Error: mutation失敗時に既存表示を維持する
 - Architecture: Browserから呼ぶ先はREST APIだけ
 
-公開UIのAgent実装前であるため、8件は`todo`として置いている。
+8件のpending契約は`PresetManager.test.tsx`と`usePresets.test.tsx`の実テストへ置換した。既存Milestone 5〜9の回帰テストも同時に実行する。

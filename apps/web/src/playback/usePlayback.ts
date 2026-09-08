@@ -9,6 +9,7 @@ export interface UsePlaybackOptions {
   readonly isAnimating: boolean;
   readonly applyMove: (move: CubeMove) => Promise<void>;
   readonly resetCube: () => Promise<void>;
+  readonly sequenceRevision?: number;
 }
 
 /** PlaybackControlsとAppが利用する操作境界。 */
@@ -35,21 +36,28 @@ export function usePlayback({
   isAnimating,
   applyMove,
   resetCube,
+  sequenceRevision = 0,
 }: UsePlaybackOptions): UsePlaybackResult {
   const [state, setState] = useState<PlaybackState>(() =>
     createInitialState(moves),
   );
   const pendingTargetIndex = useRef<number | undefined>(undefined);
   const resetRequestPending = useRef(false);
+  const appliedSequenceRevision = useRef(sequenceRevision);
 
   useEffect(() => {
     setState((current) => {
-      if (haveSameMoves(current.moves, moves)) return current;
+      if (
+        appliedSequenceRevision.current === sequenceRevision &&
+        haveSameMoves(current.moves, moves)
+      )
+        return current;
+      appliedSequenceRevision.current = sequenceRevision;
       pendingTargetIndex.current = undefined;
       resetRequestPending.current = false;
       return createInitialState(moves);
     });
-  }, [moves]);
+  }, [moves, sequenceRevision]);
 
   const sendMove = useCallback(
     async (move: CubeMove, targetIndex: number): Promise<void> => {

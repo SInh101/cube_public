@@ -64,6 +64,8 @@ vi.mock('./components', () => ({
   ),
   MoveSequenceControl: () => null,
   PlaybackControls: () => null,
+  PresetManager: () => null,
+  PresetPanel: () => null,
 }));
 
 const CUBE_ID = '00000000-0000-4000-8000-000000000006';
