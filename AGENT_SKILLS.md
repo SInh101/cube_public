@@ -42,11 +42,10 @@
 ## Skill 2 — code-reviewer
 
 ### 目的
-自力実装コードを教育目的でレビューする。
+実装コードを品質・教育の両面からレビューする。
 
 ### 最重要ルール
-原則としてコードを直接修正しない。
-レビュー対象者に修正機会を残す。
+Milestone 8までは当時の自力実装境界に従う。Milestone 9以降は指摘だけで止めず、Agentが安全に修正し、再検証する。
 
 ### 出力形式
 - Critical
@@ -73,7 +72,7 @@
 
 ### Error設計の担当境界
 
-Milestone 3以降は、status、machine-readable error code、公開message、validation分類をAgentが設計する。production code上のerror class、validation、catch、HTTP response変換は学習者が自力実装する。明示依頼がない限り、レビュー時にもAgentはエラー実装を直接修正しない。
+Milestone 9以降は、status、machine-readable error code、公開message、validation分類に加え、error class、validation、catch、HTTP response変換までAgentが設計・実装する。
 
 ### Frontend観点
 - component responsibility
@@ -100,8 +99,7 @@ Milestone 3以降は、status、machine-readable error code、公開message、va
 必要なテストケースを設計し、自動テストとして実装する。
 
 ### 原則
-Milestone 3以降は、Agentがテストケースの設計、テストコードの実装、実行結果の確認を担当する。
-テスト実装の依頼を、自力実装対象であるproduction codeをAgentが実装する許可として扱わない。
+Milestone 3以降は、Agentがテストケースの設計、テストコードの実装、実行結果の確認を担当する。Milestone 9以降はproduction codeもAgentが実装する。
 テストは公開契約と観測可能な振る舞いを優先し、内部実装への過度な密結合を避ける。
 
 ### 分類
@@ -145,7 +143,7 @@ Cube数学上の期待結果については `cube-domain` と連携する。
 - build failure調査
 
 ### 原則
-REST APIやFrontendの学習対象コードを勝手に実装しない。
+担当外のproduction codeも、Milestone 9以降は各専門責務とarchitecture-guardianの境界に従ってAgentが実装する。
 
 ---
 
@@ -212,19 +210,21 @@ project-maintainer
 ## 推奨Agent利用順
 
 ```text
-1. test-designer（テスト設計・実装）
+1. 仕様・既存境界の確認
       ↓
-2. 自力実装
+2. test-designer（テスト設計・実装）
       ↓
-3. code-reviewer
+3. Agentによるproduction実装
       ↓
-4. 自力修正
+4. code-reviewer（指摘と修正）
       ↓
 5. architecture-guardian
       ↓
 6. project-maintainer
       ↓
-7. Milestone Report
+7. 品質ゲート
+      ↓
+8. 詳細なMilestone Report / Explanation
 ```
 
 Cube数学を扱うMilestoneでは、先頭に `cube-domain` を追加する。

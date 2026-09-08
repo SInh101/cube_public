@@ -1,12 +1,12 @@
 # Rubik's Cube Web教材 開発マイルストーン
 
-## Milestone 3以降のテスト方針
+## Milestone 9以降の実装方針
 
-Milestone 3以降は、必要なテストパターンの設計、テストコードの実装、実行確認をAgentが担当する。各Milestoneで自力実装に指定されたproduction codeは引き続き学習者が担当し、テスト担当はその境界を越えて完成実装や修正を行わない。
+Milestone 9以降は、自力実装枠を設けず、設計、production code、テスト、エラー処理、設定、検証をAgentが一貫して担当する。過去Milestoneの担当記録は履歴として変更しない。
 
-## Milestone 3以降のエラー設計方針
+各Milestoneでは`docs/explanation/milestone_X.md`を作成し、ファイル責務だけでなく、設計理由、依存関係、主要処理フロー、公開契約、エラー処理、テスト観点、後続Milestoneへの影響まで詳しく説明する。
 
-HTTP status、machine-readable error code、公開message、validation分類はAgentが設計する。error class、入力validation、例外処理、HTTP error responseへの変換を行うproduction codeは学習者が自力実装する。エラー設計の担当変更は、Agentにproduction実装を許可するものではない。
+Milestone 3から8までのテスト・エラー設計方針は、各Milestoneの既存資料を履歴として参照する。
 
 ## Milestone 0 — Project Bootstrap
 
@@ -222,7 +222,7 @@ MoveSequenceを一手ずつ確認できる。
 
 ## Milestone 9 — Preset REST + Database
 
-### 自力
+### Agent
 SupabaseへPresetを保存する。
 
 例：
@@ -235,10 +235,7 @@ created_at
 updated_at
 ```
 
-CRUD APIを自力設計・実装する。
-
-### Agent
-migrationやSupabase接続設定を補助。
+CRUD API、migration、Supabase接続設定、repository、application、HTTP境界、テストを実装する。
 
 ### 学習対象
 - PostgreSQL
@@ -254,7 +251,7 @@ PresetをREST経由で永続化できる。
 
 ## Milestone 10 — Preset Frontend
 
-### 自力
+### Agent
 - Preset一覧
 - 新規登録
 - 名前変更
@@ -280,8 +277,7 @@ A B A^-1 B^-1
 
 A / B / A^-1 / B^-1 の境界情報も返す。
 
-### 自力
-Commutator用REST APIを設計する。
+Commutator用REST APIを設計・実装する。
 
 ### 完了条件
 A/Bを渡すと交換子を取得・実行できる。
@@ -290,7 +286,7 @@ A/Bを渡すと交換子を取得・実行できる。
 
 ## Milestone 12 — Commutator Teaching UI
 
-### 自力
+### Agent
 教材画面を作る。
 
 表示：
@@ -306,7 +302,6 @@ B^-1
 
 現在実行中の部分をUI上で強調する。
 
-### Agent
 変化したCubieを求める解析機能と3D表示を補助する。
 
 ### 完了条件
@@ -325,8 +320,7 @@ Cube Coreへ以下を追加。
 - fixed cubie
 - orientation change
 
-### 自力
-解析結果取得用REST APIを設計する。
+解析結果取得用REST APIを設計・実装する。
 
 ### 完了条件
 手順実行後に例えば以下を取得できる。
@@ -343,7 +337,7 @@ identity
 
 ## Milestone 14 — 3-cycle Teaching UI
 
-### 自力
+### Agent
 - 対象3ピース強調
 - 対象外を薄く表示
 - 移動順表示
@@ -352,7 +346,6 @@ identity
 - 全体再生
 - 逆再生
 
-### Agent
 3D表現を補助。
 
 ### 完了条件
