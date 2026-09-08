@@ -8,6 +8,7 @@ export interface UsePlaybackOptions {
   readonly moves: readonly CubeMove[];
   readonly isAnimating: boolean;
   readonly applyMove: (move: CubeMove) => Promise<void>;
+  readonly resetCube: () => Promise<void>;
 }
 
 /** PlaybackControlsとAppが利用する操作境界。 */
@@ -33,45 +34,63 @@ export function usePlayback({
   moves,
   isAnimating,
   applyMove,
+  resetCube,
 }: UsePlaybackOptions): UsePlaybackResult {
   const [state, setState] = useState<PlaybackState>(() =>
     createInitialState(moves),
   );
-  const moveRequestPending = useRef(false);
+  const pendingTargetIndex = useRef<number | undefined>(undefined);
+  const resetRequestPending = useRef(false);
 
   useEffect(() => {
     setState((current) => {
       if (haveSameMoves(current.moves, moves)) return current;
-      moveRequestPending.current = false;
+      pendingTargetIndex.current = undefined;
+      resetRequestPending.current = false;
       return createInitialState(moves);
     });
   }, [moves]);
 
-  const sendNextMove = useCallback(async (): Promise<void> => {
-    if (
-      isAnimating ||
-      moveRequestPending.current ||
-      state.currentIndex >= state.moves.length
-    ) {
-      return;
-    }
+  const sendMove = useCallback(
+    async (move: CubeMove, targetIndex: number): Promise<void> => {
+      if (
+        isAnimating ||
+        pendingTargetIndex.current !== undefined ||
+        resetRequestPending.current
+      ) {
+        return;
+      }
 
+      pendingTargetIndex.current = targetIndex;
+      try {
+        await applyMove(move);
+      } catch (error: unknown) {
+        pendingTargetIndex.current = undefined;
+        setState((current) => ({ ...current, status: 'paused' }));
+        throw error;
+      }
+    },
+    [applyMove, isAnimating],
+  );
+
+  const sendNextMove = useCallback(async (): Promise<void> => {
     const move = state.moves[state.currentIndex];
     if (move === undefined) return;
+    await sendMove(move, state.currentIndex + 1);
+  }, [sendMove, state.currentIndex, state.moves]);
 
-    moveRequestPending.current = true;
-    try {
-      await applyMove(move);
-    } catch (error: unknown) {
-      moveRequestPending.current = false;
-      setState((current) => ({ ...current, status: 'paused' }));
-      throw error;
-    }
-  }, [applyMove, isAnimating, state.currentIndex, state.moves]);
+  const sendPreviousMove = useCallback(async (): Promise<void> => {
+    if (state.currentIndex <= 0) return;
+    const move = state.moves[state.currentIndex - 1];
+    if (move === undefined) return;
+    await sendMove(invertMove(move), state.currentIndex - 1);
+  }, [sendMove, state.currentIndex, state.moves]);
 
   useEffect(() => {
-    if (state.status === 'playing') void sendNextMove();
-  }, [sendNextMove, state.status]);
+    if (state.status !== 'playing') return;
+    if (state.direction === 'forward') void sendNextMove();
+    else void sendPreviousMove();
+  }, [sendNextMove, sendPreviousMove, state.direction, state.status]);
 
   const play = useCallback((): void => {
     setState((current) =>
@@ -81,25 +100,70 @@ export function usePlayback({
     );
   }, []);
 
+  const pause = useCallback((): void => {
+    setState((current) =>
+      current.status === 'playing' ? { ...current, status: 'paused' } : current,
+    );
+  }, []);
+
   const next = useCallback((): void => {
     if (state.status === 'playing') return;
+    setState((current) => ({ ...current, direction: 'forward' }));
     void sendNextMove();
   }, [sendNextMove, state.status]);
 
+  const previous = useCallback((): void => {
+    if (state.status === 'playing') return;
+    setState((current) => ({ ...current, direction: 'reverse' }));
+    void sendPreviousMove();
+  }, [sendPreviousMove, state.status]);
+
+  const reversePlay = useCallback((): void => {
+    setState((current) =>
+      current.currentIndex <= 0
+        ? current
+        : { ...current, direction: 'reverse', status: 'playing' },
+    );
+  }, []);
+
+  const reset = useCallback((): void => {
+    if (
+      isAnimating ||
+      pendingTargetIndex.current !== undefined ||
+      resetRequestPending.current
+    ) {
+      return;
+    }
+
+    resetRequestPending.current = true;
+    setState((current) => ({ ...current, status: 'idle' }));
+    void resetCube()
+      .then(() => setState((current) => createInitialState(current.moves)))
+      .catch(() => setState((current) => ({ ...current, status: 'paused' })))
+      .finally(() => {
+        resetRequestPending.current = false;
+      });
+  }, [isAnimating, resetCube]);
+
   const handleAnimationComplete = useCallback((animationId: number): void => {
     void animationId;
-    if (!moveRequestPending.current) return;
+    const targetIndex = pendingTargetIndex.current;
+    if (targetIndex === undefined) return;
 
-    moveRequestPending.current = false;
+    pendingTargetIndex.current = undefined;
     setState((current) => {
-      const currentIndex = Math.min(
-        current.currentIndex + 1,
-        current.moves.length,
+      const currentIndex = Math.max(
+        0,
+        Math.min(targetIndex, current.moves.length),
       );
+      const reachedBoundary =
+        current.direction === 'forward'
+          ? currentIndex >= current.moves.length
+          : currentIndex <= 0;
       return {
         ...current,
         currentIndex,
-        status: currentIndex >= current.moves.length ? 'idle' : current.status,
+        status: reachedBoundary ? 'idle' : current.status,
       };
     });
   }, []);
@@ -107,13 +171,12 @@ export function usePlayback({
   return {
     state,
     play,
+    pause,
     next,
+    previous,
+    reversePlay,
+    reset,
     handleAnimationComplete,
-    // TODO(M8 self): 残る4操作を実装する。
-    pause: () => undefined,
-    previous: () => undefined,
-    reversePlay: () => undefined,
-    reset: () => undefined,
   };
 }
 
@@ -125,4 +188,9 @@ function haveSameMoves(
     left.length === right.length &&
     left.every((move, index) => move === right[index])
   );
+}
+
+function invertMove(move: CubeMove): CubeMove {
+  if (move.endsWith('2')) return move;
+  return move.endsWith("'") ? (move[0] as CubeMove) : (`${move}'` as CubeMove);
 }

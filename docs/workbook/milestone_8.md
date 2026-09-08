@@ -15,7 +15,7 @@
 - sequenceと現在位置のstate管理
 - timerまたはanimation完了通知を使った逐次実行
 
-進捗: 明示依頼により`Play`と`Next`のhook内部処理はAgentが実装済み。App/UIへの接続と、Pause / Previous / Reverse Play / Resetは未着手。
+進捗: 明示依頼により`usePlayback`の6操作はAgentが実装済み。App/UIへの接続は未着手。
 
 規模: UI操作6件、state machine 1件。主な自力実装対象は新規2ファイル、接続1ファイル。
 
@@ -33,11 +33,11 @@
 
 1. ~~`usePlayback.ts`でstate初期値とNextを作る。~~ Agent実装済み
 2. ~~animation完了通知を使い、Playの逐次実行を作る。~~ Agent実装済み
-3. Pauseを実装する。
-4. PreviousとReverse Playで必要なinverse変換を接続する。
-5. Resetを既存Cube reset endpointと接続する。
+3. ~~Pauseを実装する。~~ Agent実装済み
+4. ~~PreviousとReverse Playでinverse Moveを逐次適用する。~~ Agent実装済み
+5. ~~Reset用の外部境界とstate初期化を作る。~~ Agent実装済み
 6. `PlaybackControls.tsx`に6操作と現在位置を表示する。
-7. `App.tsx`でprepared moves、`applyMove`、animation完了通知、操作disableを接続する。
+7. `App.tsx`でprepared moves、`applyMove`、reset endpoint、animation完了通知、操作disableを接続する。
 
 ## 利用できる境界
 
