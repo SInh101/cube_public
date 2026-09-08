@@ -7,6 +7,7 @@ import {
   resetCube,
 } from '../application/index.js';
 import { handleApplyMoveRequest } from './handlers/handleApplyMoveRequest.js';
+import { handleCommutatorRequest } from './handlers/handleCommutatorRequest.js';
 import { isUuid } from '../validation/isUuid.js';
 
 type CubeRoute =
@@ -14,6 +15,7 @@ type CubeRoute =
   | { readonly kind: 'resource'; readonly cubeId: string }
   | { readonly kind: 'reset'; readonly cubeId: string }
   | { readonly kind: 'move'; readonly cubeId: string }
+  | { readonly kind: 'commutator'; readonly cubeId: string }
   | { readonly kind: 'unknown' };
 
 /** Cube APIの全URIを単一のVercel Function内で振り分ける。 */
@@ -49,6 +51,9 @@ export async function handleCubeRequest(request: Request): Promise<Response> {
     if (route.kind === 'move') {
       return await handleApplyMoveRequest(request, cubeId);
     }
+    if (route.kind === 'commutator') {
+      return await handleCommutatorRequest(request, cubeId);
+    }
 
     const dto =
       route.kind === 'resource'
@@ -75,9 +80,13 @@ function resolveRoute(url: URL): CubeRoute {
     const rewrittenCubeId = url.searchParams.get('cubeId');
     if (rewrittenCubeId === null) return { kind: 'collection' };
 
-    return url.searchParams.get('operation') === 'reset'
-      ? { kind: 'reset', cubeId: rewrittenCubeId }
-      : { kind: 'resource', cubeId: rewrittenCubeId };
+    const operation = url.searchParams.get('operation');
+    if (operation === 'reset')
+      return { kind: 'reset', cubeId: rewrittenCubeId };
+    if (operation === 'commutator') {
+      return { kind: 'commutator', cubeId: rewrittenCubeId };
+    }
+    return { kind: 'resource', cubeId: rewrittenCubeId };
   }
 
   if (segments.length === 3) {
@@ -92,6 +101,7 @@ function resolveRoute(url: URL): CubeRoute {
     if (cubeId === undefined) return { kind: 'unknown' };
     if (segments[3] === 'reset') return { kind: 'reset', cubeId };
     if (segments[3] === 'moves') return { kind: 'move', cubeId };
+    if (segments[3] === 'commutators') return { kind: 'commutator', cubeId };
   }
 
   return { kind: 'unknown' };
@@ -102,7 +112,8 @@ function acceptsMethod(route: CubeRoute, method: string): boolean {
     (route.kind === 'collection' && method === 'POST') ||
     (route.kind === 'resource' && method === 'GET') ||
     (route.kind === 'reset' && method === 'PUT') ||
-    (route.kind === 'move' && method === 'POST')
+    ((route.kind === 'move' || route.kind === 'commutator') &&
+      method === 'POST')
   );
 }
 

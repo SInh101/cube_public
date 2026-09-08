@@ -5,3 +5,5 @@ export { CubeNotFoundError } from './CubeNotFoundError.js';
 export { resetCube } from './resetCube.js';
 export { getCube } from './getCube.js';
 export { applyMoveToCube } from './applyMoveToCube.js';
+export { applyCommutatorToCube } from './applyCommutatorToCube.js';
+export { CommutatorInputError } from './CommutatorInputError.js';

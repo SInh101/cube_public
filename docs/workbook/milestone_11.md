@@ -1,24 +1,19 @@
 # Milestone 11 — Commutator Core Workbook
 
-## Agentが準備したもの
+## Agent実装済み
 
 - `Commutator(A, B)`
 - `A B A^-1 B^-1`の生成
 - A / B / A^-1 / B^-1の半開区間境界
-- domain testとREST pending test
-
-## Agent実装予定
-
-- Commutator用REST API: 最低1 endpoint
-- request/response/error DTO
-- parse errorとCube not foundのHTTP変換
-- 交換子をCubeへ適用するapplication処理
-
-規模: endpoint 1件以上、application機能1件、DTO/validation一式。
+- Commutator request / response DTO
+- Cubeへ交換子を一括適用するapplication処理
+- `POST /api/cubes/{cubeId}/commutators`
+- A/B別のvalidation error、404、415、405、500変換
+- domain、handler、実HTTP、Vercel rewrite経路のテスト
 
 ## 自力実装
 
-なし。Milestone 9以降の方針に従い、production code、テスト、エラー処理をAgentが一貫して実装する。
+なし。Milestone 9以降の方針に従い、production code、テスト、エラー処理をAgentが実装した。
 
 ## 境界情報
 
@@ -26,4 +21,9 @@
 
 ## 完了確認
 
-RESTでA/Bを渡すと展開手順と4境界を取得でき、対象Cubeへ適用できる。
+- [x] A/Bから交換子を展開できる
+- [x] 4部分の境界を取得できる
+- [x] RESTで対象Cubeへ適用できる
+- [x] 不正A/BでCubeを変更しない
+- [x] 公開DTOとerror契約を自動テストで固定した
+- [x] 全品質ゲートが成功した

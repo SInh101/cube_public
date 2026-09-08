@@ -5,6 +5,12 @@ export type {
   CubeStateResponseDto,
   FaceStateDto,
 } from './cubes.js';
+export type {
+  CommutatorBoundaryDto,
+  CommutatorPartDto,
+  CommutatorRequestDto,
+  CommutatorResponseDto,
+} from './commutators.js';
 export type { MoveDto, MoveRequestDto } from './moves.js';
 export type {
   MoveSequenceRequestDto,

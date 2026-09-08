@@ -1,20 +1,31 @@
-# Milestone 11 — Commutator Core 実装レポート
+# Milestone 11 — Commutator Core / REST 実装レポート
 
-## Agent担当
+## 完了内容
 
 - Commutator domain model
 - 交換子展開
 - 4部分の境界情報
-- domain test、REST pending test
+- Commutator DTO
+- Cubeへの交換子一括適用
+- Commutator REST API
+- validationと公開error変換
+- local HTTP / Vercel rewrite対応
+- domain、REST、integration test
 
-## Agent実装予定
+## REST契約
 
-REST endpoint 1件以上、application処理1件、DTO/validation一式は未着手。Milestone 9以降の方針に従いAgentが担当する。
+`POST /api/cubes/{cubeId}/commutators`へA/Bを渡すと、`A B A^-1 B^-1`を対象Cubeへ適用し、展開手順、4境界、更新後stateを返す。
 
-## 完了状況
+## 品質と制約
 
-Commutator Coreの仮実装まで完了。Milestone全体はCommutator REST APIが未着手のため未完了。
+A/BはCube変更前に完全にparseされる。不正tokenではfieldと1始まりのtoken位置を返し、CubeStateを維持する。HTTP層、application層、Cube Core、Repositoryの依存方向を維持した。
+
+Cube Repositoryは現時点でもprocess memory実装なので、ローカルserver再起動や別serverless instanceを越えたCube永続化はMilestone 11の範囲外である。
 
 ## テスト結果
 
-Vitest 210件成功・27件todo、TypeScript、ESLint、Prettier、production buildが成功した。追加5件のtodoは自力実装待ちのCommutator REST契約である。
+- Test Files: 29 passed
+- Tests: 276 passed / 0 todo
+- TypeScript、ESLint、Prettier、production build: 成功
+
+初回の全体テストでは既存Milestone 6の非同期UIテスト1件がtimeoutしたが、単独再実行と全体再実行で成功し、再現しなかった。Milestone 11の対象テストは全実行で成功した。

@@ -1,16 +1,20 @@
 # Milestone 11 — テスト設計
 
-## Agent実装済み
+## Domain
 
-- 交換子展開
-- 4部分の境界とmoves
-- 空のA/Bでも境界構造を維持
+- Happy path: `A B A^-1 B^-1`の順に展開する
+- Teaching boundary: 4部分のpart、Move、半開区間が一致する
+- Boundary: 空のA/Bでも4境界を維持する
 
-## Agent実装予定
+## REST / Application
 
-- REST responseに展開手順と境界を含める
-- Cubeへの原子的適用
-- A/Bそれぞれのparse error
-- Cube not found
+- Happy path: 展開手順、Move、4境界、適用後stateを返す
+- State transition: Responseと再取得したCubeStateが一致する
+- Atomic validation: AまたはBのparse失敗時にCubeStateを変更しない
+- Invalid input: fieldとtoken位置を含む400を返す
+- Resource: 存在しないCubeを404にする
+- HTTP contract: 不正shape、media type、UUID、methodを400/415/400/405にする
+- Boundary: 空のA/Bをidentityとして受理する
+- Integration: Vercel rewrite後のquery routeとローカル実HTTPを検証する
 
-REST設計が未着手のため5件を`todo`として予約した。Milestone 11の実装時にAgentが実テストへ置き換える。
+公開契約と観測可能なstateを検証し、handler内部の関数呼び出し順には依存しない。

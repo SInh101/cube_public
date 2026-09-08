@@ -60,4 +60,23 @@ describe('local API server over HTTP', () => {
       moves: ['R', 'U', "R'", "U'"],
     });
   });
+
+  it('Commutator endpointへ実HTTP requestを転送する', async () => {
+    const createResponse = await fetch(`${baseUrl}/api/cubes`, {
+      method: 'POST',
+    });
+    const { cubeId } = (await createResponse.json()) as { cubeId: string };
+
+    const response = await fetch(`${baseUrl}/api/cubes/${cubeId}/commutators`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ a: 'R', b: 'U' }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      cubeId,
+      sequence: "R U R' U'",
+    });
+  });
 });
