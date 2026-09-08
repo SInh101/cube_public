@@ -7,13 +7,13 @@
 - 4部分の境界情報
 - domain test、REST pending test
 
-## 自力実装
+## Agent実装予定
 
-未着手。REST endpoint 1件以上、application処理1件、DTO/validation一式。
+REST endpoint 1件以上、application処理1件、DTO/validation一式は未着手。Milestone 9以降の方針に従いAgentが担当する。
 
 ## 完了状況
 
-Agent担当は完了。Milestone全体はCommutator REST APIが未着手のため未完了。
+Commutator Coreの仮実装まで完了。Milestone全体はCommutator REST APIが未着手のため未完了。
 
 ## テスト結果
 

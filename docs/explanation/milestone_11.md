@@ -17,13 +17,13 @@
 
 ## `apps/api/src/http/milestone11.commutator.todo.test.ts`
 
-- 役割: 自力実装するREST契約のtest枠を予約する。
+- 役割: Agentが実装するREST契約のtest枠を予約する。
 - コード要約: 正常、適用、A/B validation、404を`todo`にする。
 
 ## `docs/workbook/milestone_11.md`
 
-- 役割: 自力実装規模と境界の読み方を示す。
-- コード要約: REST/applicationを未着手として記録する。
+- 役割: Agent実装規模と境界の読み方を示す。
+- コード要約: REST/applicationをAgentの未着手タスクとして記録する。
 
 ## `docs/test-design/milestone_11.md`
 
@@ -32,5 +32,5 @@
 
 ## `docs/report/milestone_11.md`
 
-- 役割: Agent担当と自力担当の進捗を記録する。
+- 役割: CoreとRESTの進捗を記録する。
 - コード要約: Core完了、REST未着手を区別する。

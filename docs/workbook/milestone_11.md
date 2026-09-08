@@ -7,7 +7,7 @@
 - A / B / A^-1 / B^-1の半開区間境界
 - domain testとREST pending test
 
-## 自力実装（未着手）
+## Agent実装予定
 
 - Commutator用REST API: 最低1 endpoint
 - request/response/error DTO
@@ -15,6 +15,10 @@
 - 交換子をCubeへ適用するapplication処理
 
 規模: endpoint 1件以上、application機能1件、DTO/validation一式。
+
+## 自力実装
+
+なし。Milestone 9以降の方針に従い、production code、テスト、エラー処理をAgentが一貫して実装する。
 
 ## 境界情報
 
