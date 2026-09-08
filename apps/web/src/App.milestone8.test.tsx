@@ -110,6 +110,25 @@ afterEach(() => {
 });
 
 describe('Milestone 8 animation boundary', () => {
+  it('通常のReset cube操作はsequence位置に関係なくReset APIを呼ぶ', async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(response({ cubeId: CUBE_ID }, 201))
+      .mockResolvedValueOnce(response({ cubeId: CUBE_ID, state: STATE }))
+      .mockResolvedValueOnce(response({ cubeId: CUBE_ID, state: STATE }));
+    vi.stubGlobal('fetch', fetchMock);
+    render(<App />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Reset cube' }));
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        `/api/cubes/${CUBE_ID}/reset`,
+        { method: 'PUT' },
+      ),
+    );
+  });
+
   it('M8-AN-01: 実回転中は操作をdisableし、完了通知後に再開する', async () => {
     const fetchMock = vi
       .fn<typeof fetch>()

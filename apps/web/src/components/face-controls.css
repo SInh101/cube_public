@@ -11,6 +11,31 @@
   min-width: 0;
 }
 
+.cube-reset-control {
+  justify-self: end;
+  min-width: 9rem;
+  padding: 0.6rem 1rem;
+  border: 0;
+  border-radius: 0.55rem;
+  color: #ffffff;
+  background: #b91c1c;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cube-reset-control:is(:hover, :focus-visible):not(:disabled) {
+  background: #991b1b;
+  outline: 0.18rem solid #fca5a5;
+  outline-offset: 0.1rem;
+}
+
+.cube-reset-control:disabled {
+  color: #94a3b8;
+  background: #e2e8f0;
+  cursor: not-allowed;
+}
+
 .animation-speed-control {
   display: grid;
   grid-template-columns: minmax(12rem, 1fr) auto;

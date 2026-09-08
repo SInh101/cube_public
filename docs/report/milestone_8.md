@@ -23,7 +23,7 @@ Milestone 8の機能条件は完了。自力実装予定だった範囲は、学
 ## テスト結果
 
 - Test Files: 21 passed
-- Tests: 230 passed / 0 todo
+- Tests: 231 passed / 0 todo
 - TypeScript: 成功
 - ESLint: 成功
 - Prettier: 対象ファイル整形済み

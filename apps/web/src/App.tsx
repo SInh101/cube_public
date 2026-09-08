@@ -236,6 +236,14 @@ export function App() {
                 onPreviewChange={setFacePreview}
                 disabled={isAnimating}
               />
+              <button
+                className="cube-reset-control"
+                type="button"
+                disabled={isAnimating}
+                onClick={reset}
+              >
+                Reset cube
+              </button>
               <MoveSequenceControl
                 sequenceInput={sequenceInput}
                 preparedMoves={preparedMoves}

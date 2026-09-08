@@ -86,6 +86,7 @@ describe('Milestone 7 App integration', () => {
     fireEvent.change(screen.getByLabelText('Sequence'), {
       target: { value: 'R U' },
     });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
     fireEvent.click(screen.getByRole('button', { name: 'Prepare moves' }));
 
     const moveButton = await screen.findByRole('button', { name: 'Apply R' });

@@ -23,7 +23,7 @@
 ## `apps/web/src/App.tsx`
 
 - 役割: M7のMove sequenceフローを保ちつつ、HTTP Moveと描画animationの境界を管理する。
-- コード要約: Move成功時に`isAnimating`を立て、対応するanimation IDの完了通知で解除して`usePlayback`へ通知する。PlaybackへMove・ResetのREST関数を注入し、通信失敗をhookへ伝播する。
+- コード要約: Move成功時に`isAnimating`を立て、対応するanimation IDの完了通知で解除して`usePlayback`へ通知する。PlaybackへMove・ResetのREST関数を注入し、通信失敗をhookへ伝播する。sequence位置に依存しない通常の`Reset cube`操作も操作盤へ配置する。
 
 ## `apps/web/src/components/face-controls.css`
 
