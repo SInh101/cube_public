@@ -6,7 +6,7 @@
 - pending test 8件
 - architecture境界の確認
 
-## 自力実装
+## Agent production実装
 
 未着手。最低8機能（一覧、CRUD 4件、再生2件、通信状態）。
 
@@ -16,4 +16,8 @@
 
 ## テスト結果
 
-Vitest 207件成功・22件todo、TypeScript、ESLint、Prettier、production buildが成功した。本Milestoneで追加した8件は自力実装待ちである。
+- Test Files: 24 passed / 1 skipped
+- Tests: 249 passed / 8 todo
+- TypeScript、ESLint、Prettier、production build: Milestone 9完了時に成功
+
+skipped扱いの1ファイルに、本MilestoneのAgent実装backlog 8件が含まれる。

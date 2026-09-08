@@ -4,9 +4,9 @@
 
 - 必須機能8件のpending test名
 - UI、HTTP、Playbackの責務分離観点
-- 自力実装規模と完了確認
+- Agent実装規模と完了確認
 
-## 自力実装（未着手）
+## Agent実装予定
 
 - Preset一覧: 1画面機能
 - 新規登録、名前変更、手順変更、削除: 4 mutation
