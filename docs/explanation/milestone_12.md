@@ -30,22 +30,53 @@
 - 役割: CubeStateと教材用強調を3D表示する。
 - コード要約: 指定IDを発光強調し、任意で対象外を半透明にするpropsを追加する。
 
-## `apps/web/src/App.milestone12.todo.test.tsx`
+## `packages/api-contract/src/commutators.ts`
 
-- 役割: 自力実装する教材UIのtest枠を予約する。
-- コード要約: 4部分表示、current強調、3D接続、境界更新を`todo`にする。
+- 役割: 交換子適用Responseと非変更の準備Responseに共通する公開DTOを定義する。
+- コード要約: `PreparedCommutatorResponseDto`を基底にし、Milestone 11の適用ResponseはCube IDとstateを追加する。既存契約を壊さず教材用準備を追加する。
+
+## `apps/api/src/application/prepareCommutator.ts`
+
+- 役割: Cubeを変更せずA/Bのparse、交換子展開、DTO変換を行う。
+- コード要約: A/B別の`CommutatorInputError`変換を一か所へ集約し、適用処理も同じ`createCommutator`を利用する。
+
+## `apps/api/api/commutators.ts` / `handleCommutatorRequest.ts`
+
+- 役割: `POST /api/commutators`をVercel Functionとローカルserverの両方で公開する。
+- コード要約: cubeIdなしなら非変更の準備Response、cubeIdありならMilestone 11の適用Responseを返す。body validationとA/B error形式は共通である。
+
+## `apps/web/src/components/CommutatorTeachingPanel.tsx` / CSS
+
+- 役割: A/B入力、交換子表記、4部分、現在部分、Prepare/Playを表示する。
+- コード要約: current partへ`aria-current="step"`を付け、視覚強調と支援技術の意味を一致させる。狭幅では4部分を2列へ折り返す。
+
+## `apps/web/src/App.tsx`
+
+- 役割: 準備API、既存Playback、CubeState、Teaching Panelを接続する。
+- コード要約: Prepare時のCubeStateを基準として保持し、現在stateとの差から強調IDを求める。Playbackの方向とindexから現在partを計算する。同じ交換子でもrevisionを増やし、再準備時はindex 0へ戻す。
+- 操作分離: 通常の面操作、Move Sequence、Presetへ移ると教材強調を解除する。教材Reset時は新しいsolved stateを比較基準にする。
+- 回帰修正: keyboard listenerを一度だけ登録し、refから最新`applyMove`を参照することで再登録間の入力欠落を防ぐ。
+
+## `apps/web/src/App.milestone12.test.tsx` / `CommutatorTeachingPanel.test.tsx`
+
+- 役割: 4部分表示、ARIA強調、準備REST、Playback境界更新、CubeView propsを検証する。
+- コード要約: Aの一手完了後にactive partがBへ移り、変化Cubie IDとdim指定がViewerへ渡ることを確認する。
 
 ## `docs/workbook/milestone_12.md`
 
-- 役割: 自力実装規模と3D境界の利用方法を示す。
-- コード要約: 最低5機能を未着手として記録する。
+- 役割: Agent実装範囲と3D境界の利用方法を示す。
+- コード要約: 完了した機能と品質ゲートをチェックリストで記録する。
 
 ## `docs/test-design/milestone_12.md`
 
 - 役割: 解析/3DとUI testを分類する。
-- コード要約: 実装済み解析とpending UIを列挙する。
+- コード要約: Core、REST、UI、integrationのテスト観点を列挙する。
 
 ## `docs/report/milestone_12.md`
 
-- 役割: Agent担当と自力担当の進捗を記録する。
-- コード要約: 解析・3D境界完了、Teaching UI未着手を区別する。
+- 役割: Milestone 12の実装結果と品質ゲートを記録する。
+- コード要約: Teaching UIを含む完了状態を記録する。
+
+## 設計理由と後続Milestone
+
+Milestone 11の`POST /api/cubes/{cubeId}/commutators`は交換子全体を即時適用する。そのResponseをPlaybackへ再投入すると二重適用になるため、Milestone 12では非変更の`POST /api/commutators`を追加した。Milestone 13以降はCube Coreの`CubieAnalysis`をREST解析へ利用でき、Frontendは引き続きCube Coreへ直接依存しない。

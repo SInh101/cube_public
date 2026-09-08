@@ -1,16 +1,20 @@
 import type {
+  CommutatorPartDto,
   CreateCubeResponseDto,
   CubeStateResponseDto,
   MoveSequenceResponseDto,
+  PreparedCommutatorResponseDto,
   PresetResponseDto,
 } from '@rubiks-learning/api-contract';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   AnimationSpeedControl,
+  CommutatorTeachingPanel,
   CubeView,
   DEFAULT_ANIMATION_DURATION_MS,
   FaceControlPanel,
+  findChangedCubieIds,
   MoveSequenceControl,
   PlaybackControls,
   PresetPanel,
@@ -41,9 +45,18 @@ export function App() {
   const [facePreview, setFacePreview] = useState<FacePreview | null>(null);
   const [sequenceInput, setSequenceInput] = useState('');
   const [preparedMoves, setPreparedMoves] = useState<readonly CubeMove[]>([]);
+  const [preparedMovesRevision, setPreparedMovesRevision] = useState(0);
   const [isSequenceLoading, setIsSequenceLoading] = useState(false);
   const [sequenceError, setSequenceError] = useState<string>();
   const [isAnimating, setIsAnimating] = useState(false);
+  const [commutator, setCommutator] = useState<
+    PreparedCommutatorResponseDto | undefined
+  >();
+  const [commutatorBaseState, setCommutatorBaseState] = useState<
+    CubeStateResponseDto['state'] | undefined
+  >();
+  const [isCommutatorLoading, setIsCommutatorLoading] = useState(false);
+  const [commutatorError, setCommutatorError] = useState<string>();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -114,6 +127,8 @@ export function App() {
     },
     [cubeId, isAnimating],
   );
+  const applyMoveRef = useRef(applyMove);
+  applyMoveRef.current = applyMove;
 
   const resetCube = useCallback(async (): Promise<void> => {
     if (cubeId === null || isAnimating) return;
@@ -134,11 +149,12 @@ export function App() {
 
       setCubeState(dto.state);
       setLastMove(null);
+      if (commutator !== undefined) setCommutatorBaseState(dto.state);
     } catch (error: unknown) {
       setMoveError(true);
       throw error;
     }
-  }, [cubeId, isAnimating]);
+  }, [commutator, cubeId, isAnimating]);
 
   const {
     state: playbackState,
@@ -155,7 +171,63 @@ export function App() {
     isAnimating,
     applyMove,
     resetCube,
+    sequenceRevision: preparedMovesRevision,
   });
+
+  const prepareCommutator = useCallback(
+    async (a: string, b: string): Promise<void> => {
+      if (cubeState === null || isAnimating) return;
+      setIsCommutatorLoading(true);
+      setCommutatorError(undefined);
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/commutators`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ a, b }),
+        });
+        if (!response.ok) {
+          throw new Error(`Commutator preparation failed: ${response.status}`);
+        }
+        const dto = (await response.json()) as PreparedCommutatorResponseDto;
+        setCommutator(dto);
+        setCommutatorBaseState(cubeState);
+        setPreparedMoves(dto.moves);
+        setPreparedMovesRevision((current) => current + 1);
+      } catch {
+        setCommutator(undefined);
+        setCommutatorBaseState(undefined);
+        setCommutatorError('Could not prepare commutator.');
+      } finally {
+        setIsCommutatorLoading(false);
+      }
+    },
+    [cubeState, isAnimating],
+  );
+
+  const activeCommutatorPart = useMemo<CommutatorPartDto | undefined>(() => {
+    if (commutator === undefined) return undefined;
+    const moveIndex =
+      playbackState.direction === 'reverse'
+        ? playbackState.currentIndex - 1
+        : playbackState.currentIndex;
+    return commutator.boundaries.find(
+      ({ startIndex, endIndex }) =>
+        startIndex <= moveIndex && moveIndex < endIndex,
+    )?.part;
+  }, [commutator, playbackState.currentIndex, playbackState.direction]);
+
+  const changedCubieIds = useMemo(
+    () =>
+      commutatorBaseState === undefined || cubeState === null
+        ? []
+        : findChangedCubieIds(commutatorBaseState, cubeState),
+    [commutatorBaseState, cubeState],
+  );
+
+  const clearCommutatorLesson = useCallback((): void => {
+    setCommutator(undefined);
+    setCommutatorBaseState(undefined);
+  }, []);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent): void {
@@ -165,12 +237,13 @@ export function App() {
       if (!isFaceMove(face)) return;
 
       const move: CubeMove = event.shiftKey ? `${face}'` : face;
-      void applyMove(move).catch(() => undefined);
+      clearCommutatorLesson();
+      void applyMoveRef.current(move).catch(() => undefined);
     }
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [applyMove]);
+  }, [clearCommutatorLesson]);
 
   const cubeAnimation = useMemo(
     () =>
@@ -207,18 +280,21 @@ export function App() {
         throw new Error(`Move sequence validation failed: ${response.status}`);
       }
       const dto = (await response.json()) as MoveSequenceResponseDto;
+      clearCommutatorLesson();
       setPreparedMoves(dto.moves);
+      setPreparedMovesRevision((current) => current + 1);
     } catch {
       setPreparedMoves([]);
       setSequenceError('Could not prepare move sequence.');
     } finally {
       setIsSequenceLoading(false);
     }
-  }, [sequenceInput]);
+  }, [clearCommutatorLesson, sequenceInput]);
 
   const preparePresetPlayback = useCallback(
     async (preset: PresetResponseDto, reverse: boolean): Promise<void> => {
       if (isAnimating || playbackState.status === 'playing') return;
+      clearCommutatorLesson();
       setSequenceInput(preset.moves);
       setSequenceError(undefined);
       try {
@@ -236,7 +312,7 @@ export function App() {
         setSequenceError('Could not prepare preset playback.');
       }
     },
-    [isAnimating, playbackState.status, startPlayback],
+    [clearCommutatorLesson, isAnimating, playbackState.status, startPlayback],
   );
 
   return (
@@ -252,6 +328,8 @@ export function App() {
               animation={cubeAnimation}
               preview={facePreview}
               onAnimationComplete={handleAnimationComplete}
+              highlightedCubieIds={changedCubieIds}
+              dimUnhighlighted={commutator !== undefined}
             />
             <div className="cube-controls">
               <AnimationSpeedControl
@@ -260,7 +338,10 @@ export function App() {
               />
               <FaceControlPanel
                 state={cubeState}
-                onMove={(move) => void applyMove(move).catch(() => undefined)}
+                onMove={(move) => {
+                  clearCommutatorLesson();
+                  void applyMove(move).catch(() => undefined);
+                }}
                 onPreviewChange={setFacePreview}
                 disabled={isAnimating}
               />
@@ -283,9 +364,10 @@ export function App() {
                   setSequenceError(undefined);
                 }}
                 onPrepare={() => void validateMoveSequence()}
-                onApplyMove={(move) =>
-                  void applyMove(move).catch(() => undefined)
-                }
+                onApplyMove={(move) => {
+                  clearCommutatorLesson();
+                  void applyMove(move).catch(() => undefined);
+                }}
               />
               <PlaybackControls
                 currentIndex={playbackState.currentIndex}
@@ -307,6 +389,20 @@ export function App() {
                 onReversePlay={(preset) =>
                   void preparePresetPlayback(preset, true)
                 }
+              />
+              <CommutatorTeachingPanel
+                definition={commutator}
+                activePart={activeCommutatorPart}
+                isLoading={isCommutatorLoading}
+                disabled={isAnimating || playbackState.status === 'playing'}
+                playDisabled={playbackState.currentIndex !== 0}
+                errorMessage={commutatorError}
+                onPrepare={(a, b) => void prepareCommutator(a, b)}
+                onPlay={() => {
+                  if (commutator !== undefined) {
+                    startPlayback(commutator.moves);
+                  }
+                }}
               />
             </div>
           </div>

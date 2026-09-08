@@ -5,16 +5,24 @@
 - 変化Cubie解析
 - 安定Cubie ID
 - CubeView強調・非対象dim props
-- Core/3D test、UI pending test
+- 非変更のCommutator準備API
+- 4段階のTeaching UI
+- Playbackと現在部分の同期
+- 変化Cubie強調と対象外dim表示
+- Core、REST、UI、integration test
 
 ## 自力実装
 
-未着手。教材画面を構成する最低5機能。
+なし。Milestone 9以降の方針に従いAgentがproduction code、テスト、エラー処理を実装した。
 
 ## 完了状況
 
-Agent担当は完了。Milestone全体はCommutator RESTとTeaching UIが未着手のため未完了。
+交換子をA / B / A⁻¹ / B⁻¹へ分け、既存Playbackで一手ずつ再生し、現在部分と開始時点から変化したCubieを同期表示できる。Milestone 12の完了条件を達成した。
 
 ## テスト結果
 
-Vitest 215件成功・31件todo、TypeScript、ESLint、Prettier、production buildが成功した。追加4件のtodoは自力実装待ちのTeaching UIである。
+- Test Files: 33 passed
+- Tests: 293 passed / 0 todo
+- TypeScript、ESLint、Prettier、production build: 成功
+
+buildには既存の500 kB超chunk警告があるが、機能・型・テストの失敗ではない。

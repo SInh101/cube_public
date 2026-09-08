@@ -13,6 +13,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from './App';
 
 vi.mock('./components', () => ({
+  findChangedCubieIds: () => [],
+  CommutatorTeachingPanel: () => null,
   DEFAULT_ANIMATION_DURATION_MS: 240,
   AnimationSpeedControl: () => null,
   FaceControlPanel: () => null,

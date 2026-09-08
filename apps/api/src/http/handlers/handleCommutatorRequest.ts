@@ -9,12 +9,13 @@ import {
   applyCommutatorToCube,
   CommutatorInputError,
   CubeNotFoundError,
+  prepareCommutator,
 } from '../../application/index.js';
 
 /** Cubeに従属するCommutator commandのHTTP境界。 */
 export async function handleCommutatorRequest(
   request: Request,
-  cubeId: string,
+  cubeId?: string,
 ): Promise<Response> {
   if (!isJsonContentType(request.headers.get('content-type'))) {
     return errorResponse(
@@ -44,9 +45,11 @@ export async function handleCommutatorRequest(
   }
 
   try {
-    return Response.json(await applyCommutatorToCube(cubeId, body.a, body.b), {
-      status: 200,
-    });
+    const dto =
+      cubeId === undefined
+        ? prepareCommutator(body.a, body.b)
+        : await applyCommutatorToCube(cubeId, body.a, body.b);
+    return Response.json(dto, { status: 200 });
   } catch (error: unknown) {
     if (error instanceof CommutatorInputError) {
       return errorResponse(

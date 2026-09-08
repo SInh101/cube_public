@@ -79,4 +79,15 @@ describe('local API server over HTTP', () => {
       sequence: "R U R' U'",
     });
   });
+
+  it('Commutator preparation endpointへ実HTTP requestを転送する', async () => {
+    const response = await fetch(`${baseUrl}/api/commutators`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ a: 'R', b: 'U' }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ sequence: "R U R' U'" });
+  });
 });

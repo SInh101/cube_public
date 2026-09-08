@@ -10,6 +10,7 @@ export type {
   CommutatorPartDto,
   CommutatorRequestDto,
   CommutatorResponseDto,
+  PreparedCommutatorResponseDto,
 } from './commutators.js';
 export type { MoveDto, MoveRequestDto } from './moves.js';
 export type {

@@ -18,3 +18,6 @@ export { PresetPanel } from './PresetPanel';
 export type { PresetPanelProps } from './PresetPanel';
 export type { FacePreview } from './FaceControl';
 export type { CubeFaceDirection, CubeMove } from './cubeViewModel';
+export { findChangedCubieIds } from './cubeViewModel';
+export { CommutatorTeachingPanel } from './CommutatorTeachingPanel';
+export type { CommutatorTeachingPanelProps } from './CommutatorTeachingPanel';

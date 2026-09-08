@@ -2,6 +2,7 @@ import { createServer, type IncomingMessage, type Server } from 'node:http';
 
 import { handleCubeRequest } from '../http/handleCubeRequest.js';
 import { handleMoveSequenceRequest } from '../http/handlers/handleMoveSequenceRequest.js';
+import { handleCommutatorRequest } from '../http/handlers/handleCommutatorRequest.js';
 import { handlePresetRequest } from '../http/handlePresetRequest.js';
 
 /** Milestone 2～8向けの、process内repositoryを維持するローカルHTTP server。 */
@@ -19,12 +20,14 @@ export function createLocalApiServer(): Server {
       const response =
         pathname === '/api/health'
           ? Response.json({ status: 'ok' }, { status: 200 })
-          : pathname === '/api/move-sequences'
-            ? await handleMoveSequenceRequest(request)
-            : pathname === '/api/presets' ||
-                pathname.startsWith('/api/presets/')
-              ? await handlePresetRequest(request)
-              : await handleCubeRequest(request);
+          : pathname === '/api/commutators'
+            ? await handleCommutatorRequest(request)
+            : pathname === '/api/move-sequences'
+              ? await handleMoveSequenceRequest(request)
+              : pathname === '/api/presets' ||
+                  pathname.startsWith('/api/presets/')
+                ? await handlePresetRequest(request)
+                : await handleCubeRequest(request);
       const headers = Object.fromEntries(response.headers.entries());
       const body = Buffer.from(await response.arrayBuffer());
 

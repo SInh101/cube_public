@@ -77,6 +77,33 @@ export function createCubieViewModels(
   return cubies;
 }
 
+/** 2つの表示stateを比較し、位置または向きが変わった現在側のCubie IDを返す。 */
+export function findChangedCubieIds(
+  before: CubeViewState,
+  after: CubeViewState,
+): readonly string[] {
+  const beforeCubies = createCubieViewModels(before);
+  const afterCubies = createCubieViewModels(after);
+  const changedIds = new Set<string>();
+
+  for (let index = 0; index < afterCubies.length; index += 1) {
+    const previous = beforeCubies[index];
+    const current = afterCubies[index];
+    if (
+      previous !== undefined &&
+      current !== undefined &&
+      (previous.id !== current.id ||
+        CUBE_FACE_DIRECTIONS.some(
+          (face) => previous.stickers[face] !== current.stickers[face],
+        ))
+    ) {
+      changedIds.add(current.id);
+    }
+  }
+
+  return [...changedIds];
+}
+
 /** Moveを、回転対象layerとThree.jsの回転軸・角度へ変換する。 */
 export function createMoveAnimation(move: CubeMove): CubeMoveAnimation {
   const face = move[0] as CubeFaceDirection;

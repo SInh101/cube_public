@@ -1,7 +1,11 @@
 import type { CubeColorDto, FaceStateDto } from '@rubiks-learning/api-contract';
 import { describe, expect, it } from 'vitest';
 
-import { createCubieViewModels, type CubeViewState } from './cubeViewModel';
+import {
+  createCubieViewModels,
+  findChangedCubieIds,
+  type CubeViewState,
+} from './cubeViewModel';
 
 describe('createCubieViewModels', () => {
   it('M5-01: 3D表示に必要な26個のcubieを生成する', () => {
@@ -44,6 +48,24 @@ describe('createCubieViewModels', () => {
         position[0] === 1 && position[1] === 1 && position[2] === 1,
     );
     expect(frontTopRight?.id).toBe('green-red-white');
+  });
+
+  it('M12-3D-02: 同一stateでは強調対象を返さない', () => {
+    const state = solvedState();
+    expect(findChangedCubieIds(state, state)).toEqual([]);
+  });
+
+  it('M12-3D-03: stickerが変化した現在側のCubie IDを重複なく返す', () => {
+    const before = solvedState();
+    const after: CubeViewState = {
+      faces: {
+        ...before.faces,
+        F: ['blue', ...before.faces.F.slice(1)] as unknown as FaceStateDto,
+      },
+    };
+    const changed = findChangedCubieIds(before, after);
+    expect(new Set(changed).size).toBe(changed.length);
+    expect(changed.length).toBeGreaterThan(0);
   });
 });
 

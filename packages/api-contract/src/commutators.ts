@@ -15,8 +15,11 @@ export interface CommutatorBoundaryDto {
   readonly moves: readonly MoveDto[];
 }
 
-export interface CommutatorResponseDto extends CubeStateResponseDto {
+export interface PreparedCommutatorResponseDto {
   readonly sequence: string;
   readonly moves: readonly MoveDto[];
   readonly boundaries: readonly CommutatorBoundaryDto[];
 }
+
+export interface CommutatorResponseDto
+  extends CubeStateResponseDto, PreparedCommutatorResponseDto {}
