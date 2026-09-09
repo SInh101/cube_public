@@ -223,6 +223,20 @@ describe('Milestone 3 Move REST API', () => {
   });
 
   describe('Integration', () => {
+    it('Vercel rewrite形式のquery routeでもMoveを適用できる', async () => {
+      const cubeId = await createCube();
+      const response = await handleCubeRequest(
+        new Request(`${CUBES_URL}?cubeId=${cubeId}&operation=move`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ move: 'R' }),
+        }),
+      );
+
+      expect(response.status).toBe(200);
+      await expect(getState(cubeId)).resolves.toEqual(expectedState(['R']));
+    });
+
     it('M3-IN-01: Cube作成、Move適用、GETをHTTP境界だけで実行する', async () => {
       const cubeId = await createCube();
 

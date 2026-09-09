@@ -88,6 +88,7 @@ function resolveRoute(url: URL): CubeRoute {
     const operation = url.searchParams.get('operation');
     if (operation === 'reset')
       return { kind: 'reset', cubeId: rewrittenCubeId };
+    if (operation === 'move') return { kind: 'move', cubeId: rewrittenCubeId };
     if (operation === 'commutator') {
       return { kind: 'commutator', cubeId: rewrittenCubeId };
     }

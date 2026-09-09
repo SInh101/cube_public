@@ -4,6 +4,10 @@
   "outputDirectory": "public",
   "rewrites": [
     {
+      "source": "/api/cubes/:cubeId/moves",
+      "destination": "/api/cubes?cubeId=:cubeId&operation=move"
+    },
+    {
       "source": "/api/cubes/:cubeId/analyses",
       "destination": "/api/cubes?cubeId=:cubeId&operation=analysis"
     },
