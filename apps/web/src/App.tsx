@@ -21,6 +21,7 @@ import {
   MoveSequenceControl,
   PlaybackControls,
   PresetPanel,
+  SliceControlPanel,
   type CubeMove,
   type CycleDisplayMode,
   type FacePreview,
@@ -36,9 +37,9 @@ import { ToolModeTabs, type ToolMode } from './components/ToolModeTabs';
 import { usePlayback } from './playback/usePlayback';
 
 type LoadStatus = 'loading' | 'ready' | 'error';
-type FaceMove = 'R' | 'L' | 'U' | 'D' | 'F' | 'B';
+type KeyboardMove = 'R' | 'L' | 'U' | 'D' | 'F' | 'B' | 'M' | 'E' | 'S';
 
-const FACE_MOVES = ['R', 'L', 'U', 'D', 'F', 'B'] as const;
+const KEYBOARD_MOVES = ['R', 'L', 'U', 'D', 'F', 'B', 'M', 'E', 'S'] as const;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
 export function App() {
@@ -405,7 +406,7 @@ export function App() {
       if (isEditableTarget(event.target)) return;
 
       const face = event.key.toUpperCase();
-      if (!isFaceMove(face)) return;
+      if (!isKeyboardMove(face)) return;
 
       const move: CubeMove = event.shiftKey ? `${face}'` : face;
       clearTeachingLessons();
@@ -711,6 +712,7 @@ function ManualCubeControls({
         onPreviewChange={onPreviewChange}
         disabled={disabled}
       />
+      <SliceControlPanel onMove={onMove} disabled={disabled} />
       <button
         className="cube-reset-control"
         type="button"
@@ -748,8 +750,8 @@ async function getCreatedCube(
   return (await response.json()) as CubeStateResponseDto;
 }
 
-function isFaceMove(value: string): value is FaceMove {
-  return (FACE_MOVES as readonly string[]).includes(value);
+function isKeyboardMove(value: string): value is KeyboardMove {
+  return (KEYBOARD_MOVES as readonly string[]).includes(value);
 }
 
 function isEditableTarget(target: EventTarget | null): boolean {

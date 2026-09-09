@@ -16,6 +16,7 @@ vi.mock('./components', () => ({
   DEFAULT_ANIMATION_DURATION_MS: 240,
   AnimationSpeedControl: () => null,
   FaceControlPanel: () => null,
+  SliceControlPanel: () => null,
   MoveSequenceControl: () => null,
   PresetPanel: () => null,
   findChangedCubieIds: (before: unknown, after: unknown) =>

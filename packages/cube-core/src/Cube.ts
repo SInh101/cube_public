@@ -22,9 +22,11 @@ interface FaceDefinition {
 
 interface MoveDefinition {
   readonly axis: Axis;
-  readonly layer: -1 | 1;
+  readonly layer: Coordinate;
   readonly outwardNormal: Vector;
 }
+
+type MoveLayer = Face | 'M' | 'E' | 'S';
 
 const FACE_DEFINITIONS: Readonly<Record<Face, FaceDefinition>> = {
   U: { color: 'white', normal: vector(0, 1, 0) },
@@ -35,13 +37,16 @@ const FACE_DEFINITIONS: Readonly<Record<Face, FaceDefinition>> = {
   B: { color: 'blue', normal: vector(0, 0, -1) },
 };
 
-const MOVE_DEFINITIONS: Readonly<Record<Face, MoveDefinition>> = {
+const MOVE_DEFINITIONS: Readonly<Record<MoveLayer, MoveDefinition>> = {
   U: { axis: 'y', layer: 1, outwardNormal: vector(0, 1, 0) },
   R: { axis: 'x', layer: 1, outwardNormal: vector(1, 0, 0) },
   F: { axis: 'z', layer: 1, outwardNormal: vector(0, 0, 1) },
   D: { axis: 'y', layer: -1, outwardNormal: vector(0, -1, 0) },
   L: { axis: 'x', layer: -1, outwardNormal: vector(-1, 0, 0) },
   B: { axis: 'z', layer: -1, outwardNormal: vector(0, 0, -1) },
+  M: { axis: 'x', layer: 0, outwardNormal: vector(-1, 0, 0) },
+  E: { axis: 'y', layer: 0, outwardNormal: vector(0, -1, 0) },
+  S: { axis: 'z', layer: 0, outwardNormal: vector(0, 0, 1) },
 };
 
 const FACE_ORDER: readonly Face[] = ['U', 'R', 'F', 'D', 'L', 'B'];
@@ -104,16 +109,16 @@ export class Cube {
   }
 
   applyMove(move: Move): void {
-    const face = move[0] as Face;
+    const layer = move[0] as MoveLayer;
     const turns = move.endsWith('2') ? 2 : move.endsWith("'") ? 3 : 1;
 
     for (let turn = 0; turn < turns; turn += 1) {
-      this.applyClockwiseQuarterTurn(face);
+      this.applyClockwiseQuarterTurn(layer);
     }
   }
 
-  private applyClockwiseQuarterTurn(face: Face): void {
-    const definition = MOVE_DEFINITIONS[face];
+  private applyClockwiseQuarterTurn(layer: MoveLayer): void {
+    const definition = MOVE_DEFINITIONS[layer];
 
     this.stickers = this.stickers.map((sticker) => {
       if (sticker.position[definition.axis] !== definition.layer)

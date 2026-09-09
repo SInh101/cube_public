@@ -19,6 +19,7 @@ vi.mock('./components', () => ({
   DEFAULT_ANIMATION_DURATION_MS: 240,
   AnimationSpeedControl: () => <div data-testid="animation-speed" />,
   FaceControlPanel: () => <div data-testid="manual-controls" />,
+  SliceControlPanel: () => null,
   MoveSequenceControl: () => null,
   PlaybackControls: () => null,
   PresetPanel: () => <div data-testid="preset-panel" />,

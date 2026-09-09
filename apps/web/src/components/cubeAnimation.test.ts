@@ -16,6 +16,9 @@ describe('Cube move animation', () => {
     ['D', 'y', -1],
     ['F', 'z', 1],
     ['B', 'z', -1],
+    ['M', 'x', 0],
+    ['E', 'y', 0],
+    ['S', 'z', 0],
   ] as const)('M6-AN-01: %sは%s軸のlayer %iを回転する', (move, axis, layer) => {
     const animation = createMoveAnimation(move);
     const position = positionOn(axis, layer);
@@ -24,7 +27,7 @@ describe('Cube move animation', () => {
     expect(isCubieInMoveLayer(position, animation)).toBe(true);
   });
 
-  it.each(['R', 'L', 'U', 'D', 'F', 'B'] as const)(
+  it.each(['R', 'L', 'U', 'D', 'F', 'B', 'M', 'E', 'S'] as const)(
     "M6-AN-02: %s'は%sと反対方向へ回転する",
     (move) => {
       expect(createMoveAnimation(`${move}'`).angle).toBe(
@@ -33,7 +36,7 @@ describe('Cube move animation', () => {
     },
   );
 
-  it.each(['R', 'L', 'U', 'D', 'F', 'B'] as const)(
+  it.each(['R', 'L', 'U', 'D', 'F', 'B', 'M', 'E', 'S'] as const)(
     'M6-AN-03: %s2は半回転する',
     (move) => {
       expect(Math.abs(createMoveAnimation(`${move}2` as CubeMove).angle)).toBe(
@@ -60,7 +63,7 @@ describe('Cube move animation', () => {
   );
 });
 
-function positionOn(axis: 'x' | 'y' | 'z', layer: -1 | 1): CubiePosition {
+function positionOn(axis: 'x' | 'y' | 'z', layer: -1 | 0 | 1): CubiePosition {
   if (axis === 'x') return [layer, 0, 0];
   if (axis === 'y') return [0, layer, 0];
   return [0, 0, layer];

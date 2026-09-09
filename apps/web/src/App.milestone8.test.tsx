@@ -43,6 +43,7 @@ vi.mock('./components', () => ({
       R move
     </button>
   ),
+  SliceControlPanel: () => null,
   MoveSequenceControl: ({
     disabled,
     onPrepare,

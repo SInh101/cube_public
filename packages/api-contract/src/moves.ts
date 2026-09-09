@@ -16,7 +16,16 @@ export type MoveDto =
   | 'F2'
   | 'B'
   | "B'"
-  | 'B2';
+  | 'B2'
+  | 'M'
+  | "M'"
+  | 'M2'
+  | 'E'
+  | "E'"
+  | 'E2'
+  | 'S'
+  | "S'"
+  | 'S2';
 
 export interface MoveRequestDto {
   readonly move: MoveDto;

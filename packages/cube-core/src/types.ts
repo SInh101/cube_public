@@ -32,6 +32,15 @@ export const MOVES = [
   'B',
   "B'",
   'B2',
+  'M',
+  "M'",
+  'M2',
+  'E',
+  "E'",
+  'E2',
+  'S',
+  "S'",
+  'S2',
 ] as const;
 
 export type Move = (typeof MOVES)[number];
