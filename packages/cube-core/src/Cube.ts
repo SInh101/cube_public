@@ -57,6 +57,24 @@ export class Cube {
     return new Cube(createSolvedStickers());
   }
 
+  /** 永続化したface stateからCubeを復元する。 */
+  static fromState(state: CubeState): Cube {
+    const stickers = FACE_ORDER.flatMap((face) => {
+      const values = state.faces[face];
+      if (!Array.isArray(values) || values.length !== 9) {
+        throw new Error(
+          `Invalid cube state: face ${face} must have 9 stickers`,
+        );
+      }
+      return values.map((color, index) => ({
+        color,
+        position: facePosition(face, Math.floor(index / 3), index % 3),
+        normal: FACE_DEFINITIONS[face].normal,
+      }));
+    });
+    return new Cube(stickers);
+  }
+
   /** 現在状態を共有参照なしで複製し、非変更の解析に利用できるようにする。 */
   clone(): Cube {
     return new Cube(

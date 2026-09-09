@@ -1,5 +1,7 @@
 # Rubik's Cube Learning
 
+公開リポジトリでの秘密情報の扱いは[`SECURITY.md`](SECURITY.md)、GitHub Pages・Vercel・Supabaseの設定は[`docs/deployment/public-hosting.md`](docs/deployment/public-hosting.md)を参照してください。
+
 Rubik's Cubeを題材に、ReactとTypeScriptでREST API連携を学ぶためのモノレポです。Milestone 2までのCube CoreとローカルCube REST APIを含みます。
 
 ## 構成

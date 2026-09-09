@@ -1,5 +1,7 @@
+import { withCors } from '../src/http/withCors.js';
+
 export default {
-  fetch(): Response {
+  fetch: withCors((): Response => {
     return Response.json({ status: 'ok' }, { status: 200 });
-  },
+  }),
 };

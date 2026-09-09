@@ -89,7 +89,7 @@ workspace単位のTypeScript、ESLint、Prettier、Vitest、buildをCIで強制�
 
 ## 技術的負債と改善候補
 
-1. Cube Repositoryはin-memoryである。ローカル学習用途では適切だが、Vercel Functionsではinstanceをまたいだ永続性を保証できない。公開環境でCube状態を維持する場合はSupabase/Redis等の`CubeRepository`実装へ差し替える。
+1. Cube RepositoryはSupabase環境変数がある公開環境では永続化し、未設定のローカル環境ではin-memoryへfallbackする。Cube行の自動期限切れは未実装なので、長期公開時は保存期限または古い行の削除運用を検討する。
 2. Web production bundleはThree.jsを含むため約750 kBで、Viteの500 kB警告が出る。機能上は問題ないが、初期表示を軽量化するならCubeViewまたはAnalysis modeをdynamic importする。
 3. `App.tsx`は統合責務が増えている。次の大規模機能追加時はCube session、analysis、playback orchestrationをcustom hookへ段階的に分離する。
 4. CORSは学習・開発向けに`*`である。認証を導入する公開サービスでは許可originを設定値へ限定する。
