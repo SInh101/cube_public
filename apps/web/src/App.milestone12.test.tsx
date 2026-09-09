@@ -97,13 +97,18 @@ const MOVED_STATE = {
   },
 } as unknown as CubeStateResponseDto['state'];
 const DEFINITION = {
-  sequence: "R U R' U'",
-  moves: ['R', 'U', "R'", "U'"],
+  sequence: "R D U D' R' U'",
+  moves: ['R', 'D', 'U', "D'", "R'", "U'"],
   boundaries: [
-    { part: 'A', startIndex: 0, endIndex: 1, moves: ['R'] },
-    { part: 'B', startIndex: 1, endIndex: 2, moves: ['U'] },
-    { part: 'A_INVERSE', startIndex: 2, endIndex: 3, moves: ["R'"] },
-    { part: 'B_INVERSE', startIndex: 3, endIndex: 4, moves: ["U'"] },
+    { part: 'A', startIndex: 0, endIndex: 2, moves: ['R', 'D'] },
+    { part: 'B', startIndex: 2, endIndex: 3, moves: ['U'] },
+    {
+      part: 'A_INVERSE',
+      startIndex: 3,
+      endIndex: 5,
+      moves: ["D'", "R'"],
+    },
+    { part: 'B_INVERSE', startIndex: 5, endIndex: 6, moves: ["U'"] },
   ],
 };
 
@@ -142,7 +147,8 @@ describe('Milestone 12 commutator teaching integration', () => {
   });
 
   it('M12-UI-04: 部分境界を越えると強調表示を更新する', async () => {
-    vi.stubGlobal('fetch', createFetchMock());
+    const fetchMock = createFetchMock();
+    vi.stubGlobal('fetch', fetchMock);
     render(<App />);
 
     fireEvent.click(
@@ -159,6 +165,8 @@ describe('Milestone 12 commutator teaching integration', () => {
         'changed-cubie',
       ),
     );
+    fireEvent.click(screen.getByRole('button', { name: 'Complete animation' }));
+    await waitFor(() => expect(moveRequestCount(fetchMock)).toBe(2));
     fireEvent.click(screen.getByRole('button', { name: 'Complete animation' }));
     await waitFor(() =>
       expect(screen.getByLabelText('Active commutator part').textContent).toBe(
@@ -177,9 +185,16 @@ describe('Milestone 12 commutator teaching integration', () => {
     fireEvent.click(prepareButton);
     await waitFor(() =>
       expect(screen.getByLabelText('Playback move count').textContent).toBe(
-        '4',
+        '6',
       ),
     );
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    await waitFor(() =>
+      expect(screen.getByLabelText('Highlighted cubies').textContent).toBe(
+        'changed-cubie',
+      ),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Complete animation' }));
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     await waitFor(() =>
       expect(screen.getByLabelText('Highlighted cubies').textContent).toBe(
@@ -211,18 +226,20 @@ describe('Milestone 12 commutator teaching integration', () => {
     );
     await waitFor(() =>
       expect(screen.getByLabelText('Playback move count').textContent).toBe(
-        '4',
+        '6',
       ),
     );
     fireEvent.click(screen.getByRole('button', { name: 'Play next part' }));
     await waitFor(() => expect(moveRequestCount(fetchMock)).toBe(1));
+    fireEvent.click(screen.getByRole('button', { name: 'Complete animation' }));
+    await waitFor(() => expect(moveRequestCount(fetchMock)).toBe(2));
     fireEvent.click(screen.getByRole('button', { name: 'Complete animation' }));
     await waitFor(() =>
       expect(screen.getByLabelText('Active commutator part').textContent).toBe(
         'B',
       ),
     );
-    expect(moveRequestCount(fetchMock)).toBe(1);
+    expect(moveRequestCount(fetchMock)).toBe(2);
   });
 });
 

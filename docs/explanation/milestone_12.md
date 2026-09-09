@@ -61,7 +61,8 @@
 ## `apps/web/src/playback/usePlayback.ts`
 
 - 役割: 通常再生に加え、指定indexまでの範囲再生を提供する。
-- コード要約: `playUntil(targetIndex)`が停止位置をrefへ保持し、各animation完了後に到達判定する。sequence末尾ならidle、途中の部分境界ならpausedへ遷移する。Play、Pause、Next、Previous、Reverse Play、Resetでは古い停止位置を解除する。
+- コード要約: `playUntil(targetIndex)`が停止位置を`PlaybackState.stopAtIndex`へ保持し、各animation完了後に到達判定する。sequence末尾ならidle、途中の部分境界ならpausedへ遷移する。Play、Pause、Next、Previous、Reverse Play、Resetでは古い停止位置を解除する。
+- 競合対策: Prepare直後のsequence同期と部分再生開始が近接しても、再生statusと停止位置を同じstate transitionで確定し、境界情報だけが消えない。UIはPlayback側のMove同期が完了するまで再生buttonを無効にする。
 
 ## `apps/web/src/App.milestone12.test.tsx` / `CommutatorTeachingPanel.test.tsx`
 

@@ -27,3 +27,5 @@
 - TypeScript、ESLint、Prettier、production build: 成功
 
 buildには既存の500 kB超chunk警告があるが、機能・型・テストの失敗ではない。
+
+`Play next part`の初期実装で停止位置をrefに置いていたため、Prepare直後のsequence同期と競合して境界を越えて再生する場合があった。停止位置をPlayback stateへ統合し、複数MoveのAがA終端で停止するintegration testへ強化した。

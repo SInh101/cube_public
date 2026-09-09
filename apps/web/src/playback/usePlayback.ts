@@ -45,7 +45,6 @@ export function usePlayback({
   );
   const pendingTargetIndex = useRef<number | undefined>(undefined);
   const resetRequestPending = useRef(false);
-  const stopAtIndex = useRef<number | undefined>(undefined);
   const appliedSequenceRevision = useRef(sequenceRevision);
 
   useEffect(() => {
@@ -58,7 +57,6 @@ export function usePlayback({
       appliedSequenceRevision.current = sequenceRevision;
       pendingTargetIndex.current = undefined;
       resetRequestPending.current = false;
-      stopAtIndex.current = undefined;
       return createInitialState(moves);
     });
   }, [moves, sequenceRevision]);
@@ -78,8 +76,11 @@ export function usePlayback({
         await applyMove(move);
       } catch (error: unknown) {
         pendingTargetIndex.current = undefined;
-        stopAtIndex.current = undefined;
-        setState((current) => ({ ...current, status: 'paused' }));
+        setState((current) => ({
+          ...current,
+          status: 'paused',
+          stopAtIndex: undefined,
+        }));
         void error;
       }
     },
@@ -106,11 +107,15 @@ export function usePlayback({
   }, [sendNextMove, sendPreviousMove, state.direction, state.status]);
 
   const play = useCallback((): void => {
-    stopAtIndex.current = undefined;
     setState((current) =>
       current.currentIndex >= current.moves.length
         ? current
-        : { ...current, direction: 'forward', status: 'playing' },
+        : {
+            ...current,
+            direction: 'forward',
+            status: 'playing',
+            stopAtIndex: undefined,
+          },
     );
   }, []);
 
@@ -118,14 +123,17 @@ export function usePlayback({
     setState((current) => {
       const boundedTarget = Math.min(targetIndex, current.moves.length);
       if (boundedTarget <= current.currentIndex) return current;
-      stopAtIndex.current = boundedTarget;
-      return { ...current, direction: 'forward', status: 'playing' };
+      return {
+        ...current,
+        direction: 'forward',
+        status: 'playing',
+        stopAtIndex: boundedTarget,
+      };
     });
   }, []);
 
   const start = useCallback((nextMoves: readonly CubeMove[]): void => {
     pendingTargetIndex.current = undefined;
-    stopAtIndex.current = undefined;
     setState({
       ...createInitialState(nextMoves),
       status: nextMoves.length === 0 ? 'idle' : 'playing',
@@ -133,32 +141,43 @@ export function usePlayback({
   }, []);
 
   const pause = useCallback((): void => {
-    stopAtIndex.current = undefined;
     setState((current) =>
-      current.status === 'playing' ? { ...current, status: 'paused' } : current,
+      current.status === 'playing'
+        ? { ...current, status: 'paused', stopAtIndex: undefined }
+        : current,
     );
   }, []);
 
   const next = useCallback((): void => {
     if (state.status === 'playing') return;
-    stopAtIndex.current = undefined;
-    setState((current) => ({ ...current, direction: 'forward' }));
+    setState((current) => ({
+      ...current,
+      direction: 'forward',
+      stopAtIndex: undefined,
+    }));
     void sendNextMove();
   }, [sendNextMove, state.status]);
 
   const previous = useCallback((): void => {
     if (state.status === 'playing') return;
-    stopAtIndex.current = undefined;
-    setState((current) => ({ ...current, direction: 'reverse' }));
+    setState((current) => ({
+      ...current,
+      direction: 'reverse',
+      stopAtIndex: undefined,
+    }));
     void sendPreviousMove();
   }, [sendPreviousMove, state.status]);
 
   const reversePlay = useCallback((): void => {
-    stopAtIndex.current = undefined;
     setState((current) =>
       current.currentIndex <= 0
         ? current
-        : { ...current, direction: 'reverse', status: 'playing' },
+        : {
+            ...current,
+            direction: 'reverse',
+            status: 'playing',
+            stopAtIndex: undefined,
+          },
     );
   }, []);
 
@@ -172,8 +191,11 @@ export function usePlayback({
     }
 
     resetRequestPending.current = true;
-    stopAtIndex.current = undefined;
-    setState((current) => ({ ...current, status: 'idle' }));
+    setState((current) => ({
+      ...current,
+      status: 'idle',
+      stopAtIndex: undefined,
+    }));
     void resetCube()
       .then(() => setState((current) => createInitialState(current.moves)))
       .catch(() => setState((current) => ({ ...current, status: 'paused' })))
@@ -199,12 +221,12 @@ export function usePlayback({
           : currentIndex <= 0;
       const reachedRequestedStop =
         current.direction === 'forward' &&
-        stopAtIndex.current !== undefined &&
-        currentIndex >= stopAtIndex.current;
-      if (reachedRequestedStop) stopAtIndex.current = undefined;
+        current.stopAtIndex !== undefined &&
+        currentIndex >= current.stopAtIndex;
       return {
         ...current,
         currentIndex,
+        stopAtIndex: reachedRequestedStop ? undefined : current.stopAtIndex,
         status: reachedBoundary
           ? 'idle'
           : reachedRequestedStop

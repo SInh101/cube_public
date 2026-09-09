@@ -15,4 +15,6 @@ export interface PlaybackState {
   readonly currentIndex: number;
   readonly direction: PlaybackDirection;
   readonly status: PlaybackStatus;
+  /** 部分再生時だけ設定する、forward方向の排他的終了index。 */
+  readonly stopAtIndex?: number;
 }
