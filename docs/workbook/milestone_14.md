@@ -37,3 +37,14 @@ REST DTOのposition labelは教材上の表示に使い、同じpermutation entr
 7. Close analysisで解析結果、highlight、markerが消えることを確認する
 
 画面幅が90rem以下、つまり2列表示で右カラムに横scrollやカードの見切れが生じ得る範囲では、CubeViewと操作カラムを1列表示へ切り替える。広い画面ではmainを最大96remまで使い、右カラムの枠・影・操作カードを収める。
+
+## 完了チェック
+
+- [x] 対象3 pieceを強調し、対象外を薄く表示できる
+- [x] piece cycleと3本のsticker cycleを順序付きで表示できる
+- [x] Next / Previous / Play all / Reverse allがanimation完了と同期する
+- [x] 3-cycle以外のpieceが元へ戻ることをfixed/identity情報から確認できる
+- [x] 解析終了時にhighlightとmarkerを解除できる
+- [x] Practice / Analysisを分離し、将来Tutorialを追加できる
+- [x] レスポンシブ表示で操作カードが右カラムから見切れない
+- [x] 自動テストにtodoがなく、全品質ゲートが成功した

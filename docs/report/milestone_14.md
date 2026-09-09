@@ -1,5 +1,9 @@
 # Milestone 14 — 3-cycle Teaching UI 実装レポート
 
+## 完了判定
+
+**完了。** `MILESTONES.md`の完了条件である「3個のピースが循環し、それ以外が元に戻ることを視覚的に確認できる」を、対象3 pieceのhighlight、対象外dim、順序marker、fixed/identity表示、step再生によって満たした。
+
 ## 実装範囲
 
 - sequence analysis APIを利用する教材パネル
