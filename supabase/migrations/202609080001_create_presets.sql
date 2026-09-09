@@ -26,5 +26,8 @@ execute function public.set_updated_at();
 
 alter table public.presets enable row level security;
 
+revoke all on table public.presets from anon, authenticated;
+grant select, insert, update, delete on table public.presets to service_role;
+
 comment on table public.presets is
   'Move sequence presets accessed only through the learning REST API';

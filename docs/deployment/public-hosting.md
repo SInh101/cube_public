@@ -2,7 +2,7 @@
 
 ## 1. Supabase
 
-Free projectを作成し、`supabase/migrations`をファイル名順に適用する。`presets`と`cubes`はいずれもRLSが有効で、Frontendから直接操作するpolicyは作成しない。
+Free projectを作成する際はData APIを有効、Automatically expose new tablesを無効、automatic RLSを有効にする。`supabase/migrations`をファイル名順に適用する。`presets`と`cubes`はいずれもRLSが有効で、browser roleをrevokeし、Vercelの`service_role`だけへ明示的にCRUD権限を与える。
 
 控える値:
 
