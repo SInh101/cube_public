@@ -22,7 +22,10 @@ type CubeRoute =
 
 /** Cube APIの全URIを単一のVercel Function内で振り分ける。 */
 export async function handleCubeRequest(request: Request): Promise<Response> {
-  const route = resolveRoute(new URL(request.url));
+  // Local Fetch Requests contain an absolute URL, while the Vercel Node
+  // adapter may expose only the request target (for example `/api/cubes`).
+  // A base URL makes both forms safe to parse; only pathname/query are used.
+  const route = resolveRoute(new URL(request.url, 'http://localhost'));
 
   if (route.kind === 'unknown') {
     return errorResponse(404, 'RESOURCE_NOT_FOUND', 'Resource not found');
