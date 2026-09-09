@@ -13,7 +13,7 @@ Free projectを作成する際はData APIを有効、Automatically expose new ta
 
 ## 2. Vercel
 
-GitHub repositoryをImportし、Root Directoryを`apps/api`にする。Root Directory設定の「Include source files outside of the Root Directory」を有効にし、workspaceの`packages/cube-core`と`packages/api-contract`をbuild対象へ含める。新しいVercel projectでは通常この設定は既定で有効だが、明示的に確認する。Framework PresetはOther、Overrideは不要で、repository内の`vercel.json`を利用する。
+GitHub repositoryをImportし、Root Directoryを`apps/api`にする。Root Directory設定の「Include source files outside of the Root Directory」を有効にし、workspaceの`packages/cube-core`と`packages/api-contract`をbuild対象へ含める。新しいVercel projectでは通常この設定は既定で有効だが、明示的に確認する。Framework PresetはOther、Overrideは不要で、repository内の`vercel.json`を利用する。`vercel.json`のInstall Commandはbuild用TypeScriptを確実に導入するため`npm install --include=dev`に固定している。
 
 Vercel Environment Variablesへ次を設定する。
 
