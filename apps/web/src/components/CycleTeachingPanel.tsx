@@ -10,7 +10,7 @@ import type {
 } from '../playback/playbackTypes';
 import './cycle-teaching-panel.css';
 
-export type CycleDisplayMode = 'highlight' | 'labels';
+export type CycleDisplayMode = 'highlight' | 'labels' | 'stickers';
 export interface CycleTeachingPanelProps {
   readonly result?: SequenceAnalysisResponseDto;
   readonly selection?: CycleSelection;
@@ -141,6 +141,15 @@ export function CycleTeachingPanel(props: CycleTeachingPanelProps) {
                 onChange={() => props.onDisplayModeChange('labels')}
               />
               Show position labels
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="cycle-display"
+                checked={props.displayMode === 'stickers'}
+                onChange={() => props.onDisplayModeChange('stickers')}
+              />
+              Visualize stickers
             </label>
           </fieldset>
           <p aria-label="Cycle playback position">

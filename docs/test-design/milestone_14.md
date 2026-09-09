@@ -5,6 +5,7 @@
 - cornerの3-cycleを優先して初期選択する
 - position labelの巡回順を安定Cubie IDと1・2・3 markerへ変換する
 - 選択先が存在しない場合は表示対象を返さない
+- 選択pieceの色をホーム面記号へ変換し、現在向いている面へsticker markerを配置する
 
 ## UI component
 
@@ -16,6 +17,7 @@
 
 - 対象3 IDだけを`CubeView`へ渡し、対象外をdimする
 - markerはlabelsモードでのみ渡す
+- sticker markerはstickersモードでのみ渡す
 - Nextは正方向の1手、Previousは直前の逆手を送る
 - Play allとReverse allはanimation完了を待って順に送る
 - animation完了前にstepを更新しない

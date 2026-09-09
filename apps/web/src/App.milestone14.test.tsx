@@ -29,12 +29,18 @@ vi.mock('./components', () => ({
     highlightedCubieIds,
     dimUnhighlighted,
     cubieMarkers,
+    stickerMarkers,
     onAnimationComplete,
   }: {
     animation?: { id: number };
     highlightedCubieIds?: readonly string[];
     dimUnhighlighted?: boolean;
     cubieMarkers?: readonly { cubieId: string; label: string }[];
+    stickerMarkers?: readonly {
+      cubieId: string;
+      face: string;
+      label: string;
+    }[];
     onAnimationComplete?: (id: number) => void;
   }) => (
     <div>
@@ -48,6 +54,11 @@ vi.mock('./components', () => ({
           .join(',') ?? ''}
       </output>
       <output aria-label="Animation id">{animation?.id ?? ''}</output>
+      <output aria-label="Sticker markers">
+        {stickerMarkers
+          ?.map(({ cubieId, face, label }) => `${cubieId}:${face}:${label}`)
+          .join(',') ?? ''}
+      </output>
       <button
         type="button"
         aria-label="Complete animation"
@@ -70,7 +81,7 @@ vi.mock('./components', () => ({
     currentIndex: number;
     playbackDisabled?: boolean;
     onAnalyze: (sequence: string) => void;
-    onDisplayModeChange: (mode: 'highlight' | 'labels') => void;
+    onDisplayModeChange: (mode: 'highlight' | 'labels' | 'stickers') => void;
     onNext: () => void;
     onPrevious: () => void;
     onPlay: () => void;
@@ -84,6 +95,9 @@ vi.mock('./components', () => ({
       </button>
       <button type="button" onClick={() => onDisplayModeChange('labels')}>
         Show position labels
+      </button>
+      <button type="button" onClick={() => onDisplayModeChange('stickers')}>
+        Visualize stickers
       </button>
       <button type="button" disabled={playbackDisabled} onClick={onNext}>
         Cycle next
@@ -114,7 +128,10 @@ const ANALYSIS: SequenceAnalysisResponseDto = {
     corners: {
       identity: false,
       permutation: ['URF', 'DLF', 'ULB'].map((label, index) => ({
-        cubieId: `piece-${index + 1}`,
+        cubieId:
+          ['green-red-white', 'green-orange-yellow', 'blue-orange-white'][
+            index
+          ] ?? '',
         from: [0, 0, 0],
         to: [0, 0, 0],
         fromLabel: label,
@@ -145,7 +162,7 @@ describe('Milestone 14 cycle teaching integration', () => {
   it('M14-UI-01: 対象3 pieceのCubie IDを強調する', async () => {
     await renderAnalyzedApp();
     expect(screen.getByLabelText('Highlighted cubies').textContent).toBe(
-      'piece-1,piece-2,piece-3',
+      'green-red-white,green-orange-yellow,blue-orange-white',
     );
   });
 
@@ -161,7 +178,21 @@ describe('Milestone 14 cycle teaching integration', () => {
       screen.getByRole('button', { name: 'Show position labels' }),
     );
     expect(screen.getByLabelText('Cubie markers').textContent).toBe(
-      'piece-1:1,piece-2:2,piece-3:3',
+      'green-red-white:1,green-orange-yellow:2,blue-orange-white:3',
+    );
+  });
+
+  it('M14-UI-03b: ステッカー可視化ボタンで選択pieceの各ステッカーを表示する', async () => {
+    await renderAnalyzedApp();
+    fireEvent.click(screen.getByRole('button', { name: 'Visualize stickers' }));
+    expect(screen.getByLabelText('Sticker markers').textContent).toContain(
+      'green-red-white:R:R',
+    );
+    expect(screen.getByLabelText('Sticker markers').textContent).toContain(
+      'green-red-white:U:U',
+    );
+    expect(screen.getByLabelText('Sticker markers').textContent).toContain(
+      'green-red-white:F:F',
     );
   });
 

@@ -2,6 +2,7 @@ import type { SequenceAnalysisResponseDto } from '@rubiks-learning/api-contract'
 import { describe, expect, it } from 'vitest';
 
 import {
+  createCycleStickerMarkers,
   createCycleVisualization,
   firstThreeCycle,
 } from './cycleVisualization';
@@ -23,6 +24,16 @@ describe('cycleVisualization', () => {
         { cubieId: 'piece-3', label: '3' },
       ],
     });
+  });
+
+  it('M14-VM-03: 選択pieceの物理ステッカーを現在面へ配置する', () => {
+    expect(
+      createCycleStickerMarkers(solvedState(), ['green-red-white']),
+    ).toEqual([
+      { cubieId: 'green-red-white', face: 'R', label: 'R' },
+      { cubieId: 'green-red-white', face: 'U', label: 'U' },
+      { cubieId: 'green-red-white', face: 'F', label: 'F' },
+    ]);
   });
 });
 
@@ -60,4 +71,17 @@ function fixture(): SequenceAnalysisResponseDto {
       },
     },
   };
+}
+
+function solvedState(): SequenceAnalysisResponseDto['state'] {
+  return {
+    faces: {
+      U: Array(9).fill('white'),
+      R: Array(9).fill('red'),
+      F: Array(9).fill('green'),
+      D: Array(9).fill('yellow'),
+      L: Array(9).fill('orange'),
+      B: Array(9).fill('blue'),
+    },
+  } as unknown as SequenceAnalysisResponseDto['state'];
 }

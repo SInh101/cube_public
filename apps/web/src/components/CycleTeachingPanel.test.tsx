@@ -31,8 +31,10 @@ describe('CycleTeachingPanel', () => {
     fireEvent.click(
       screen.getByRole('radio', { name: 'Show position labels' }),
     );
+    fireEvent.click(screen.getByRole('radio', { name: 'Visualize stickers' }));
     expect(onSelectCycle).toHaveBeenCalledWith('corner', 0);
     expect(onDisplayModeChange).toHaveBeenCalledWith('labels');
+    expect(onDisplayModeChange).toHaveBeenCalledWith('stickers');
   });
 
   it('M14-CP-03: playback未同期時は再生操作だけを無効にする', () => {

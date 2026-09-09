@@ -10,6 +10,7 @@ Milestone 13が返す順列解析を教材UIへ接続し、3-cycleの対象・�
 - cornerまたはedgeの3-cycleを選択できる
 - 対象3 pieceだけを強調し、それ以外を薄く表示できる
 - 表示モードを切り替えると、巡回順を1・2・3のmarkerで表示できる
+- Visualize stickersで対象pieceの各物理ステッカーを面記号付きで表示できる
 - Next、Previous、Play all、Reverse allを利用できる
 - step更新とmarker移動は実回転animationの完了に同期する
 - 解析だけでは保存中のCube状態を変更しない
@@ -27,4 +28,5 @@ REST DTOのposition labelは教材上の表示に使い、同じpermutation entr
 1. 3-cycle analysisで手順を入力してAnalyze sequenceを押す
 2. cycleを選び、強調対象が3 pieceであることを確認する
 3. Show position labelsへ切り替え、1・2・3がpieceに追従することを確認する
-4. Next / Previous / Play all / Reverse allを試す
+4. Visualize stickersへ切り替え、U/R/Fなどが個々のステッカー上に表示されることを確認する
+5. Next / Previous / Play all / Reverse allを試す

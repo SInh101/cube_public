@@ -25,6 +25,7 @@ import {
   type FacePreview,
 } from './components';
 import {
+  createCycleStickerMarkers,
   createCycleVisualization,
   firstThreeCycle,
   type CycleSelection,
@@ -318,6 +319,13 @@ export function App() {
         : createCycleVisualization(cycleAnalysis, cycleSelection),
     [cycleAnalysis, cycleSelection],
   );
+  const cycleStickerMarkers = useMemo(
+    () =>
+      cycleVisualization === undefined || cubeState === null
+        ? undefined
+        : createCycleStickerMarkers(cubeState, cycleVisualization.cubieIds),
+    [cubeState, cycleVisualization],
+  );
 
   const isCyclePlaybackReady =
     cycleAnalysis !== undefined &&
@@ -434,6 +442,11 @@ export function App() {
               cubieMarkers={
                 cycleDisplayMode === 'labels'
                   ? cycleVisualization?.markers
+                  : undefined
+              }
+              stickerMarkers={
+                cycleDisplayMode === 'stickers'
+                  ? cycleStickerMarkers
                   : undefined
               }
             />

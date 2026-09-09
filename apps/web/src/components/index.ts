@@ -1,6 +1,6 @@
 export { CubeView } from './CubeView';
 export type { CubeViewProps } from './CubeView';
-export type { CubeViewMarker } from './CubeView';
+export type { CubeViewMarker, CubeViewStickerMarker } from './CubeView';
 export { CycleTeachingPanel } from './CycleTeachingPanel';
 export type {
   CycleDisplayMode,
