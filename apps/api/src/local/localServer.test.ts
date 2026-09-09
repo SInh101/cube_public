@@ -90,4 +90,21 @@ describe('local API server over HTTP', () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ sequence: "R U R' U'" });
   });
+
+  it('Sequence analysis endpointへ実HTTP requestを転送する', async () => {
+    const createResponse = await fetch(`${baseUrl}/api/cubes`, {
+      method: 'POST',
+    });
+    const { cubeId } = (await createResponse.json()) as { cubeId: string };
+    const response = await fetch(`${baseUrl}/api/cubes/${cubeId}/analyses`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ sequence: 'R' }),
+    });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      cubeId,
+      analysis: { identity: false },
+    });
+  });
 });

@@ -8,7 +8,10 @@ export type {
   CubiePosition,
   CubieSnapshot,
 } from './CubieAnalysis.js';
-export { analyzePermutation } from './PermutationAnalysis.js';
+export {
+  analyzePermutation,
+  cubiePositionLabel,
+} from './PermutationAnalysis.js';
 export type {
   OrientationChange,
   PermutationAnalysis,

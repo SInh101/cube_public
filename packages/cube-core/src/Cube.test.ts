@@ -2,6 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { Cube, FACES, MOVES, type Move } from './index';
 
 describe('Cube', () => {
+  it('M13-AN-07: cloneの回転は元Cubeを変更しない', () => {
+    const cube = Cube.solved();
+    const before = cube.getState();
+    const cloned = cube.clone();
+    cloned.applyMove('R');
+    expect(cube.getState()).toEqual(before);
+    expect(cloned.getState()).not.toEqual(before);
+  });
   it('creates a solved cube with nine stickers of one color on every face', () => {
     const state = Cube.solved().getState();
 

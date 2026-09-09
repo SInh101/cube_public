@@ -57,6 +57,17 @@ export class Cube {
     return new Cube(createSolvedStickers());
   }
 
+  /** 現在状態を共有参照なしで複製し、非変更の解析に利用できるようにする。 */
+  clone(): Cube {
+    return new Cube(
+      this.stickers.map((sticker) => ({
+        color: sticker.color,
+        position: { ...sticker.position },
+        normal: { ...sticker.normal },
+      })),
+    );
+  }
+
   reset(): void {
     this.stickers = createSolvedStickers();
   }

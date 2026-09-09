@@ -7,16 +7,23 @@
 - 3-cycle検出
 - fixed cubie
 - orientation change
-- Core test、REST pending test
+- 教材用position label
+- 非変更のsequence解析application
+- 解析REST APIとDTO/error
+- Core、REST、integration test
 
 ## 自力実装
 
-未着手。解析REST endpoint 1件以上、application処理1件、DTO/validation一式。
+なし。Milestone 9以降の方針に従いAgentがproduction code、テスト、エラー処理を実装した。
 
 ## 完了状況
 
-Agent担当は完了。Milestone全体は解析結果取得REST APIが未着手のため未完了。
+`POST /api/cubes/{cubeId}/analyses`で、解析元Cubeを変更せずsequence適用後のcorner/edge cycle、3-cycle、fixed、orientation、resultStateを取得できる。Milestone 13の完了条件を達成した。
 
 ## テスト結果
 
-Vitest 220件成功・36件todo、TypeScript、ESLint、Prettier、production buildが成功した。追加5件のtodoは自力実装待ちの解析REST契約である。
+- Test Files: 35 passed
+- Tests: 312 passed / 0 todo
+- TypeScript、ESLint、Prettier、production build: 成功
+
+buildには既存の500 kB超chunk警告があるが、機能・型・テストの失敗ではない。

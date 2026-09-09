@@ -1,22 +1,22 @@
 # Milestone 13 — 3-cycle Analysis Workbook
 
-## Agentが準備したもの
+## Agent実装済み
 
 - Cubie permutation
 - cycle decomposition
 - 3-cycle抽出
 - fixed cubie
 - edge/corner orientation change
-- Core testとREST pending test
-
-## 自力実装（未着手）
-
 - 解析結果取得REST API: 最低1 endpoint
 - request/response/error DTO
-- Cubeまたはsequenceを解析へ渡すapplication処理
+- Cubeを変更せずsequenceを解析へ渡すapplication処理
 - corner/edgeを区別した公開response変換
+- `URF`などの教材用position label
+- Core、REST、rewrite、実HTTP test
 
-規模: endpoint 1件以上、application処理1件、DTO/validation一式。
+## 自力実装
+
+なし。Milestone 9以降の方針に従いAgentがすべて実装した。
 
 ## Core responseの意味
 
@@ -28,4 +28,8 @@
 
 ## 完了確認
 
-REST responseでcorner/edgeのcycle、identity、3-cycle、fixed、orientationを説明できる。
+- [x] corner/edge別のcycleを返す
+- [x] identity、3-cycle、fixed、orientationを返す
+- [x] `URF`などのposition labelを返す
+- [x] 解析元Cubeを変更しない
+- [x] 全品質ゲートが成功した

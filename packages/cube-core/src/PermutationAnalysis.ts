@@ -11,6 +11,8 @@ export interface PermutationEntry {
   readonly kind: CubieKind;
   readonly from: CubiePosition;
   readonly to: CubiePosition;
+  readonly fromLabel: string;
+  readonly toLabel: string;
 }
 
 export interface OrientationChange extends PermutationEntry {
@@ -47,6 +49,8 @@ export function analyzePermutation(
       kind: beforeCubie.kind,
       from: beforeCubie.position,
       to: afterCubie.position,
+      fromLabel: cubiePositionLabel(beforeCubie.position),
+      toLabel: cubiePositionLabel(afterCubie.position),
     });
   });
 
@@ -90,6 +94,27 @@ export function analyzePermutation(
     ),
     orientationChanges: Object.freeze(orientationChanges),
   });
+}
+
+/** 座標をSingmasterで読みやすい固定position名へ変換する。 */
+export function cubiePositionLabel([x, y, z]: CubiePosition): string {
+  if (y === 1 && x === 1 && z === 1) return 'URF';
+  if (y === 1 && x === -1 && z === 1) return 'UFL';
+  if (y === 1 && x === -1 && z === -1) return 'ULB';
+  if (y === 1 && x === 1 && z === -1) return 'UBR';
+  if (y === -1 && x === 1 && z === 1) return 'DFR';
+  if (y === -1 && x === -1 && z === 1) return 'DLF';
+  if (y === -1 && x === -1 && z === -1) return 'DBL';
+  if (y === -1 && x === 1 && z === -1) return 'DRB';
+
+  const faces: string[] = [];
+  if (y === 1) faces.push('U');
+  if (y === -1) faces.push('D');
+  if (z === 1) faces.push('F');
+  if (z === -1) faces.push('B');
+  if (x === 1) faces.push('R');
+  if (x === -1) faces.push('L');
+  return faces.join('');
 }
 
 function decomposeCycles(

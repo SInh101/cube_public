@@ -1,5 +1,15 @@
 export { API_ERROR_CODES } from './errors.js';
 export type {
+  AnalyzeSequenceRequestDto,
+  AnalyzedCubieKindDto,
+  CubieCoordinateDto,
+  CubiePositionDto,
+  OrientationChangeDto,
+  PermutationEntryDto,
+  PieceAnalysisDto,
+  SequenceAnalysisResponseDto,
+} from './analyses.js';
+export type {
   CreateCubeResponseDto,
   CubeColorDto,
   CubeStateResponseDto,

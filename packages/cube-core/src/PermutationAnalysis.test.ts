@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import { Cube } from './Cube.js';
-import { analyzePermutation } from './PermutationAnalysis.js';
+import {
+  analyzePermutation,
+  cubiePositionLabel,
+} from './PermutationAnalysis.js';
 import { parseSequence } from './MoveSequence.js';
 
 describe('Permutation analysis', () => {
@@ -59,5 +62,42 @@ describe('Permutation analysis', () => {
 
     expect(analysis.threeCycles.length).toBeGreaterThan(0);
     expect(analysis.threeCycles.every(({ length }) => length === 3)).toBe(true);
+  });
+
+  it('M13-AN-05: 教材用のcorner/edge position名を返す', () => {
+    expect(cubiePositionLabel([1, 1, 1])).toBe('URF');
+    expect(cubiePositionLabel([-1, 1, -1])).toBe('ULB');
+    expect(cubiePositionLabel([-1, -1, 1])).toBe('DLF');
+    expect(cubiePositionLabel([1, 1, 0])).toBe('UR');
+  });
+
+  it('M13-AN-06: orientation deltaはcorner mod 3、edge mod 2の範囲に収まる', () => {
+    const cube = Cube.solved();
+    const before = cube.getState();
+    for (const move of parseSequence("R U F' L D B")) cube.applyMove(move);
+    const changes = analyzePermutation(
+      before,
+      cube.getState(),
+    ).orientationChanges;
+    expect(
+      changes
+        .filter(({ kind }) => kind === 'edge')
+        .every(({ delta }) => delta === 1),
+    ).toBe(true);
+    expect(
+      changes
+        .filter(({ kind }) => kind === 'corner')
+        .every(({ delta }) => delta === 1 || delta === 2),
+    ).toBe(true);
+    expect(
+      changes
+        .filter(({ kind }) => kind === 'edge')
+        .reduce((sum, { delta }) => sum + delta, 0) % 2,
+    ).toBe(0);
+    expect(
+      changes
+        .filter(({ kind }) => kind === 'corner')
+        .reduce((sum, { delta }) => sum + delta, 0) % 3,
+    ).toBe(0);
   });
 });

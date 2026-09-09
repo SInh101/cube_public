@@ -8,6 +8,7 @@ import {
 } from '../application/index.js';
 import { handleApplyMoveRequest } from './handlers/handleApplyMoveRequest.js';
 import { handleCommutatorRequest } from './handlers/handleCommutatorRequest.js';
+import { handleSequenceAnalysisRequest } from './handlers/handleSequenceAnalysisRequest.js';
 import { isUuid } from '../validation/isUuid.js';
 
 type CubeRoute =
@@ -16,6 +17,7 @@ type CubeRoute =
   | { readonly kind: 'reset'; readonly cubeId: string }
   | { readonly kind: 'move'; readonly cubeId: string }
   | { readonly kind: 'commutator'; readonly cubeId: string }
+  | { readonly kind: 'analysis'; readonly cubeId: string }
   | { readonly kind: 'unknown' };
 
 /** Cube APIの全URIを単一のVercel Function内で振り分ける。 */
@@ -54,6 +56,9 @@ export async function handleCubeRequest(request: Request): Promise<Response> {
     if (route.kind === 'commutator') {
       return await handleCommutatorRequest(request, cubeId);
     }
+    if (route.kind === 'analysis') {
+      return await handleSequenceAnalysisRequest(request, cubeId);
+    }
 
     const dto =
       route.kind === 'resource'
@@ -86,6 +91,8 @@ function resolveRoute(url: URL): CubeRoute {
     if (operation === 'commutator') {
       return { kind: 'commutator', cubeId: rewrittenCubeId };
     }
+    if (operation === 'analysis')
+      return { kind: 'analysis', cubeId: rewrittenCubeId };
     return { kind: 'resource', cubeId: rewrittenCubeId };
   }
 
@@ -102,6 +109,7 @@ function resolveRoute(url: URL): CubeRoute {
     if (segments[3] === 'reset') return { kind: 'reset', cubeId };
     if (segments[3] === 'moves') return { kind: 'move', cubeId };
     if (segments[3] === 'commutators') return { kind: 'commutator', cubeId };
+    if (segments[3] === 'analyses') return { kind: 'analysis', cubeId };
   }
 
   return { kind: 'unknown' };
@@ -112,7 +120,9 @@ function acceptsMethod(route: CubeRoute, method: string): boolean {
     (route.kind === 'collection' && method === 'POST') ||
     (route.kind === 'resource' && method === 'GET') ||
     (route.kind === 'reset' && method === 'PUT') ||
-    ((route.kind === 'move' || route.kind === 'commutator') &&
+    ((route.kind === 'move' ||
+      route.kind === 'commutator' ||
+      route.kind === 'analysis') &&
       method === 'POST')
   );
 }
