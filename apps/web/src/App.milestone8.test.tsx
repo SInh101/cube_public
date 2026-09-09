@@ -2,6 +2,7 @@
 
 import type { CubeStateResponseDto } from '@rubiks-learning/api-contract';
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -162,6 +163,39 @@ afterEach(() => {
 });
 
 describe('Milestone 8 animation boundary', () => {
+  it('Reset完了前の操作を送らず、完了後はreset後のstateから操作する', async () => {
+    let resolveReset!: (response: Response) => void;
+    const resetResponse = new Promise<Response>((resolve) => {
+      resolveReset = resolve;
+    });
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(response({ cubeId: CUBE_ID }, 201))
+      .mockResolvedValueOnce(response({ cubeId: CUBE_ID, state: STATE }))
+      .mockReturnValueOnce(resetResponse)
+      .mockResolvedValueOnce(response({ cubeId: CUBE_ID, state: STATE }));
+    vi.stubGlobal('fetch', fetchMock);
+    render(<App />);
+
+    const resetButton = await screen.findByRole('button', {
+      name: 'Reset cube',
+    });
+    const moveButton = screen.getByRole('button', { name: 'R move' });
+    fireEvent.click(resetButton);
+
+    await waitFor(() => expect(moveButton).toHaveProperty('disabled', true));
+    fireEvent.click(moveButton);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+
+    await act(async () =>
+      resolveReset(response({ cubeId: CUBE_ID, state: STATE })),
+    );
+    await waitFor(() => expect(moveButton).toHaveProperty('disabled', false));
+    fireEvent.click(moveButton);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
+    expect(lastRequestBody(fetchMock)).toEqual({ move: 'R' });
+  });
+
   it('通常のReset cube操作はsequence位置に関係なくReset APIを呼ぶ', async () => {
     const fetchMock = vi
       .fn<typeof fetch>()

@@ -61,6 +61,8 @@ export function App() {
   const [isSequenceLoading, setIsSequenceLoading] = useState(false);
   const [sequenceError, setSequenceError] = useState<string>();
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const resetInFlightRef = useRef(false);
   const [commutator, setCommutator] = useState<
     PreparedCommutatorResponseDto | undefined
   >();
@@ -123,6 +125,7 @@ export function App() {
     async (move: CubeMove): Promise<void> => {
       if (cubeId === null) throw new Error('Cube is not ready');
       if (isAnimating) throw new Error('Cube is animating');
+      if (resetInFlightRef.current) throw new Error('Cube is resetting');
 
       setFacePreview(null);
       setMoveError(false);
@@ -168,6 +171,7 @@ export function App() {
   const prepareMovesForPlayback = useCallback(
     async (moves: readonly CubeMove[]): Promise<void> => {
       if (cubeId === null) throw new Error('Cube is not ready');
+      if (resetInFlightRef.current) throw new Error('Cube is resetting');
       const pendingMoves = batchedMoveStatesRef.current.map(({ move }) => move);
       if (
         pendingMoves.length === moves.length &&
@@ -206,8 +210,10 @@ export function App() {
   );
 
   const resetCube = useCallback(async (): Promise<void> => {
-    if (cubeId === null || isAnimating) return;
+    if (cubeId === null || isAnimating || resetInFlightRef.current) return;
 
+    resetInFlightRef.current = true;
+    setIsResetting(true);
     setMoveError(false);
     batchedMoveStatesRef.current = [];
 
@@ -229,6 +235,9 @@ export function App() {
     } catch (error: unknown) {
       setMoveError(true);
       throw error;
+    } finally {
+      resetInFlightRef.current = false;
+      setIsResetting(false);
     }
   }, [commutator, cubeId, isAnimating]);
 
@@ -542,7 +551,7 @@ export function App() {
                 >
                   <ManualCubeControls
                     state={cubeState}
-                    disabled={isAnimating}
+                    disabled={isAnimating || isResetting}
                     onMove={(move) => {
                       clearTeachingLessons();
                       void applyMove(move).catch(() => undefined);
@@ -554,7 +563,7 @@ export function App() {
                     sequenceInput={sequenceInput}
                     preparedMoves={preparedMoves}
                     isLoading={isSequenceLoading}
-                    disabled={isAnimating}
+                    disabled={isAnimating || isResetting}
                     errorMessage={sequenceError}
                     onSequenceInputChange={(value) => {
                       setSequenceInput(value);
@@ -571,7 +580,7 @@ export function App() {
                     moveCount={playbackState.moves.length}
                     status={playbackState.status}
                     direction={playbackState.direction}
-                    disabled={isAnimating}
+                    disabled={isAnimating || isResetting}
                     onPlay={play}
                     onPause={pause}
                     onNext={next}
@@ -581,7 +590,11 @@ export function App() {
                   />
                   <PresetPanel
                     apiBaseUrl={API_BASE_URL}
-                    disabled={isAnimating || playbackState.status === 'playing'}
+                    disabled={
+                      isAnimating ||
+                      isResetting ||
+                      playbackState.status === 'playing'
+                    }
                     onPlay={(preset) =>
                       void preparePresetPlayback(preset, false)
                     }
@@ -601,7 +614,11 @@ export function App() {
                     definition={commutator}
                     activePart={activeCommutatorPart}
                     isLoading={isCommutatorLoading}
-                    disabled={isAnimating || playbackState.status === 'playing'}
+                    disabled={
+                      isAnimating ||
+                      isResetting ||
+                      playbackState.status === 'playing'
+                    }
                     playDisabled={
                       !isCommutatorPlaybackReady ||
                       playbackState.currentIndex !== 0
@@ -631,7 +648,7 @@ export function App() {
                     status={playbackState.status}
                     direction={playbackState.direction}
                     isLoading={isCycleAnalysisLoading}
-                    disabled={isAnimating}
+                    disabled={isAnimating || isResetting}
                     playbackDisabled={!isCyclePlaybackReady}
                     errorMessage={cycleAnalysisError}
                     onAnalyze={(sequence, conjugate) =>
@@ -659,7 +676,7 @@ export function App() {
                       moveCount={playbackState.moves.length}
                       status={playbackState.status}
                       direction={playbackState.direction}
-                      disabled={isAnimating}
+                      disabled={isAnimating || isResetting}
                       onPlay={play}
                       onPause={pause}
                       onNext={next}
@@ -669,7 +686,7 @@ export function App() {
                     />
                     <ManualCubeControls
                       state={cubeState}
-                      disabled={isAnimating}
+                      disabled={isAnimating || isResetting}
                       onMove={(move) => {
                         clearTeachingLessons();
                         void applyMove(move).catch(() => undefined);
