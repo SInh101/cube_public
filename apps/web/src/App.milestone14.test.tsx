@@ -71,6 +71,7 @@ vi.mock('./components', () => ({
     currentIndex,
     playbackDisabled,
     onAnalyze,
+    onClear,
     onDisplayModeChange,
     onNext,
     onPrevious,
@@ -81,6 +82,7 @@ vi.mock('./components', () => ({
     currentIndex: number;
     playbackDisabled?: boolean;
     onAnalyze: (sequence: string) => void;
+    onClear: () => void;
     onDisplayModeChange: (mode: 'highlight' | 'labels' | 'stickers') => void;
     onNext: () => void;
     onPrevious: () => void;
@@ -93,6 +95,11 @@ vi.mock('./components', () => ({
       <button type="button" onClick={() => onAnalyze('R U F')}>
         Analyze sequence
       </button>
+      {result !== undefined && (
+        <button type="button" onClick={onClear}>
+          Close analysis
+        </button>
+      )}
       <button type="button" onClick={() => onDisplayModeChange('labels')}>
         Show position labels
       </button>
@@ -207,6 +214,16 @@ describe('Milestone 14 cycle teaching integration', () => {
   it('M14-UI-02: 対象外を薄く表示する', async () => {
     await renderAnalyzedApp();
     expect(screen.getByLabelText('Dim unhighlighted').textContent).toBe('true');
+  });
+
+  it('M14-UI-02b: Close analysisで解析表示と3D強調を解除する', async () => {
+    await renderAnalyzedApp();
+    fireEvent.click(screen.getByRole('button', { name: 'Close analysis' }));
+    expect(screen.getByLabelText('Highlighted cubies').textContent).toBe('');
+    expect(screen.getByLabelText('Dim unhighlighted').textContent).toBe(
+      'false',
+    );
+    expect(screen.getByLabelText('Cycle ready').textContent).toBe('false');
   });
 
   it('M14-UI-03: 表示モード選択時だけcycle順を1/2/3 markerとして渡す', async () => {

@@ -275,6 +275,7 @@ export function App() {
     setCycleAnalysis(undefined);
     setCycleSelection(undefined);
     setStickerCycleIndex(0);
+    setCycleAnalysisError(undefined);
   }, []);
 
   const clearTeachingLessons = useCallback((): void => {
@@ -576,6 +577,10 @@ export function App() {
                     playbackDisabled={!isCyclePlaybackReady}
                     errorMessage={cycleAnalysisError}
                     onAnalyze={(sequence) => void analyzeSequence(sequence)}
+                    onClear={() => {
+                      pause();
+                      clearCycleLesson();
+                    }}
                     onSelectCycle={(kind, index) => {
                       setCycleSelection({ kind, index });
                       setStickerCycleIndex(0);

@@ -29,6 +29,8 @@
 - PracticeとAnalysisを上位tabで分離する
 - 速度設定はtabより前、Analysisの手動操作盤は教材より後に配置する
 - PresetはPracticeだけに表示する
+- 右カラムが横overflowする前の82remで1列へ切り替える
+- Close analysisで解析結果と3D highlight/markerを解除する
 
 ## 回帰ゲート
 

@@ -8,7 +8,7 @@
 ## `apps/web/src/components/CycleTeachingPanel.tsx`
 
 - 役割: 3-cycle教材の入力、解析結果、選択、表示モード、再生操作をまとめる。
-- コード要約: corner/edge cycle、orientation、固定pieceを表示する。Visualize stickersでは3本のsticker cycleを個別ボタンとして表示し、1セットずつ選択する。解析中・回転中・再生中・キュー同期前を分けてボタンを制御する。
+- コード要約: corner/edge cycle、orientation、固定pieceを表示する。Visualize stickersでは3本のsticker cycleを個別ボタンとして表示し、1セットずつ選択する。Close analysisから解析表示を明示的に終了できる。解析中・回転中・再生中・キュー同期前を分けてボタンを制御する。
 
 ## `apps/web/src/components/cycle-teaching-panel.css`
 
@@ -34,6 +34,11 @@
 
 - 役割: 上位タブとモード内パネル、Analysis下段の手動操作領域を視覚的に区切る。
 - コード要約: 選択tabを強調し、教材と低優先度操作盤の間へseparatorを置く。
+
+## `apps/web/src/components/face-controls.css` / `apps/web/src/styles.css`
+
+- 役割: 2列表示と1列表示の安全な境界を管理する。
+- コード要約: 右カラムの必要幅を考慮して82rem以下で1列へ移行する。広い画面では右カラムだけを縦scrollとし、横overflowを防ぐ。mainはpaddingを含めてviewport幅へ収める。
 
 ## テストファイル
 

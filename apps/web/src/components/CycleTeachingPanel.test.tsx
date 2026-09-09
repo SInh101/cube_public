@@ -65,6 +65,13 @@ describe('CycleTeachingPanel', () => {
     fireEvent.click(second);
     expect(onStickerCycleIndexChange).toHaveBeenCalledWith(1);
   });
+
+  it('M14-CP-05: 解析表示を閉じられる', () => {
+    const onClear = vi.fn();
+    renderPanel({ onClear });
+    fireEvent.click(screen.getByRole('button', { name: 'Close analysis' }));
+    expect(onClear).toHaveBeenCalledOnce();
+  });
 });
 
 function renderPanel(overrides: Partial<CycleTeachingPanelProps> = {}): void {
@@ -80,6 +87,7 @@ function renderPanel(overrides: Partial<CycleTeachingPanelProps> = {}): void {
       direction="forward"
       isLoading={false}
       onAnalyze={vi.fn()}
+      onClear={vi.fn()}
       onSelectCycle={vi.fn()}
       onDisplayModeChange={vi.fn()}
       onStickerCycleIndexChange={vi.fn()}

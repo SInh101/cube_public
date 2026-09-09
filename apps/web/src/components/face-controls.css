@@ -13,6 +13,7 @@
   min-width: 0;
   max-height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
   padding-right: 0.5rem;
   scrollbar-gutter: stable;
@@ -191,7 +192,7 @@
   outline: none;
 }
 
-@media (max-width: 70rem) {
+@media (max-width: 82rem) {
   .cube-workspace {
     grid-template-columns: 1fr;
     height: auto;

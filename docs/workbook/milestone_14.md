@@ -34,3 +34,6 @@ REST DTOのposition labelは教材上の表示に使い、同じpermutation entr
 4. Visualize stickersへ切り替え、3本のsticker cycle選択ボタンが表示されることを確認する
 5. 各ボタンで、該当する3ステッカーだけに1・2・3が表示されることを確認する
 6. Next / Previous / Play all / Reverse allを試す
+7. Close analysisで解析結果、highlight、markerが消えることを確認する
+
+画面幅が82rem以下、つまり2列表示で右カラムに横scrollが必要になり得る範囲では、CubeViewと操作カラムを1列表示へ切り替える。

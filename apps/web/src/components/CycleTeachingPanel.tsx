@@ -27,6 +27,7 @@ export interface CycleTeachingPanelProps {
   readonly playbackDisabled?: boolean;
   readonly errorMessage?: string;
   readonly onAnalyze: (sequence: string) => void;
+  readonly onClear: () => void;
   readonly onSelectCycle: (kind: AnalyzedCubieKindDto, index: number) => void;
   readonly onDisplayModeChange: (mode: CycleDisplayMode) => void;
   readonly onStickerCycleIndexChange: (index: number) => void;
@@ -65,11 +66,16 @@ export function CycleTeachingPanel(props: CycleTeachingPanelProps) {
       )}
       {props.result !== undefined && (
         <>
-          <p>
-            {props.result.analysis.identity
-              ? 'Identity'
-              : 'Permutation detected'}
-          </p>
+          <div className="cycle-teaching__result-heading">
+            <p>
+              {props.result.analysis.identity
+                ? 'Identity'
+                : 'Permutation detected'}
+            </p>
+            <button type="button" disabled={isBusy} onClick={props.onClear}>
+              Close analysis
+            </button>
+          </div>
           <div className="cycle-teaching__cycles">
             {(['corner', 'edge'] as const).map((kind) => {
               const cycles =

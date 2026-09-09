@@ -19,15 +19,22 @@ describe('desktop workspace layout', () => {
 
   it('狭い画面では一列のpage scrollへ戻す', () => {
     expect(styles).toMatch(
-      /@media \(max-width:\s*70rem\)[\s\S]*\.cube-controls\s*\{[^}]*overflow-y:\s*visible/u,
+      /@media \(max-width:\s*82rem\)[\s\S]*\.cube-controls\s*\{[^}]*overflow-y:\s*visible/u,
     );
   });
 
   it('desktopではpage全体のscrollを発生させない', () => {
     expect(globalStyles).toMatch(
-      /@media \(min-width:\s*70\.001rem\)[\s\S]*body\s*\{[^}]*overflow:\s*hidden/u,
+      /@media \(min-width:\s*82\.001rem\)[\s\S]*body\s*\{[^}]*overflow:\s*hidden/u,
     );
     expect(globalStyles).toMatch(/main\s*\{[^}]*height:\s*100dvh/su);
+  });
+
+  it('右カラムに横scrollが必要になる前に一列へ切り替える', () => {
+    expect(styles).toMatch(/\.cube-controls\s*\{[^}]*overflow-x:\s*hidden/su);
+    expect(globalStyles).toMatch(
+      /main\s*\{[^}]*box-sizing:\s*border-box;[^}]*width:\s*100%/su,
+    );
   });
   it('keeps each face card inside a single-column control panel', () => {
     expect(styles).toMatch(
