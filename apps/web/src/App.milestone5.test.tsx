@@ -16,6 +16,7 @@ vi.mock('./components', () => ({
     <div data-testid="cube-view">{JSON.stringify(state)}</div>
   ),
   FaceControlPanel: () => null,
+  SliceControlPanel: () => null,
   MoveSequenceControl: () => null,
   PlaybackControls: () => null,
   PresetManager: () => null,

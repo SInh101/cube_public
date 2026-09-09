@@ -16,6 +16,7 @@ vi.mock('./components', () => ({
   DEFAULT_ANIMATION_DURATION_MS: 240,
   AnimationSpeedControl: () => null,
   FaceControlPanel: () => null,
+  SliceControlPanel: () => null,
   MoveSequenceControl: () => null,
   PresetPanel: () => null,
   findChangedCubieIds: (before: unknown, after: unknown) =>
@@ -36,6 +37,7 @@ vi.mock('./components', () => ({
         {highlightedCubieIds?.join(',') ?? ''}
       </output>
       <output aria-label="Dim unhighlighted">{String(dimUnhighlighted)}</output>
+      <output aria-label="Animation id">{animation?.id}</output>
       <button
         type="button"
         aria-label="Complete animation"
@@ -169,7 +171,7 @@ describe('Milestone 12 commutator teaching integration', () => {
       ),
     );
     fireEvent.click(screen.getByRole('button', { name: 'Complete animation' }));
-    await waitFor(() => expect(moveRequestCount(fetchMock)).toBe(2));
+    expect(moveRequestCount(fetchMock)).toBe(1);
     fireEvent.click(screen.getByRole('button', { name: 'Complete animation' }));
     await waitFor(() =>
       expect(screen.getByLabelText('Active commutator part').textContent).toBe(
@@ -236,15 +238,21 @@ describe('Milestone 12 commutator teaching integration', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: 'Play next part' }));
     await waitFor(() => expect(moveRequestCount(fetchMock)).toBe(1));
+    await waitFor(() =>
+      expect(screen.getByLabelText('Animation id').textContent).toBe('1'),
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Complete animation' }));
-    await waitFor(() => expect(moveRequestCount(fetchMock)).toBe(2));
+    expect(moveRequestCount(fetchMock)).toBe(1);
+    await waitFor(() =>
+      expect(screen.getByLabelText('Animation id').textContent).toBe('2'),
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Complete animation' }));
     await waitFor(() =>
       expect(screen.getByLabelText('Active commutator part').textContent).toBe(
         'B',
       ),
     );
-    expect(moveRequestCount(fetchMock)).toBe(2);
+    expect(moveRequestCount(fetchMock)).toBe(1);
   });
 });
 
@@ -275,8 +283,18 @@ function createFetchMock() {
       return Promise.resolve(jsonResponse(DEFINITION));
     }
     if (url === `/api/cubes/${CUBE_ID}/moves`) {
+      const body = JSON.parse(String(init?.body)) as {
+        move?: string;
+        moves?: string[];
+      };
+      const moves = body.moves ?? (body.move === undefined ? [] : [body.move]);
       return Promise.resolve(
-        jsonResponse({ cubeId: CUBE_ID, state: MOVED_STATE }),
+        jsonResponse({
+          cubeId: CUBE_ID,
+          moves,
+          states: moves.map(() => MOVED_STATE),
+          state: MOVED_STATE,
+        }),
       );
     }
     return Promise.resolve(jsonResponse({}, 500));

@@ -8,6 +8,7 @@ export interface UsePlaybackOptions {
   readonly moves: readonly CubeMove[];
   readonly isAnimating: boolean;
   readonly applyMove: (move: CubeMove) => Promise<void>;
+  readonly prepareMoves?: (moves: readonly CubeMove[]) => Promise<void>;
   readonly resetCube: () => Promise<void>;
   readonly sequenceRevision?: number;
 }
@@ -37,6 +38,7 @@ export function usePlayback({
   moves,
   isAnimating,
   applyMove,
+  prepareMoves,
   resetCube,
   sequenceRevision = 0,
 }: UsePlaybackOptions): UsePlaybackResult {
@@ -46,6 +48,7 @@ export function usePlayback({
   const pendingTargetIndex = useRef<number | undefined>(undefined);
   const resetRequestPending = useRef(false);
   const appliedSequenceRevision = useRef(sequenceRevision);
+  const preparationPending = useRef(false);
 
   useEffect(() => {
     setState((current) => {
@@ -106,39 +109,71 @@ export function usePlayback({
     else void sendPreviousMove();
   }, [sendNextMove, sendPreviousMove, state.direction, state.status]);
 
-  const play = useCallback((): void => {
-    setState((current) =>
-      current.currentIndex >= current.moves.length
-        ? current
-        : {
+  const prepareThen = useCallback(
+    (movesToPrepare: readonly CubeMove[], startPlaying: () => void): void => {
+      if (preparationPending.current || movesToPrepare.length === 0) return;
+      if (prepareMoves === undefined) {
+        startPlaying();
+        return;
+      }
+      preparationPending.current = true;
+      void prepareMoves(movesToPrepare)
+        .then(startPlaying)
+        .catch(() =>
+          setState((current) => ({
             ...current,
-            direction: 'forward',
-            status: 'playing',
+            status: 'paused',
             stopAtIndex: undefined,
-          },
-    );
-  }, []);
+          })),
+        )
+        .finally(() => {
+          preparationPending.current = false;
+        });
+    },
+    [prepareMoves],
+  );
 
-  const playUntil = useCallback((targetIndex: number): void => {
-    setState((current) => {
-      const boundedTarget = Math.min(targetIndex, current.moves.length);
-      if (boundedTarget <= current.currentIndex) return current;
-      return {
+  const play = useCallback((): void => {
+    if (state.currentIndex >= state.moves.length) return;
+    prepareThen(state.moves.slice(state.currentIndex), () =>
+      setState((current) => ({
         ...current,
         direction: 'forward',
         status: 'playing',
-        stopAtIndex: boundedTarget,
-      };
-    });
-  }, []);
+        stopAtIndex: undefined,
+      })),
+    );
+  }, [prepareThen, state.currentIndex, state.moves]);
 
-  const start = useCallback((nextMoves: readonly CubeMove[]): void => {
-    pendingTargetIndex.current = undefined;
-    setState({
-      ...createInitialState(nextMoves),
-      status: nextMoves.length === 0 ? 'idle' : 'playing',
-    });
-  }, []);
+  const playUntil = useCallback(
+    (targetIndex: number): void => {
+      const boundedTarget = Math.min(targetIndex, state.moves.length);
+      if (boundedTarget <= state.currentIndex) return;
+      prepareThen(state.moves.slice(state.currentIndex, boundedTarget), () =>
+        setState((current) => ({
+          ...current,
+          direction: 'forward',
+          status: 'playing',
+          stopAtIndex: boundedTarget,
+        })),
+      );
+    },
+    [prepareThen, state.currentIndex, state.moves],
+  );
+
+  const start = useCallback(
+    (nextMoves: readonly CubeMove[]): void => {
+      pendingTargetIndex.current = undefined;
+      if (nextMoves.length === 0) {
+        setState(createInitialState(nextMoves));
+        return;
+      }
+      prepareThen(nextMoves, () =>
+        setState({ ...createInitialState(nextMoves), status: 'playing' }),
+      );
+    },
+    [prepareThen],
+  );
 
   const pause = useCallback((): void => {
     setState((current) =>
@@ -169,17 +204,20 @@ export function usePlayback({
   }, [sendPreviousMove, state.status]);
 
   const reversePlay = useCallback((): void => {
-    setState((current) =>
-      current.currentIndex <= 0
-        ? current
-        : {
-            ...current,
-            direction: 'reverse',
-            status: 'playing',
-            stopAtIndex: undefined,
-          },
+    if (state.currentIndex <= 0) return;
+    const reverseMoves = state.moves
+      .slice(0, state.currentIndex)
+      .reverse()
+      .map(invertMove);
+    prepareThen(reverseMoves, () =>
+      setState((current) => ({
+        ...current,
+        direction: 'reverse',
+        status: 'playing',
+        stopAtIndex: undefined,
+      })),
     );
-  }, []);
+  }, [prepareThen, state.currentIndex, state.moves]);
 
   const reset = useCallback((): void => {
     if (

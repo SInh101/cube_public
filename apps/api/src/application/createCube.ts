@@ -10,5 +10,5 @@ export async function createCube(): Promise<CreateCubeResponseDto> {
 
   await cubeRepository.save(cubeId, cube);
 
-  return { cubeId };
+  return { cubeId, state: cube.getState() };
 }

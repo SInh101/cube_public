@@ -1,11 +1,15 @@
 import type {
   ApiErrorCode,
   ErrorResponseDto,
+  MoveBatchRequestDto,
   MoveRequestDto,
 } from '@rubiks-learning/api-contract';
 import { MOVES, type Move } from '@rubiks-learning/cube-core';
 
-import { applyMoveToCube } from '../../application/applyMoveToCube.js';
+import {
+  applyMovesToCube,
+  applyMoveToCube,
+} from '../../application/applyMoveToCube.js';
 import { CubeNotFoundError } from '../../application/CubeNotFoundError.js';
 
 export async function handleApplyMoveRequest(
@@ -31,7 +35,7 @@ export async function handleApplyMoveRequest(
     );
   }
 
-  if (!isMoveRequestDto(body)) {
+  if (!isMoveRequestDto(body) && !isMoveBatchRequestDto(body)) {
     return errorResponse(
       400,
       'REQUEST_NOT_CORRECT',
@@ -39,16 +43,23 @@ export async function handleApplyMoveRequest(
     );
   }
 
-  if (!isMove(body.move)) {
+  const moves = 'moves' in body ? body.moves : [body.move];
+  if (!moves.every(isMove)) {
     return errorResponse(
       400,
       'MOVE_NOT_CORRECT',
-      'move must be one of the supported Move values',
+      'moves' in body
+        ? 'every move must be one of the supported Move values'
+        : 'move must be one of the supported Move values',
     );
   }
 
   try {
-    return Response.json(await applyMoveToCube(cubeId, body.move), {
+    const dto =
+      'moves' in body
+        ? await applyMovesToCube(cubeId, body.moves)
+        : await applyMoveToCube(cubeId, body.move);
+    return Response.json(dto, {
       status: 200,
     });
   } catch (error: unknown) {
@@ -58,6 +69,21 @@ export async function handleApplyMoveRequest(
 
     return errorResponse(500, 'INTERNAL_SERVER_ERROR', 'internal server error');
   }
+}
+
+function isMoveBatchRequestDto(value: unknown): value is MoveBatchRequestDto {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false;
+  }
+  const keys = Object.keys(value);
+  const moves = (value as Record<string, unknown>).moves;
+  return (
+    keys.length === 1 &&
+    keys[0] === 'moves' &&
+    Array.isArray(moves) &&
+    moves.length > 0 &&
+    moves.every((move) => typeof move === 'string')
+  );
 }
 
 function isJsonContentType(contentType: string | null): boolean {

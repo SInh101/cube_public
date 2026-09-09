@@ -65,6 +65,7 @@ vi.mock('./components', () => ({
       ])}
     </div>
   ),
+  SliceControlPanel: () => null,
   MoveSequenceControl: () => null,
   PlaybackControls: () => null,
   PresetManager: () => null,

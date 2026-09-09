@@ -24,7 +24,12 @@ export type {
   CommutatorResponseDto,
   PreparedCommutatorResponseDto,
 } from './commutators.js';
-export type { MoveDto, MoveRequestDto } from './moves.js';
+export type {
+  MoveBatchRequestDto,
+  MoveBatchResponseDto,
+  MoveDto,
+  MoveRequestDto,
+} from './moves.js';
 export type {
   MoveSequenceRequestDto,
   MoveSequenceResponseDto,

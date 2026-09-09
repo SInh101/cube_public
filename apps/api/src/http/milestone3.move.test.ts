@@ -291,12 +291,16 @@ describe('Milestone 3 Move REST API', () => {
       for (const color of new Set(stickers)) {
         expect(stickers.filter((value) => value === color)).toHaveLength(9);
       }
-      expect(body.state.faces.U[4]).toBe('white');
-      expect(body.state.faces.R[4]).toBe('red');
-      expect(body.state.faces.F[4]).toBe('green');
-      expect(body.state.faces.D[4]).toBe('yellow');
-      expect(body.state.faces.L[4]).toBe('orange');
-      expect(body.state.faces.B[4]).toBe('blue');
+      // Outer-face turns keep all centers fixed. Slice turns intentionally
+      // move four centers around their rotation axis.
+      if ('URFDLB'.includes(move[0]!)) {
+        expect(body.state.faces.U[4]).toBe('white');
+        expect(body.state.faces.R[4]).toBe('red');
+        expect(body.state.faces.F[4]).toBe('green');
+        expect(body.state.faces.D[4]).toBe('yellow');
+        expect(body.state.faces.L[4]).toBe('orange');
+        expect(body.state.faces.B[4]).toBe('blue');
+      }
     });
 
     it('M3-RG-02: response変更がrepository内stateへ影響しない', async () => {

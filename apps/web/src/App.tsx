@@ -2,6 +2,7 @@ import type {
   CommutatorPartDto,
   CreateCubeResponseDto,
   CubeStateResponseDto,
+  MoveBatchResponseDto,
   MoveSequenceResponseDto,
   PreparedCommutatorResponseDto,
   PresetResponseDto,
@@ -20,6 +21,7 @@ import {
   MoveSequenceControl,
   PlaybackControls,
   PresetPanel,
+  SliceControlPanel,
   type CubeMove,
   type CycleDisplayMode,
   type FacePreview,
@@ -35,9 +37,9 @@ import { ToolModeTabs, type ToolMode } from './components/ToolModeTabs';
 import { usePlayback } from './playback/usePlayback';
 
 type LoadStatus = 'loading' | 'ready' | 'error';
-type FaceMove = 'R' | 'L' | 'U' | 'D' | 'F' | 'B';
+type KeyboardMove = 'R' | 'L' | 'U' | 'D' | 'F' | 'B' | 'M' | 'E' | 'S';
 
-const FACE_MOVES = ['R', 'L', 'U', 'D', 'F', 'B'] as const;
+const KEYBOARD_MOVES = ['R', 'L', 'U', 'D', 'F', 'B', 'M', 'E', 'S'] as const;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
 export function App() {
@@ -79,6 +81,9 @@ export function App() {
   const [isCycleAnalysisLoading, setIsCycleAnalysisLoading] = useState(false);
   const [cycleAnalysisError, setCycleAnalysisError] = useState<string>();
   const [toolMode, setToolMode] = useState<ToolMode>('practice');
+  const batchedMoveStatesRef = useRef<
+    { readonly move: CubeMove; readonly state: CubeStateResponseDto['state'] }[]
+  >([]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -92,17 +97,13 @@ export function App() {
         if (!createResponse.ok) {
           throw new Error(`Cube creation failed: ${createResponse.status}`);
         }
-        const createDto =
-          (await createResponse.json()) as CreateCubeResponseDto;
+        const createDto = (await createResponse.json()) as
+          CreateCubeResponseDto | { readonly cubeId: string };
 
-        const getResponse = await fetch(
-          `${API_BASE_URL}/api/cubes/${createDto.cubeId}`,
-          { signal: controller.signal },
-        );
-        if (!getResponse.ok) {
-          throw new Error(`Cube retrieval failed: ${getResponse.status}`);
-        }
-        const stateDto = (await getResponse.json()) as CubeStateResponseDto;
+        const stateDto =
+          'state' in createDto
+            ? createDto
+            : await getCreatedCube(createDto.cubeId, controller.signal);
 
         setCubeId(createDto.cubeId);
         setCubeState(stateDto.state);
@@ -126,6 +127,18 @@ export function App() {
       setFacePreview(null);
       setMoveError(false);
       try {
+        const prepared = batchedMoveStatesRef.current.shift();
+        if (prepared !== undefined) {
+          if (prepared.move !== move) {
+            batchedMoveStatesRef.current = [];
+            throw new Error('Prepared playback order does not match');
+          }
+          setCubeState(prepared.state);
+          setLastMove(move);
+          setAnimationId((current) => current + 1);
+          setIsAnimating(true);
+          return;
+        }
         const response = await fetch(
           `${API_BASE_URL}/api/cubes/${cubeId}/moves`,
           {
@@ -152,10 +165,51 @@ export function App() {
   const applyMoveRef = useRef(applyMove);
   applyMoveRef.current = applyMove;
 
+  const prepareMovesForPlayback = useCallback(
+    async (moves: readonly CubeMove[]): Promise<void> => {
+      if (cubeId === null) throw new Error('Cube is not ready');
+      const pendingMoves = batchedMoveStatesRef.current.map(({ move }) => move);
+      if (
+        pendingMoves.length === moves.length &&
+        pendingMoves.every((move, index) => move === moves[index])
+      ) {
+        return;
+      }
+      // The server has already applied a prepared batch. If playback changes
+      // direction while paused, first undo the not-yet-animated suffix so the
+      // persisted state remains aligned with the visible state.
+      const compensationMoves = invertMoves(pendingMoves);
+      const requestMoves = [...compensationMoves, ...moves];
+      const response = await fetch(
+        `${API_BASE_URL}/api/cubes/${cubeId}/moves`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ moves: requestMoves }),
+        },
+      );
+      if (!response.ok) {
+        throw new Error(`Move batch application failed: ${response.status}`);
+      }
+      const dto = (await response.json()) as MoveBatchResponseDto;
+      if (dto.states.length !== requestMoves.length) {
+        throw new Error('Move batch response length does not match');
+      }
+      batchedMoveStatesRef.current = moves.map((move, index) => ({
+        move,
+        state: dto.states[
+          compensationMoves.length + index
+        ] as CubeStateResponseDto['state'],
+      }));
+    },
+    [cubeId],
+  );
+
   const resetCube = useCallback(async (): Promise<void> => {
     if (cubeId === null || isAnimating) return;
 
     setMoveError(false);
+    batchedMoveStatesRef.current = [];
 
     try {
       const response = await fetch(
@@ -193,6 +247,7 @@ export function App() {
     moves: preparedMoves,
     isAnimating,
     applyMove,
+    prepareMoves: prepareMovesForPlayback,
     resetCube,
     sequenceRevision: preparedMovesRevision,
   });
@@ -351,7 +406,7 @@ export function App() {
       if (isEditableTarget(event.target)) return;
 
       const face = event.key.toUpperCase();
-      if (!isFaceMove(face)) return;
+      if (!isKeyboardMove(face)) return;
 
       const move: CubeMove = event.shiftKey ? `${face}'` : face;
       clearTeachingLessons();
@@ -657,6 +712,7 @@ function ManualCubeControls({
         onPreviewChange={onPreviewChange}
         disabled={disabled}
       />
+      <SliceControlPanel onMove={onMove} disabled={disabled} />
       <button
         className="cube-reset-control"
         type="button"
@@ -681,8 +737,21 @@ function invertMoves(moves: readonly CubeMove[]): readonly CubeMove[] {
     );
 }
 
-function isFaceMove(value: string): value is FaceMove {
-  return (FACE_MOVES as readonly string[]).includes(value);
+async function getCreatedCube(
+  cubeId: string,
+  signal: AbortSignal,
+): Promise<CubeStateResponseDto> {
+  const response = await fetch(`${API_BASE_URL}/api/cubes/${cubeId}`, {
+    signal,
+  });
+  if (!response.ok) {
+    throw new Error(`Cube retrieval failed: ${response.status}`);
+  }
+  return (await response.json()) as CubeStateResponseDto;
+}
+
+function isKeyboardMove(value: string): value is KeyboardMove {
+  return (KEYBOARD_MOVES as readonly string[]).includes(value);
 }
 
 function isEditableTarget(target: EventTarget | null): boolean {

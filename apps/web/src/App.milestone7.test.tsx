@@ -19,6 +19,7 @@ vi.mock('./components', () => ({
   DEFAULT_ANIMATION_DURATION_MS: 240,
   AnimationSpeedControl: () => null,
   FaceControlPanel: () => null,
+  SliceControlPanel: () => null,
   CubeView: ({ state }: { state: CubeStateResponseDto['state'] }) => (
     <div data-testid="cube-view">{JSON.stringify(state)}</div>
   ),

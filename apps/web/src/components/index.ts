@@ -14,6 +14,7 @@ export {
   MIN_ANIMATION_DURATION_MS,
 } from './AnimationSpeedControl';
 export { FaceControlPanel } from './FaceControlPanel';
+export { SliceControlPanel } from './SliceControlPanel';
 export { MoveSequenceControl } from './MoveSequenceControl';
 export type { MoveSequenceControlProps } from './MoveSequenceControl';
 export { PlaybackControls } from './PlaybackControls';
