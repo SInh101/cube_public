@@ -1,31 +1,36 @@
 # Milestone 14 — Codex実装解説
 
+## `apps/web/src/analysis/cycleVisualization.ts`
+
+- 役割: REST解析結果を3D表示用の値へ変換する。
+- コード要約: 最初の3-cycleを選び、position labelからpermutation entryを引いて安定Cubie IDへ変換する。cycle順と同じ順に1・2・3 markerを作る。
+
+## `apps/web/src/components/CycleTeachingPanel.tsx`
+
+- 役割: 3-cycle教材の入力、解析結果、選択、表示モード、再生操作をまとめる。
+- コード要約: corner/edge cycle、orientation、固定pieceを表示する。解析中・回転中・再生中・キュー同期前を分けてボタンを制御する。
+
+## `apps/web/src/components/cycle-teaching-panel.css`
+
+- 役割: 教材パネルを既存の右カラムへ収まるレスポンシブなUIにする。
+- コード要約: 入力、cycle候補、モード、再生ボタンをgrid/flexで整理する。
+
 ## `apps/web/src/components/CubeView.tsx`
 
-- 役割: 3-cycle教材用のCubie markerを3D描画する。
-- コード要約: `cubieMarkers`を安定Cubie IDで対応付け、camera方向を向くSpriteとして描画する。実回転対象markerはturning groupへ入れ、layer animationへ追従させる。texture/materialをcleanupする。
+- 役割: 3-cycleの順序markerを3D Cube上に描画する。
+- コード要約: markerを安定Cubie IDへ関連付ける。回転対象markerを同じturning groupへ移すため、animation中も対象pieceに追従する。Sprite用resourceはcleanup時に破棄する。
 
-## `apps/web/src/components/index.ts`
+## `apps/web/src/App.tsx`
 
-- 役割: Web componentの公開APIを定義する。
-- コード要約: `CubeViewMarker`型を公開する。
+- 役割: analysis REST境界、教材UI、CubeView、既存playbackを統合する。
+- コード要約: 解析結果から初期cycleを選択し、movesを`usePlayback`へ設定する。解析結果とplayback queueが一致するまで再生を止め、更新競合を防ぐ。別の操作体系を開始した場合は古い教材表示を消す。
 
-## `apps/web/src/App.milestone14.todo.test.tsx`
+## テストファイル
 
-- 役割: 自力実装する3-cycle Teaching UIのtest枠を予約する。
-- コード要約: highlight、dim、順序、step、正逆再生、同期を`todo`にする。
+- `apps/web/src/analysis/cycleVisualization.test.ts`: labelから安定ID・markerへの変換
+- `apps/web/src/components/CycleTeachingPanel.test.tsx`: 実コンポーネントの表示と操作制御
+- `apps/web/src/App.milestone14.test.tsx`: REST、3D props、step、連続・逆再生、animation同期
 
-## `docs/workbook/milestone_14.md`
+## 後続への配慮
 
-- 役割: 自力実装規模と3D propsの利用例を示す。
-- コード要約: 最低8機能を未着手として記録する。
-
-## `docs/test-design/milestone_14.md`
-
-- 役割: 3-cycle Teaching UIのtest patternを分類する。
-- コード要約: 強調、順序、再生、同期、境界を列挙する。
-
-## `docs/report/milestone_14.md`
-
-- 役割: Agent担当と自力担当の進捗を記録する。
-- コード要約: 3D marker完了、Teaching UI未着手を区別する。
+解析はCoreをFrontendへ直接持ち込まずREST DTOだけに依存する。3D表示は安定Cubie ID、再生は共通`usePlayback`を利用するため、将来の操作方式追加でも解析・描画・再生を独立して交換できる。

@@ -1,6 +1,11 @@
 export { CubeView } from './CubeView';
 export type { CubeViewProps } from './CubeView';
 export type { CubeViewMarker } from './CubeView';
+export { CycleTeachingPanel } from './CycleTeachingPanel';
+export type {
+  CycleDisplayMode,
+  CycleTeachingPanelProps,
+} from './CycleTeachingPanel';
 export {
   ANIMATION_DURATION_STEP_MS,
   AnimationSpeedControl,

@@ -5,12 +5,14 @@ import type {
   MoveSequenceResponseDto,
   PreparedCommutatorResponseDto,
   PresetResponseDto,
+  SequenceAnalysisResponseDto,
 } from '@rubiks-learning/api-contract';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   AnimationSpeedControl,
   CommutatorTeachingPanel,
+  CycleTeachingPanel,
   CubeView,
   DEFAULT_ANIMATION_DURATION_MS,
   FaceControlPanel,
@@ -19,8 +21,14 @@ import {
   PlaybackControls,
   PresetPanel,
   type CubeMove,
+  type CycleDisplayMode,
   type FacePreview,
 } from './components';
+import {
+  createCycleVisualization,
+  firstThreeCycle,
+  type CycleSelection,
+} from './analysis/cycleVisualization';
 import './components/face-controls.css';
 import { usePlayback } from './playback/usePlayback';
 
@@ -57,6 +65,16 @@ export function App() {
   >();
   const [isCommutatorLoading, setIsCommutatorLoading] = useState(false);
   const [commutatorError, setCommutatorError] = useState<string>();
+  const [cycleAnalysis, setCycleAnalysis] = useState<
+    SequenceAnalysisResponseDto | undefined
+  >();
+  const [cycleSelection, setCycleSelection] = useState<
+    CycleSelection | undefined
+  >();
+  const [cycleDisplayMode, setCycleDisplayMode] =
+    useState<CycleDisplayMode>('highlight');
+  const [isCycleAnalysisLoading, setIsCycleAnalysisLoading] = useState(false);
+  const [cycleAnalysisError, setCycleAnalysisError] = useState<string>();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -178,6 +196,8 @@ export function App() {
   const prepareCommutator = useCallback(
     async (a: string, b: string): Promise<void> => {
       if (cubeState === null || isAnimating) return;
+      setCycleAnalysis(undefined);
+      setCycleSelection(undefined);
       setIsCommutatorLoading(true);
       setCommutatorError(undefined);
       try {
@@ -247,6 +267,65 @@ export function App() {
     setCommutatorBaseState(undefined);
   }, []);
 
+  const clearCycleLesson = useCallback((): void => {
+    setCycleAnalysis(undefined);
+    setCycleSelection(undefined);
+  }, []);
+
+  const clearTeachingLessons = useCallback((): void => {
+    clearCommutatorLesson();
+    clearCycleLesson();
+  }, [clearCommutatorLesson, clearCycleLesson]);
+
+  const analyzeSequence = useCallback(
+    async (sequence: string): Promise<void> => {
+      if (cubeId === null || isAnimating) return;
+      setIsCycleAnalysisLoading(true);
+      setCycleAnalysisError(undefined);
+      clearCommutatorLesson();
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/cubes/${cubeId}/analyses`,
+          {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ sequence }),
+          },
+        );
+        if (!response.ok) {
+          throw new Error(`Sequence analysis failed: ${response.status}`);
+        }
+        const dto = (await response.json()) as SequenceAnalysisResponseDto;
+        setCycleAnalysis(dto);
+        setCycleSelection(firstThreeCycle(dto));
+        setPreparedMoves(dto.moves);
+        setPreparedMovesRevision((current) => current + 1);
+      } catch {
+        setCycleAnalysis(undefined);
+        setCycleSelection(undefined);
+        setCycleAnalysisError('Could not analyze sequence.');
+      } finally {
+        setIsCycleAnalysisLoading(false);
+      }
+    },
+    [clearCommutatorLesson, cubeId, isAnimating],
+  );
+
+  const cycleVisualization = useMemo(
+    () =>
+      cycleAnalysis === undefined
+        ? undefined
+        : createCycleVisualization(cycleAnalysis, cycleSelection),
+    [cycleAnalysis, cycleSelection],
+  );
+
+  const isCyclePlaybackReady =
+    cycleAnalysis !== undefined &&
+    cycleAnalysis.moves.length === playbackState.moves.length &&
+    cycleAnalysis.moves.every(
+      (move, index) => move === playbackState.moves[index],
+    );
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent): void {
       if (isEditableTarget(event.target)) return;
@@ -255,13 +334,13 @@ export function App() {
       if (!isFaceMove(face)) return;
 
       const move: CubeMove = event.shiftKey ? `${face}'` : face;
-      clearCommutatorLesson();
+      clearTeachingLessons();
       void applyMoveRef.current(move).catch(() => undefined);
     }
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [clearCommutatorLesson]);
+  }, [clearTeachingLessons]);
 
   const cubeAnimation = useMemo(
     () =>
@@ -298,7 +377,7 @@ export function App() {
         throw new Error(`Move sequence validation failed: ${response.status}`);
       }
       const dto = (await response.json()) as MoveSequenceResponseDto;
-      clearCommutatorLesson();
+      clearTeachingLessons();
       setPreparedMoves(dto.moves);
       setPreparedMovesRevision((current) => current + 1);
     } catch {
@@ -307,12 +386,12 @@ export function App() {
     } finally {
       setIsSequenceLoading(false);
     }
-  }, [clearCommutatorLesson, sequenceInput]);
+  }, [clearTeachingLessons, sequenceInput]);
 
   const preparePresetPlayback = useCallback(
     async (preset: PresetResponseDto, reverse: boolean): Promise<void> => {
       if (isAnimating || playbackState.status === 'playing') return;
-      clearCommutatorLesson();
+      clearTeachingLessons();
       setSequenceInput(preset.moves);
       setSequenceError(undefined);
       try {
@@ -330,7 +409,7 @@ export function App() {
         setSequenceError('Could not prepare preset playback.');
       }
     },
-    [clearCommutatorLesson, isAnimating, playbackState.status, startPlayback],
+    [clearTeachingLessons, isAnimating, playbackState.status, startPlayback],
   );
 
   return (
@@ -346,8 +425,17 @@ export function App() {
               animation={cubeAnimation}
               preview={facePreview}
               onAnimationComplete={handleAnimationComplete}
-              highlightedCubieIds={changedCubieIds}
-              dimUnhighlighted={commutator !== undefined}
+              highlightedCubieIds={
+                cycleVisualization?.cubieIds ?? changedCubieIds
+              }
+              dimUnhighlighted={
+                cycleVisualization !== undefined || commutator !== undefined
+              }
+              cubieMarkers={
+                cycleDisplayMode === 'labels'
+                  ? cycleVisualization?.markers
+                  : undefined
+              }
             />
             <div className="cube-controls">
               <AnimationSpeedControl
@@ -357,7 +445,7 @@ export function App() {
               <FaceControlPanel
                 state={cubeState}
                 onMove={(move) => {
-                  clearCommutatorLesson();
+                  clearTeachingLessons();
                   void applyMove(move).catch(() => undefined);
                 }}
                 onPreviewChange={setFacePreview}
@@ -383,7 +471,7 @@ export function App() {
                 }}
                 onPrepare={() => void validateMoveSequence()}
                 onApplyMove={(move) => {
-                  clearCommutatorLesson();
+                  clearTeachingLessons();
                   void applyMove(move).catch(() => undefined);
                 }}
               />
@@ -429,6 +517,28 @@ export function App() {
                     playUntil(nextCommutatorPartEnd);
                   }
                 }}
+              />
+              <CycleTeachingPanel
+                result={cycleAnalysis}
+                selection={cycleSelection}
+                displayMode={cycleDisplayMode}
+                currentIndex={playbackState.currentIndex}
+                moveCount={playbackState.moves.length}
+                status={playbackState.status}
+                direction={playbackState.direction}
+                isLoading={isCycleAnalysisLoading}
+                disabled={isAnimating}
+                playbackDisabled={!isCyclePlaybackReady}
+                errorMessage={cycleAnalysisError}
+                onAnalyze={(sequence) => void analyzeSequence(sequence)}
+                onSelectCycle={(kind, index) =>
+                  setCycleSelection({ kind, index })
+                }
+                onDisplayModeChange={setCycleDisplayMode}
+                onNext={next}
+                onPrevious={previous}
+                onPlay={play}
+                onReversePlay={reversePlay}
               />
             </div>
           </div>

@@ -1,37 +1,30 @@
 # Milestone 14 — 3-cycle Teaching UI Workbook
 
-## Agentが準備したもの
+## 目的
 
-- Milestone 12のCubie強調・対象外dim props
-- `CubeViewMarker`と`cubieMarkers`による3D順序marker
-- markerが対象layer animationへ追従する描画
-- 自力実装8機能のpending test
+Milestone 13が返す順列解析を教材UIへ接続し、3-cycleの対象・巡回順・手順中の動きを立体表示で追えるようにする。
 
-## 自力実装（未着手）
+## 完成条件
 
-- 対象3 piece強調と対象外dim: 2表示機能
-- 移動順を解析cycleからmarkerへ変換: 1機能
-- Next / Previous / Play / Reverse Play: 4操作
-- step・animation・marker同期: 1状態管理
+- 任意の手順を現在のCube状態に対して解析できる
+- cornerまたはedgeの3-cycleを選択できる
+- 対象3 pieceだけを強調し、それ以外を薄く表示できる
+- 表示モードを切り替えると、巡回順を1・2・3のmarkerで表示できる
+- Next、Previous、Play all、Reverse allを利用できる
+- step更新とmarker移動は実回転animationの完了に同期する
+- 解析だけでは保存中のCube状態を変更しない
 
-規模: 最低8機能。component/file数は設計後に記録する。
+## 実装方針
 
-## 3D props
+REST DTOのposition labelは教材上の表示に使い、同じpermutation entryの安定Cubie IDは3D対象の追跡に使う。再生処理は既存の`usePlayback`へ集約し、M14専用の別state machineは作らない。
 
-```tsx
-<CubeView
-  highlightedCubieIds={cycle}
-  dimUnhighlighted
-  cubieMarkers={[
-    { cubieId: cycle[0], label: '1' },
-    { cubieId: cycle[1], label: '2' },
-    { cubieId: cycle[2], label: '3' },
-  ]}
-/>
-```
+## 自力実装部分
 
-この配列を作る処理とUI stateは自力実装する。markerはSpriteとしてcameraを向き、Move対象ならlayerと一緒に動く。
+0件。Milestone 10以降の運用ルールに従い、実装・テストはAgent担当とする。
 
-## 完了確認
+## 確認方法
 
-3 pieceの循環順、対象外が固定されること、正逆の一手再生を同期して確認できる。
+1. 3-cycle analysisで手順を入力してAnalyze sequenceを押す
+2. cycleを選び、強調対象が3 pieceであることを確認する
+3. Show position labelsへ切り替え、1・2・3がpieceに追従することを確認する
+4. Next / Previous / Play all / Reverse allを試す
