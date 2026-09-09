@@ -8,6 +8,7 @@
 - 非変更のCommutator準備API
 - 4段階のTeaching UI
 - Playbackと現在部分の同期
+- A / B / A⁻¹ / B⁻¹単位の`Play next part`
 - 変化Cubie強調と対象外dim表示
 - Core、REST、UI、integration test
 
@@ -22,7 +23,7 @@
 ## テスト結果
 
 - Test Files: 33 passed
-- Tests: 293 passed / 0 todo
+- Tests: 296 passed / 0 todo
 - TypeScript、ESLint、Prettier、production build: 成功
 
 buildには既存の500 kB超chunk警告があるが、機能・型・テストの失敗ではない。

@@ -160,6 +160,7 @@ export function App() {
     state: playbackState,
     start: startPlayback,
     play,
+    playUntil,
     pause,
     next,
     previous,
@@ -215,6 +216,16 @@ export function App() {
         startIndex <= moveIndex && moveIndex < endIndex,
     )?.part;
   }, [commutator, playbackState.currentIndex, playbackState.direction]);
+
+  const nextCommutatorPartEnd = useMemo(
+    () =>
+      commutator?.boundaries.find(
+        ({ startIndex, endIndex }) =>
+          startIndex <= playbackState.currentIndex &&
+          playbackState.currentIndex < endIndex,
+      )?.endIndex,
+    [commutator, playbackState.currentIndex],
+  );
 
   const changedCubieIds = useMemo(
     () =>
@@ -396,11 +407,17 @@ export function App() {
                 isLoading={isCommutatorLoading}
                 disabled={isAnimating || playbackState.status === 'playing'}
                 playDisabled={playbackState.currentIndex !== 0}
+                playNextDisabled={nextCommutatorPartEnd === undefined}
                 errorMessage={commutatorError}
                 onPrepare={(a, b) => void prepareCommutator(a, b)}
                 onPlay={() => {
                   if (commutator !== undefined) {
                     startPlayback(commutator.moves);
+                  }
+                }}
+                onPlayNextPart={() => {
+                  if (nextCommutatorPartEnd !== undefined) {
+                    playUntil(nextCommutatorPartEnd);
                   }
                 }}
               />

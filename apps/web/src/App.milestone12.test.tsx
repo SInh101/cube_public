@@ -62,11 +62,13 @@ vi.mock('./components', () => ({
     activePart,
     onPrepare,
     onPlay,
+    onPlayNextPart,
   }: {
     definition?: { sequence: string };
     activePart?: string;
     onPrepare: (a: string, b: string) => void;
     onPlay: () => void;
+    onPlayNextPart: () => void;
   }) => (
     <div>
       <output aria-label="Prepared commutator">{definition?.sequence}</output>
@@ -76,6 +78,9 @@ vi.mock('./components', () => ({
       </button>
       <button type="button" onClick={onPlay}>
         Play commutator
+      </button>
+      <button type="button" onClick={onPlayNextPart}>
+        Play next part
       </button>
     </div>
   ),
@@ -195,7 +200,39 @@ describe('Milestone 12 commutator teaching integration', () => {
       ),
     );
   });
+
+  it('M12-PB-02: Play next partは現在部分の終端で停止する', async () => {
+    const fetchMock = createFetchMock();
+    vi.stubGlobal('fetch', fetchMock);
+    render(<App />);
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Prepare commutator' }),
+    );
+    await waitFor(() =>
+      expect(screen.getByLabelText('Playback move count').textContent).toBe(
+        '4',
+      ),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Play next part' }));
+    await waitFor(() => expect(moveRequestCount(fetchMock)).toBe(1));
+    fireEvent.click(screen.getByRole('button', { name: 'Complete animation' }));
+    await waitFor(() =>
+      expect(screen.getByLabelText('Active commutator part').textContent).toBe(
+        'B',
+      ),
+    );
+    expect(moveRequestCount(fetchMock)).toBe(1);
+  });
 });
+
+function moveRequestCount(
+  fetchMock: ReturnType<typeof createFetchMock>,
+): number {
+  return fetchMock.mock.calls.filter(([input]) =>
+    String(input).endsWith('/moves'),
+  ).length;
+}
 
 function createFetchMock() {
   return vi.fn<typeof fetch>((input, init) => {

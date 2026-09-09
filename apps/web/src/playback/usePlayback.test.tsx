@@ -173,4 +173,27 @@ describe('usePlayback', () => {
     act(() => result.current.play());
     await waitFor(() => expect(applyMove).toHaveBeenCalledTimes(2));
   });
+
+  it('M12-PB-01: playUntilは指定indexまで連続再生して停止する', async () => {
+    const applyMove = vi.fn().mockResolvedValue(undefined);
+    const resetCube = vi.fn().mockResolvedValue(undefined);
+    const { result } = renderHook(() =>
+      usePlayback({
+        moves: ['R', 'U', 'F'],
+        isAnimating: false,
+        applyMove,
+        resetCube,
+      }),
+    );
+
+    act(() => result.current.playUntil(2));
+    await waitFor(() => expect(applyMove).toHaveBeenLastCalledWith('R'));
+    act(() => result.current.handleAnimationComplete(1));
+    await waitFor(() => expect(applyMove).toHaveBeenLastCalledWith('U'));
+    act(() => result.current.handleAnimationComplete(2));
+
+    expect(result.current.state.currentIndex).toBe(2);
+    expect(result.current.state.status).toBe('paused');
+    expect(applyMove).toHaveBeenCalledTimes(2);
+  });
 });

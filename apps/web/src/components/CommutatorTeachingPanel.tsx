@@ -12,9 +12,11 @@ export interface CommutatorTeachingPanelProps {
   readonly isLoading: boolean;
   readonly disabled?: boolean;
   readonly playDisabled?: boolean;
+  readonly playNextDisabled?: boolean;
   readonly errorMessage?: string;
   readonly onPrepare: (a: string, b: string) => void;
   readonly onPlay: () => void;
+  readonly onPlayNextPart: () => void;
 }
 
 const PART_LABELS: Readonly<Record<CommutatorPartDto, string>> = {
@@ -31,9 +33,11 @@ export function CommutatorTeachingPanel({
   isLoading,
   disabled = false,
   playDisabled = false,
+  playNextDisabled = false,
   errorMessage,
   onPrepare,
   onPlay,
+  onPlayNextPart,
 }: CommutatorTeachingPanelProps) {
   const [a, setA] = useState('R');
   const [b, setB] = useState('U');
@@ -93,13 +97,24 @@ export function CommutatorTeachingPanel({
               </li>
             ))}
           </ol>
-          <button
-            type="button"
-            disabled={disabled || playDisabled || definition.moves.length === 0}
-            onClick={onPlay}
-          >
-            Play commutator
-          </button>
+          <div className="commutator-teaching__actions">
+            <button
+              type="button"
+              disabled={
+                disabled || playDisabled || definition.moves.length === 0
+              }
+              onClick={onPlay}
+            >
+              Play commutator
+            </button>
+            <button
+              type="button"
+              disabled={disabled || playNextDisabled}
+              onClick={onPlayNextPart}
+            >
+              Play next part
+            </button>
+          </div>
         </div>
       )}
     </section>

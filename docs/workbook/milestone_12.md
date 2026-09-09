@@ -9,6 +9,7 @@
 - 現在部分の強調: 1機能
 - 非変更の`POST /api/commutators`から交換子・境界を取得する通信: 1機能
 - Milestone 8 Playbackとの接続: 1機能
+- A / B / A⁻¹ / B⁻¹単位の`Play next part`: 1機能
 - 解析結果をCubeView propsへ変換する表示state: 1機能
 - Core、REST、UI、integration test
 
@@ -28,4 +29,5 @@
 - [x] 現在部分をPlayback indexと同期して強調できる
 - [x] 変化Cubieを強調し、対象外を薄く表示できる
 - [x] Play、Pause、Next、Previous、Reverse Play、Resetを再利用できる
+- [x] `Play next part`が現在部分の終端で停止する
 - [x] 全品質ゲートが成功した

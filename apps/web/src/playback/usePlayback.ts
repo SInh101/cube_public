@@ -17,6 +17,7 @@ export interface UsePlaybackResult {
   readonly state: PlaybackState;
   readonly start: (moves: readonly CubeMove[]) => void;
   readonly play: () => void;
+  readonly playUntil: (targetIndex: number) => void;
   readonly pause: () => void;
   readonly next: () => void;
   readonly previous: () => void;
@@ -44,6 +45,7 @@ export function usePlayback({
   );
   const pendingTargetIndex = useRef<number | undefined>(undefined);
   const resetRequestPending = useRef(false);
+  const stopAtIndex = useRef<number | undefined>(undefined);
   const appliedSequenceRevision = useRef(sequenceRevision);
 
   useEffect(() => {
@@ -56,6 +58,7 @@ export function usePlayback({
       appliedSequenceRevision.current = sequenceRevision;
       pendingTargetIndex.current = undefined;
       resetRequestPending.current = false;
+      stopAtIndex.current = undefined;
       return createInitialState(moves);
     });
   }, [moves, sequenceRevision]);
@@ -75,6 +78,7 @@ export function usePlayback({
         await applyMove(move);
       } catch (error: unknown) {
         pendingTargetIndex.current = undefined;
+        stopAtIndex.current = undefined;
         setState((current) => ({ ...current, status: 'paused' }));
         void error;
       }
@@ -102,6 +106,7 @@ export function usePlayback({
   }, [sendNextMove, sendPreviousMove, state.direction, state.status]);
 
   const play = useCallback((): void => {
+    stopAtIndex.current = undefined;
     setState((current) =>
       current.currentIndex >= current.moves.length
         ? current
@@ -109,8 +114,18 @@ export function usePlayback({
     );
   }, []);
 
+  const playUntil = useCallback((targetIndex: number): void => {
+    setState((current) => {
+      const boundedTarget = Math.min(targetIndex, current.moves.length);
+      if (boundedTarget <= current.currentIndex) return current;
+      stopAtIndex.current = boundedTarget;
+      return { ...current, direction: 'forward', status: 'playing' };
+    });
+  }, []);
+
   const start = useCallback((nextMoves: readonly CubeMove[]): void => {
     pendingTargetIndex.current = undefined;
+    stopAtIndex.current = undefined;
     setState({
       ...createInitialState(nextMoves),
       status: nextMoves.length === 0 ? 'idle' : 'playing',
@@ -118,6 +133,7 @@ export function usePlayback({
   }, []);
 
   const pause = useCallback((): void => {
+    stopAtIndex.current = undefined;
     setState((current) =>
       current.status === 'playing' ? { ...current, status: 'paused' } : current,
     );
@@ -125,17 +141,20 @@ export function usePlayback({
 
   const next = useCallback((): void => {
     if (state.status === 'playing') return;
+    stopAtIndex.current = undefined;
     setState((current) => ({ ...current, direction: 'forward' }));
     void sendNextMove();
   }, [sendNextMove, state.status]);
 
   const previous = useCallback((): void => {
     if (state.status === 'playing') return;
+    stopAtIndex.current = undefined;
     setState((current) => ({ ...current, direction: 'reverse' }));
     void sendPreviousMove();
   }, [sendPreviousMove, state.status]);
 
   const reversePlay = useCallback((): void => {
+    stopAtIndex.current = undefined;
     setState((current) =>
       current.currentIndex <= 0
         ? current
@@ -153,6 +172,7 @@ export function usePlayback({
     }
 
     resetRequestPending.current = true;
+    stopAtIndex.current = undefined;
     setState((current) => ({ ...current, status: 'idle' }));
     void resetCube()
       .then(() => setState((current) => createInitialState(current.moves)))
@@ -177,10 +197,19 @@ export function usePlayback({
         current.direction === 'forward'
           ? currentIndex >= current.moves.length
           : currentIndex <= 0;
+      const reachedRequestedStop =
+        current.direction === 'forward' &&
+        stopAtIndex.current !== undefined &&
+        currentIndex >= stopAtIndex.current;
+      if (reachedRequestedStop) stopAtIndex.current = undefined;
       return {
         ...current,
         currentIndex,
-        status: reachedBoundary ? 'idle' : current.status,
+        status: reachedBoundary
+          ? 'idle'
+          : reachedRequestedStop
+            ? 'paused'
+            : current.status,
       };
     });
   }, []);
@@ -189,6 +218,7 @@ export function usePlayback({
     state,
     start,
     play,
+    playUntil,
     pause,
     next,
     previous,

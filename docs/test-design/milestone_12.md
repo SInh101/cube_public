@@ -13,6 +13,8 @@
 - current part強調
 - 解析結果からCubeView propsへの接続
 - 部分境界での表示更新
+- `playUntil`が指定した部分終端で停止し、後続Moveを送らない
+- Teaching UIの`Play next part`から現在boundaryを再生する
 - Cubeを変更しない交換子準備APIとvalidation
 - 同一交換子を再準備した場合のPlayback位置初期化
 - ローカル実HTTPから準備APIを利用できること

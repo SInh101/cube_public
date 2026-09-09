@@ -56,6 +56,12 @@
 - コード要約: Prepare時のCubeStateを基準として保持し、現在stateとの差から強調IDを求める。Playbackの方向とindexから現在partを計算する。同じ交換子でもrevisionを増やし、再準備時はindex 0へ戻す。
 - 操作分離: 通常の面操作、Move Sequence、Presetへ移ると教材強調を解除する。教材Reset時は新しいsolved stateを比較基準にする。
 - 回帰修正: keyboard listenerを一度だけ登録し、refから最新`applyMove`を参照することで再登録間の入力欠落を防ぐ。
+- 部分再生: 現在indexを含むboundaryの`endIndex`を`playUntil`へ渡し、A、B、A⁻¹、B⁻¹の終端で自動停止する。通常のNextは従来どおり一手だけ進む。
+
+## `apps/web/src/playback/usePlayback.ts`
+
+- 役割: 通常再生に加え、指定indexまでの範囲再生を提供する。
+- コード要約: `playUntil(targetIndex)`が停止位置をrefへ保持し、各animation完了後に到達判定する。sequence末尾ならidle、途中の部分境界ならpausedへ遷移する。Play、Pause、Next、Previous、Reverse Play、Resetでは古い停止位置を解除する。
 
 ## `apps/web/src/App.milestone12.test.tsx` / `CommutatorTeachingPanel.test.tsx`
 
@@ -80,3 +86,5 @@
 ## 設計理由と後続Milestone
 
 Milestone 11の`POST /api/cubes/{cubeId}/commutators`は交換子全体を即時適用する。そのResponseをPlaybackへ再投入すると二重適用になるため、Milestone 12では非変更の`POST /api/commutators`を追加した。Milestone 13以降はCube Coreの`CubieAnalysis`をREST解析へ利用でき、Frontendは引き続きCube Coreへ直接依存しない。
+
+`URF / LFD / ULB`のような表記は、強調対象を示すだけでなくcornerの向きとcycle順を意味する。単純な変化強調はMilestone 12、順序付き3-cycle・orientation・固定pieceの表記と表示モード切替はMilestone 13の解析結果を利用する責務として分ける。

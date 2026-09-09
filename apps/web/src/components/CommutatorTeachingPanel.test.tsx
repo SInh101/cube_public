@@ -37,6 +37,7 @@ describe('CommutatorTeachingPanel', () => {
         isLoading={false}
         onPrepare={vi.fn()}
         onPlay={vi.fn()}
+        onPlayNextPart={vi.fn()}
       />,
     );
 
@@ -56,6 +57,7 @@ describe('CommutatorTeachingPanel', () => {
         isLoading={false}
         onPrepare={vi.fn()}
         onPlay={vi.fn()}
+        onPlayNextPart={vi.fn()}
       />,
     );
 
@@ -71,11 +73,28 @@ describe('CommutatorTeachingPanel', () => {
         isLoading={false}
         onPrepare={onPrepare}
         onPlay={vi.fn()}
+        onPlayNextPart={vi.fn()}
       />,
     );
     fireEvent.change(screen.getByLabelText('A'), { target: { value: 'R U' } });
     fireEvent.change(screen.getByLabelText('B'), { target: { value: 'F' } });
     fireEvent.click(screen.getByRole('button', { name: 'Prepare commutator' }));
     expect(onPrepare).toHaveBeenCalledWith('R U', 'F');
+  });
+
+  it('Play next partから部分再生callbackを呼ぶ', () => {
+    const onPlayNextPart = vi.fn();
+    render(
+      <CommutatorTeachingPanel
+        definition={DEFINITION}
+        activePart="A"
+        isLoading={false}
+        onPrepare={vi.fn()}
+        onPlay={vi.fn()}
+        onPlayNextPart={onPlayNextPart}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Play next part' }));
+    expect(onPlayNextPart).toHaveBeenCalledOnce();
   });
 });
