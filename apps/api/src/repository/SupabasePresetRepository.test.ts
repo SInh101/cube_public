@@ -31,14 +31,8 @@ describe('SupabasePresetRepository', () => {
         updatedAt: '2026-01-02',
       },
     ]);
-    expect(fetchMock).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({
-        headers: expect.objectContaining({
-          apikey: 'secret',
-          authorization: 'Bearer secret',
-        }),
-      }),
-    );
+    const headers = new Headers(fetchMock.mock.calls[0]?.[1]?.headers);
+    expect(headers.get('apikey')).toBe('secret');
+    expect(headers.get('authorization')).toBe('Bearer secret');
   });
 });

@@ -46,14 +46,15 @@ export class SupabasePresetRepository implements PresetRepository {
     return rows.length > 0;
   }
   private async request<T>(query: string, init: RequestInit = {}) {
+    const headers = new Headers(init.headers);
+    headers.set('apikey', this.key);
+    headers.set('content-type', 'application/json');
+    if (!this.key.startsWith('sb_secret_')) {
+      headers.set('authorization', `Bearer ${this.key}`);
+    }
     const response = await fetch(`${this.url}/rest/v1/presets${query}`, {
       ...init,
-      headers: {
-        apikey: this.key,
-        authorization: `Bearer ${this.key}`,
-        'content-type': 'application/json',
-        ...init.headers,
-      },
+      headers,
     });
     if (!response.ok)
       throw new Error(`Preset repository failed: ${response.status}`);

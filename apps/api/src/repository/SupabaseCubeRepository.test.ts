@@ -19,9 +19,25 @@ describe('SupabaseCubeRepository', () => {
     const id = crypto.randomUUID();
     await repository.save(id, Cube.solved());
     expect((await repository.findById(id))?.getState()).toEqual(state);
-    expect(fetchMock.mock.calls[0]?.[1]?.headers).toMatchObject({
-      Prefer: 'resolution=merge-duplicates,return=minimal',
-      apikey: 'server-secret',
-    });
+    const headers = new Headers(fetchMock.mock.calls[0]?.[1]?.headers);
+    expect(headers.get('prefer')).toBe(
+      'resolution=merge-duplicates,return=minimal',
+    );
+    expect(headers.get('apikey')).toBe('server-secret');
+  });
+
+  it('新Secret keyはapikeyだけへ設定する', async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(new Response(null, { status: 201 }));
+    vi.stubGlobal('fetch', fetchMock);
+    const repository = new SupabaseCubeRepository(
+      'https://example.supabase.co',
+      'sb_secret_example',
+    );
+    await repository.save(crypto.randomUUID(), Cube.solved());
+    const headers = new Headers(fetchMock.mock.calls[0]?.[1]?.headers);
+    expect(headers.get('apikey')).toBe('sb_secret_example');
+    expect(headers.has('authorization')).toBe(false);
   });
 });

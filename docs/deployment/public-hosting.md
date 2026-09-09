@@ -7,9 +7,9 @@ Free projectを作成する際はData APIを有効、Automatically expose new ta
 控える値:
 
 - Project URL
-- `service_role` key
+- Secret key (`sb_secret_...`)
 
-これらをファイルへ書かない。特にservice-role keyは公開してはいけない。Vercelでは`SUPABASE_SERVICE_ROLE_KEY`をSensitiveとして登録する。
+これらをファイルへ書かない。特にSecret keyは公開してはいけない。Vercelでは`SUPABASE_SECRET_KEY`をSensitiveとして登録する。
 
 ## 2. Vercel
 
@@ -19,7 +19,7 @@ Vercel Environment Variablesへ次を設定する。
 
 ```text
 SUPABASE_URL=<Supabase Project URL>
-SUPABASE_SERVICE_ROLE_KEY=<Supabase service-role key>
+SUPABASE_SECRET_KEY=<Supabase sb_secret_ key>
 CORS_ALLOWED_ORIGIN=https://<GITHUB_OWNER>.github.io
 ```
 

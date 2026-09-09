@@ -7,7 +7,7 @@
 - API key、service-role key、access token、password、private key、接続文字列をcommitしない。
 - 秘密情報はVercelまたはGitHubのEnvironment/Repository secretsへ保存する。
 - `VITE_*`はbrowser bundleへ公開される。秘密情報には絶対に使用しない。
-- Supabaseの`SUPABASE_SERVICE_ROLE_KEY`はVercel server環境だけで使用する。
+- Supabaseの`SUPABASE_SECRET_KEY`（legacyでは`SUPABASE_SERVICE_ROLE_KEY`）はVercel server環境だけで使用する。
 - `.env.example`には変数名と無害な説明だけを置き、実値や実在するproject URLを置かない。
 - ログ、error response、test snapshotへtoken、環境変数値、stack traceを出さない。
 - 外部入力はHTTP境界で検証し、DBはRLSを有効にしてbrowserから直接service-role操作させない。

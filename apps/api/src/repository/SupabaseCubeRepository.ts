@@ -32,14 +32,15 @@ export class SupabaseCubeRepository implements CubeRepository {
   }
 
   private request(query: string, init: RequestInit = {}): Promise<Response> {
+    const headers = new Headers(init.headers);
+    headers.set('apikey', this.key);
+    headers.set('content-type', 'application/json');
+    if (!this.key.startsWith('sb_secret_')) {
+      headers.set('authorization', `Bearer ${this.key}`);
+    }
     return fetch(`${this.url}/rest/v1/cubes${query}`, {
       ...init,
-      headers: {
-        apikey: this.key,
-        authorization: `Bearer ${this.key}`,
-        'content-type': 'application/json',
-        ...init.headers,
-      },
+      headers,
     });
   }
 }
