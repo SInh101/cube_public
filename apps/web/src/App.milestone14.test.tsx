@@ -117,28 +117,42 @@ vi.mock('./components', () => ({
 
 const CUBE_ID = '00000000-0000-4000-8000-000000000014';
 const STATE = solvedState();
+const RESULT_STATE = analyzedResultState();
 const ANALYSIS: SequenceAnalysisResponseDto = {
   cubeId: CUBE_ID,
   state: STATE,
   sequence: 'R U F',
   moves: ['R', 'U', 'F'],
-  resultState: STATE,
+  resultState: RESULT_STATE,
   analysis: {
     identity: false,
     corners: {
       identity: false,
-      permutation: ['URF', 'DLF', 'ULB'].map((label, index) => ({
-        cubieId:
-          ['green-red-white', 'green-orange-yellow', 'blue-orange-white'][
-            index
-          ] ?? '',
-        from: [0, 0, 0],
-        to: [0, 0, 0],
-        fromLabel: label,
-        toLabel: label,
-      })),
-      cycles: [['URF', 'DLF', 'ULB']],
-      threeCycles: [['URF', 'DLF', 'ULB']],
+      permutation: [
+        {
+          cubieId: 'green-red-white',
+          from: [1, 1, 1],
+          to: [-1, 1, -1],
+          fromLabel: 'URF',
+          toLabel: 'ULB',
+        },
+        {
+          cubieId: 'green-orange-yellow',
+          from: [-1, -1, 1],
+          to: [1, 1, 1],
+          fromLabel: 'DLF',
+          toLabel: 'URF',
+        },
+        {
+          cubieId: 'blue-orange-white',
+          from: [-1, 1, -1],
+          to: [-1, -1, 1],
+          fromLabel: 'ULB',
+          toLabel: 'DLF',
+        },
+      ],
+      cycles: [['DLF', 'URF', 'ULB']],
+      threeCycles: [['DLF', 'URF', 'ULB']],
       fixedCubieLabels: [],
       orientationChanges: [],
     },
@@ -186,13 +200,13 @@ describe('Milestone 14 cycle teaching integration', () => {
     await renderAnalyzedApp();
     fireEvent.click(screen.getByRole('button', { name: 'Visualize stickers' }));
     expect(screen.getByLabelText('Sticker markers').textContent).toContain(
-      'green-red-white:R:R',
+      'green-red-white:U:1',
     );
     expect(screen.getByLabelText('Sticker markers').textContent).toContain(
-      'green-red-white:U:U',
+      'green-orange-yellow:L:2',
     );
     expect(screen.getByLabelText('Sticker markers').textContent).toContain(
-      'green-red-white:F:F',
+      'blue-orange-white:U:3',
     );
   });
 
@@ -346,4 +360,67 @@ function solvedState(): CubeStateResponseDto['state'] {
       B: Array(9).fill('blue'),
     },
   } as unknown as CubeStateResponseDto['state'];
+}
+
+function analyzedResultState(): CubeStateResponseDto['state'] {
+  return {
+    faces: {
+      U: [
+        'white',
+        'white',
+        'white',
+        'white',
+        'white',
+        'white',
+        'white',
+        'white',
+        'orange',
+      ],
+      R: ['green', 'red', 'red', 'red', 'red', 'red', 'red', 'red', 'red'],
+      F: [
+        'green',
+        'green',
+        'yellow',
+        'green',
+        'green',
+        'green',
+        'orange',
+        'green',
+        'green',
+      ],
+      D: [
+        'blue',
+        'yellow',
+        'yellow',
+        'yellow',
+        'yellow',
+        'yellow',
+        'yellow',
+        'yellow',
+        'yellow',
+      ],
+      L: [
+        'red',
+        'orange',
+        'orange',
+        'orange',
+        'orange',
+        'orange',
+        'orange',
+        'orange',
+        'white',
+      ],
+      B: [
+        'blue',
+        'blue',
+        'green',
+        'blue',
+        'blue',
+        'blue',
+        'blue',
+        'blue',
+        'blue',
+      ],
+    },
+  };
 }

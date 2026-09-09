@@ -51,6 +51,20 @@ describe('CycleTeachingPanel', () => {
       ).disabled,
     ).toBe(false);
   });
+
+  it('M14-CP-04: 3本のsticker cycleを切り替える', () => {
+    const onStickerCycleIndexChange = vi.fn();
+    renderPanel({
+      displayMode: 'stickers',
+      stickerCycles: stickerCycles(),
+      onStickerCycleIndexChange,
+    });
+    const second = screen.getByRole('button', {
+      name: 'FUR → DLF → BUL',
+    });
+    fireEvent.click(second);
+    expect(onStickerCycleIndexChange).toHaveBeenCalledWith(1);
+  });
 });
 
 function renderPanel(overrides: Partial<CycleTeachingPanelProps> = {}): void {
@@ -59,6 +73,7 @@ function renderPanel(overrides: Partial<CycleTeachingPanelProps> = {}): void {
       result={fixture()}
       selection={{ kind: 'corner', index: 0 }}
       displayMode="highlight"
+      stickerCycleIndex={0}
       currentIndex={0}
       moveCount={3}
       status="idle"
@@ -67,6 +82,7 @@ function renderPanel(overrides: Partial<CycleTeachingPanelProps> = {}): void {
       onAnalyze={vi.fn()}
       onSelectCycle={vi.fn()}
       onDisplayModeChange={vi.fn()}
+      onStickerCycleIndexChange={vi.fn()}
       onNext={vi.fn()}
       onPrevious={vi.fn()}
       onPlay={vi.fn()}
@@ -74,6 +90,24 @@ function renderPanel(overrides: Partial<CycleTeachingPanelProps> = {}): void {
       {...overrides}
     />,
   );
+}
+
+function stickerCycles(): NonNullable<
+  CycleTeachingPanelProps['stickerCycles']
+> {
+  const labels = [
+    ['URF', 'LDF', 'ULB'],
+    ['FUR', 'DLF', 'BUL'],
+    ['RUF', 'FDL', 'LUB'],
+  ] as const;
+  return labels.map((cycleLabels) => ({
+    labels: cycleLabels,
+    members: [
+      { cubieId: 'one', color: 'white' },
+      { cubieId: 'two', color: 'orange' },
+      { cubieId: 'three', color: 'white' },
+    ],
+  }));
 }
 
 function fixture(): SequenceAnalysisResponseDto {

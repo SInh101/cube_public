@@ -4,6 +4,7 @@ import type {
 } from '@rubiks-learning/api-contract';
 import { useState, type FormEvent } from 'react';
 import type { CycleSelection } from '../analysis/cycleVisualization';
+import type { StickerCycleVisualization } from '../analysis/cycleVisualization';
 import type {
   PlaybackDirection,
   PlaybackStatus,
@@ -15,6 +16,8 @@ export interface CycleTeachingPanelProps {
   readonly result?: SequenceAnalysisResponseDto;
   readonly selection?: CycleSelection;
   readonly displayMode: CycleDisplayMode;
+  readonly stickerCycles?: readonly StickerCycleVisualization[];
+  readonly stickerCycleIndex: number;
   readonly currentIndex: number;
   readonly moveCount: number;
   readonly status: PlaybackStatus;
@@ -26,6 +29,7 @@ export interface CycleTeachingPanelProps {
   readonly onAnalyze: (sequence: string) => void;
   readonly onSelectCycle: (kind: AnalyzedCubieKindDto, index: number) => void;
   readonly onDisplayModeChange: (mode: CycleDisplayMode) => void;
+  readonly onStickerCycleIndexChange: (index: number) => void;
   readonly onNext: () => void;
   readonly onPrevious: () => void;
   readonly onPlay: () => void;
@@ -80,19 +84,25 @@ export function CycleTeachingPanel(props: CycleTeachingPanelProps) {
                   {cycles.length === 0 ? (
                     <p>None</p>
                   ) : (
-                    cycles.map((cycle, index) => (
-                      <button
-                        key={cycle.join('-')}
-                        type="button"
-                        aria-pressed={
-                          props.selection?.kind === kind &&
-                          props.selection.index === index
-                        }
-                        onClick={() => props.onSelectCycle(kind, index)}
-                      >
-                        ({cycle.join(' → ')})
-                      </button>
-                    ))
+                    cycles.map((cycle, index) => {
+                      const isSelected =
+                        props.selection?.kind === kind &&
+                        props.selection.index === index;
+                      const displayedCycle =
+                        isSelected && props.stickerCycles?.[0] !== undefined
+                          ? props.stickerCycles[0].labels
+                          : cycle;
+                      return (
+                        <button
+                          key={cycle.join('-')}
+                          type="button"
+                          aria-pressed={isSelected}
+                          onClick={() => props.onSelectCycle(kind, index)}
+                        >
+                          ({displayedCycle.join(' → ')})
+                        </button>
+                      );
+                    })
                   )}
                 </div>
               );
@@ -152,6 +162,22 @@ export function CycleTeachingPanel(props: CycleTeachingPanelProps) {
               Visualize stickers
             </label>
           </fieldset>
+          {props.displayMode === 'stickers' &&
+            props.stickerCycles !== undefined && (
+              <div className="cycle-teaching__sticker-cycles">
+                <h3>Sticker cycles</h3>
+                {props.stickerCycles.map((cycle, index) => (
+                  <button
+                    key={cycle.labels.join('-')}
+                    type="button"
+                    aria-pressed={props.stickerCycleIndex === index}
+                    onClick={() => props.onStickerCycleIndexChange(index)}
+                  >
+                    {cycle.labels.join(' → ')}
+                  </button>
+                ))}
+              </div>
+            )}
           <p aria-label="Cycle playback position">
             {props.currentIndex} / {props.moveCount} ({props.direction})
           </p>

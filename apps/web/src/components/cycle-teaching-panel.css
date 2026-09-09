@@ -55,6 +55,17 @@
   background: #1d4ed8;
   outline: 0.18rem solid #93c5fd;
 }
+.cycle-teaching__sticker-cycles {
+  display: grid;
+  gap: 0.4rem;
+}
+.cycle-teaching__sticker-cycles button {
+  text-align: left;
+}
+.cycle-teaching__sticker-cycles button[aria-pressed='true'] {
+  background: #7c3aed;
+  outline: 0.18rem solid #c4b5fd;
+}
 .cycle-teaching__modes {
   display: flex;
   flex-wrap: wrap;

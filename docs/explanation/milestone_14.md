@@ -3,12 +3,12 @@
 ## `apps/web/src/analysis/cycleVisualization.ts`
 
 - 役割: REST解析結果を3D表示用の値へ変換する。
-- コード要約: 最初の3-cycleを選び、position labelからpermutation entryを引いて安定Cubie IDへ変換する。cycle順と同じ順に1・2・3 markerを作る。ステッカー表示では現在のCube状態から選択pieceを引き、色をホーム面記号へ変換して現在向いている面と対応付ける。
+- コード要約: 最初の3-cycleを選び、Coreの内部cycle方向を教材で読むsticker移動方向へ反転する。position labelから安定Cubie IDを引き、解析前後のsticker色を照合してcornerを3本のsticker cycleへ分解する。`URF`や`LDF`の先頭文字が対象面となり、残り2文字はそのpositionの基準順を保つ。選択中の物理ステッカーは現在のCube状態でも色で追跡する。
 
 ## `apps/web/src/components/CycleTeachingPanel.tsx`
 
 - 役割: 3-cycle教材の入力、解析結果、選択、表示モード、再生操作をまとめる。
-- コード要約: corner/edge cycle、orientation、固定pieceを表示する。解析中・回転中・再生中・キュー同期前を分けてボタンを制御する。
+- コード要約: corner/edge cycle、orientation、固定pieceを表示する。Visualize stickersでは3本のsticker cycleを個別ボタンとして表示し、1セットずつ選択する。解析中・回転中・再生中・キュー同期前を分けてボタンを制御する。
 
 ## `apps/web/src/components/cycle-teaching-panel.css`
 
@@ -18,7 +18,7 @@
 ## `apps/web/src/components/CubeView.tsx`
 
 - 役割: 3-cycleの順序markerを3D Cube上に描画する。
-- コード要約: markerを安定Cubie IDへ関連付ける。ステッカーmarkerは対象面の法線方向へ配置する。回転対象markerを同じturning groupへ移すため、animation中も対象piece・ステッカーに追従する。Sprite用resourceはcleanup時に破棄する。
+- コード要約: markerを安定Cubie IDとステッカー色へ関連付ける。選択中の3枚だけを対象面の法線方向へ配置する。回転対象markerを同じturning groupへ移すため、animation中も対象piece・ステッカーに追従する。Sprite用resourceはcleanup時に破棄する。
 
 ## `apps/web/src/App.tsx`
 

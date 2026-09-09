@@ -6,7 +6,9 @@
 - corner/edge 3-cycleの選択
 - 対象3 pieceのhighlightと対象外dim
 - 1・2・3 markerによる巡回順表示
-- U/R/Fなどの記号による物理ステッカー可視化
+- 先頭文字が対象面を示す向き付きsticker表記
+- corner 3-cycleを3本のsticker cycleへ分解
+- 3ステッカー1セットでの切替可視化
 - Next / Previous / Play all / Reverse all
 - animation完了単位のstep同期
 - playback queue切替時の競合防止
@@ -23,7 +25,7 @@
 
 M14専用のview model、component、App統合テストに加え、全Milestoneの回帰テストを実行した。
 
-- Vitest: 38ファイル、327件成功、todo 0件
+- Vitest: 38ファイル、329件成功、todo 0件
 - TypeScript: 全workspace成功
 - ESLint: 成功
 - Prettier check: 成功

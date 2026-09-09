@@ -74,6 +74,7 @@ export function App() {
   >();
   const [cycleDisplayMode, setCycleDisplayMode] =
     useState<CycleDisplayMode>('highlight');
+  const [stickerCycleIndex, setStickerCycleIndex] = useState(0);
   const [isCycleAnalysisLoading, setIsCycleAnalysisLoading] = useState(false);
   const [cycleAnalysisError, setCycleAnalysisError] = useState<string>();
 
@@ -271,6 +272,7 @@ export function App() {
   const clearCycleLesson = useCallback((): void => {
     setCycleAnalysis(undefined);
     setCycleSelection(undefined);
+    setStickerCycleIndex(0);
   }, []);
 
   const clearTeachingLessons = useCallback((): void => {
@@ -299,6 +301,7 @@ export function App() {
         const dto = (await response.json()) as SequenceAnalysisResponseDto;
         setCycleAnalysis(dto);
         setCycleSelection(firstThreeCycle(dto));
+        setStickerCycleIndex(0);
         setPreparedMoves(dto.moves);
         setPreparedMovesRevision((current) => current + 1);
       } catch {
@@ -323,8 +326,11 @@ export function App() {
     () =>
       cycleVisualization === undefined || cubeState === null
         ? undefined
-        : createCycleStickerMarkers(cubeState, cycleVisualization.cubieIds),
-    [cubeState, cycleVisualization],
+        : createCycleStickerMarkers(
+            cubeState,
+            cycleVisualization.stickerCycles[stickerCycleIndex],
+          ),
+    [cubeState, cycleVisualization, stickerCycleIndex],
   );
 
   const isCyclePlaybackReady =
@@ -535,6 +541,8 @@ export function App() {
                 result={cycleAnalysis}
                 selection={cycleSelection}
                 displayMode={cycleDisplayMode}
+                stickerCycles={cycleVisualization?.stickerCycles}
+                stickerCycleIndex={stickerCycleIndex}
                 currentIndex={playbackState.currentIndex}
                 moveCount={playbackState.moves.length}
                 status={playbackState.status}
@@ -544,10 +552,12 @@ export function App() {
                 playbackDisabled={!isCyclePlaybackReady}
                 errorMessage={cycleAnalysisError}
                 onAnalyze={(sequence) => void analyzeSequence(sequence)}
-                onSelectCycle={(kind, index) =>
-                  setCycleSelection({ kind, index })
-                }
+                onSelectCycle={(kind, index) => {
+                  setCycleSelection({ kind, index });
+                  setStickerCycleIndex(0);
+                }}
                 onDisplayModeChange={setCycleDisplayMode}
+                onStickerCycleIndexChange={setStickerCycleIndex}
                 onNext={next}
                 onPrevious={previous}
                 onPlay={play}
