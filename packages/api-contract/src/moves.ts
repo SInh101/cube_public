@@ -21,3 +21,15 @@ export type MoveDto =
 export interface MoveRequestDto {
   readonly move: MoveDto;
 }
+
+export interface MoveBatchRequestDto {
+  readonly moves: readonly MoveDto[];
+}
+
+export interface MoveBatchResponseDto {
+  readonly cubeId: string;
+  readonly moves: readonly MoveDto[];
+  /** 各indexのmoveを適用した直後の状態。同じindexのアニメーションに使う。 */
+  readonly states: readonly import('./cubes.js').CubeStateResponseDto['state'][];
+  readonly state: import('./cubes.js').CubeStateResponseDto['state'];
+}

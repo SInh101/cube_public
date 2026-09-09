@@ -363,15 +363,15 @@ async function completeAllMoves(
   fetchMock: ReturnType<typeof createFetchMock>,
   expectedCount: number,
 ): Promise<void> {
-  let completedCount = moveBodies(fetchMock).length;
-  while (completedCount < expectedCount) {
-    await completeAnimation(completedCount);
-    await waitFor(() =>
-      expect(moveBodies(fetchMock)).toHaveLength(completedCount + 1),
-    );
-    completedCount += 1;
+  const latestBody = moveRequestBodies(fetchMock).at(-1);
+  const batchSize = latestBody?.moves?.length ?? 1;
+  for (
+    let animationId = expectedCount - batchSize + 1;
+    animationId <= expectedCount;
+    animationId += 1
+  ) {
+    await completeAnimation(animationId);
   }
-  await completeAnimation(expectedCount);
   await waitFor(() =>
     expect(moveBodies(fetchMock)).toHaveLength(expectedCount),
   );
@@ -380,9 +380,25 @@ async function completeAllMoves(
 function moveBodies(
   fetchMock: ReturnType<typeof createFetchMock>,
 ): { move: string }[] {
+  return moveRequestBodies(fetchMock).flatMap((body) =>
+    body.moves === undefined
+      ? [{ move: body.move as string }]
+      : body.moves.map((move) => ({ move })),
+  );
+}
+
+function moveRequestBodies(
+  fetchMock: ReturnType<typeof createFetchMock>,
+): { move?: string; moves?: string[] }[] {
   return fetchMock.mock.calls
     .filter(([input]) => String(input).endsWith('/moves'))
-    .map(([, init]) => JSON.parse(String(init?.body)) as { move: string });
+    .map(
+      ([, init]) =>
+        JSON.parse(String(init?.body)) as {
+          move?: string;
+          moves?: string[];
+        },
+    );
 }
 
 function analysisBodies(
@@ -408,8 +424,21 @@ function createFetchMock() {
       return Promise.resolve(jsonResponse({ cubeId: CUBE_ID, state: STATE }));
     if (url.endsWith('/analyses'))
       return Promise.resolve(jsonResponse(ANALYSIS));
-    if (url.endsWith('/moves'))
-      return Promise.resolve(jsonResponse({ cubeId: CUBE_ID, state: STATE }));
+    if (url.endsWith('/moves')) {
+      const body = JSON.parse(String(init?.body)) as {
+        move?: string;
+        moves?: string[];
+      };
+      const moves = body.moves ?? (body.move === undefined ? [] : [body.move]);
+      return Promise.resolve(
+        jsonResponse({
+          cubeId: CUBE_ID,
+          moves,
+          states: moves.map(() => STATE),
+          state: STATE,
+        }),
+      );
+    }
     return Promise.resolve(jsonResponse({}, 500));
   });
 }

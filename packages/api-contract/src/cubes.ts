@@ -1,8 +1,3 @@
-/** POST /api/cubes の成功レスポンス。 */
-export interface CreateCubeResponseDto {
-  readonly cubeId: string;
-}
-
 export type CubeColorDto =
   'white' | 'red' | 'green' | 'yellow' | 'orange' | 'blue';
 
@@ -31,3 +26,6 @@ export interface CubeStateResponseDto {
     };
   };
 }
+
+/** POST /api/cubes の成功レスポンス。作成直後のGETを不要にする。 */
+export type CreateCubeResponseDto = CubeStateResponseDto;

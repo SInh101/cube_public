@@ -16,7 +16,10 @@ describe('Milestone 4 REST API contract', () => {
     const dto = (await response.json()) as CreateCubeResponseDto;
 
     expect(response.status).toBe(201);
-    expect(dto).toEqual({ cubeId: expect.any(String) });
+    expect(dto).toMatchObject({
+      cubeId: expect.any(String),
+      state: { faces: { U: expect.any(Array) } },
+    });
     expect(dto.cubeId).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     );

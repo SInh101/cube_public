@@ -150,7 +150,10 @@ describe('M2-IN: endpoint integration', () => {
     expect(createResponse.headers.get('content-type')).toContain(
       'application/json',
     );
-    expect(createDto).toEqual({ cubeId: expect.any(String) });
+    expect(createDto).toMatchObject({
+      cubeId: expect.any(String),
+      state: { faces: { U: expect.any(Array) } },
+    });
     expect(resetResponse.headers.get('content-type')).toContain(
       'application/json',
     );

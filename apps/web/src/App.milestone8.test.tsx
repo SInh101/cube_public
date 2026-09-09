@@ -211,9 +211,23 @@ describe('Milestone 8 animation boundary', () => {
       .mockResolvedValueOnce(response({ cubeId: CUBE_ID }, 201))
       .mockResolvedValueOnce(response({ cubeId: CUBE_ID, state: STATE }))
       .mockResolvedValueOnce(response({ sequence: 'R U', moves: ['R', 'U'] }))
-      .mockImplementation(() =>
-        Promise.resolve(response({ cubeId: CUBE_ID, state: STATE })),
-      );
+      .mockImplementation((_, init) => {
+        const body =
+          typeof init?.body === 'string' ? JSON.parse(init.body) : {};
+        const moves = body.moves as string[] | undefined;
+        return Promise.resolve(
+          response(
+            moves === undefined
+              ? { cubeId: CUBE_ID, state: STATE }
+              : {
+                  cubeId: CUBE_ID,
+                  moves,
+                  states: moves.map(() => STATE),
+                  state: STATE,
+                },
+          ),
+        );
+      });
     vi.stubGlobal('fetch', fetchMock);
     render(<App />);
 
@@ -256,7 +270,7 @@ describe('Milestone 8 animation boundary', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Play' }));
     await waitFor(() =>
-      expect(lastRequestBody(fetchMock)).toEqual({ move: 'R' }),
+      expect(lastRequestBody(fetchMock)).toEqual({ moves: ['R', 'U'] }),
     );
     fireEvent.click(screen.getByRole('button', { name: 'Pause' }));
     await completeAnimation(3);
@@ -274,7 +288,7 @@ describe('Milestone 8 animation boundary', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Reverse Play' }));
     await waitFor(() =>
-      expect(lastRequestBody(fetchMock)).toEqual({ move: "R'" }),
+      expect(lastRequestBody(fetchMock)).toEqual({ moves: ["U'", "R'"] }),
     );
     await completeAnimation(4);
     await waitFor(() =>
@@ -314,7 +328,14 @@ describe('Milestone 8 animation boundary', () => {
         return Promise.resolve(
           body.sequence === 'R'
             ? response({ sequence: 'R', moves: ['R'] })
-            : response({ cubeId: CUBE_ID, state: STATE }),
+            : response({
+                cubeId: CUBE_ID,
+                moves: body.moves,
+                states: Array.isArray(body.moves)
+                  ? body.moves.map(() => STATE)
+                  : undefined,
+                state: STATE,
+              }),
         );
       });
     vi.stubGlobal('fetch', fetchMock);
@@ -369,7 +390,7 @@ async function playPresetAndComplete(
 ): Promise<void> {
   fireEvent.click(screen.getByRole('button', { name: buttonName }));
   await waitFor(() =>
-    expect(lastRequestBody(fetchMock)).toEqual({ move: expectedMove }),
+    expect(lastRequestBody(fetchMock)).toEqual({ moves: [expectedMove] }),
   );
   await completeAnimation(animationId);
   await waitFor(() =>
