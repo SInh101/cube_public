@@ -11,6 +11,7 @@ export type CubiePositionDto = readonly [
 
 export interface AnalyzeSequenceRequestDto {
   readonly sequence: string;
+  readonly conjugate?: string;
 }
 
 export interface PermutationEntryDto {
@@ -34,13 +35,25 @@ export interface PieceAnalysisDto {
   readonly orientationChanges: readonly OrientationChangeDto[];
 }
 
+export interface CubePermutationAnalysisDto {
+  readonly identity: boolean;
+  readonly corners: PieceAnalysisDto;
+  readonly edges: PieceAnalysisDto;
+}
+
+export interface ConjugationAnalysisDto {
+  readonly setupSequence: string;
+  readonly inverseSetupSequence: string;
+  readonly baseSequence: string;
+  readonly conjugatedSequence: string;
+  readonly baseAnalysis: CubePermutationAnalysisDto;
+  readonly preservesThreeCycle: boolean;
+}
+
 export interface SequenceAnalysisResponseDto extends CubeStateResponseDto {
   readonly sequence: string;
   readonly moves: readonly MoveDto[];
   readonly resultState: CubeStateResponseDto['state'];
-  readonly analysis: {
-    readonly identity: boolean;
-    readonly corners: PieceAnalysisDto;
-    readonly edges: PieceAnalysisDto;
-  };
+  readonly analysis: CubePermutationAnalysisDto;
+  readonly conjugation?: ConjugationAnalysisDto;
 }

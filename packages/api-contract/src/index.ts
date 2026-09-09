@@ -2,6 +2,8 @@ export { API_ERROR_CODES } from './errors.js';
 export type {
   AnalyzeSequenceRequestDto,
   AnalyzedCubieKindDto,
+  ConjugationAnalysisDto,
+  CubePermutationAnalysisDto,
   CubieCoordinateDto,
   CubiePositionDto,
   OrientationChangeDto,

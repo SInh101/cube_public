@@ -5,6 +5,7 @@ import type {
 import { useState, type FormEvent } from 'react';
 import type { CycleSelection } from '../analysis/cycleVisualization';
 import type { StickerCycleVisualization } from '../analysis/cycleVisualization';
+import { normalizeTeachingCycle } from '../analysis/cycleVisualization';
 import type {
   PlaybackDirection,
   PlaybackStatus,
@@ -26,7 +27,7 @@ export interface CycleTeachingPanelProps {
   readonly disabled?: boolean;
   readonly playbackDisabled?: boolean;
   readonly errorMessage?: string;
-  readonly onAnalyze: (sequence: string) => void;
+  readonly onAnalyze: (sequence: string, conjugate: string) => void;
   readonly onClear: () => void;
   readonly onSelectCycle: (kind: AnalyzedCubieKindDto, index: number) => void;
   readonly onDisplayModeChange: (mode: CycleDisplayMode) => void;
@@ -39,11 +40,12 @@ export interface CycleTeachingPanelProps {
 
 export function CycleTeachingPanel(props: CycleTeachingPanelProps) {
   const [sequence, setSequence] = useState("R' D R U2 R' D' R U2");
+  const [conjugate, setConjugate] = useState('');
   const isBusy = props.disabled || props.status === 'playing';
   const playbackBusy = isBusy || props.playbackDisabled;
   const submit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
-    props.onAnalyze(sequence);
+    props.onAnalyze(sequence, conjugate);
   };
   return (
     <section className="cycle-teaching" aria-labelledby="cycle-title">
@@ -57,6 +59,16 @@ export function CycleTeachingPanel(props: CycleTeachingPanelProps) {
             onChange={(event) => setSequence(event.target.value)}
           />
         </label>
+        <label>
+          Conjugate setup (X)
+          <input
+            value={conjugate}
+            placeholder="Example: U R"
+            disabled={isBusy || props.isLoading}
+            onChange={(event) => setConjugate(event.target.value)}
+          />
+        </label>
+        <p className="cycle-teaching__hint">[X: A] = X A X&apos;</p>
         <button type="submit" disabled={isBusy || props.isLoading}>
           {props.isLoading ? 'Analyzing…' : 'Analyze sequence'}
         </button>
@@ -66,6 +78,9 @@ export function CycleTeachingPanel(props: CycleTeachingPanelProps) {
       )}
       {props.result !== undefined && (
         <>
+          {props.result.conjugation !== undefined && (
+            <ConjugationResult result={props.result} />
+          )}
           <div className="cycle-teaching__result-heading">
             <p>
               {props.result.analysis.identity
@@ -221,6 +236,59 @@ export function CycleTeachingPanel(props: CycleTeachingPanelProps) {
       )}
     </section>
   );
+}
+
+function ConjugationResult({
+  result,
+}: {
+  result: SequenceAnalysisResponseDto;
+}) {
+  const conjugation = result.conjugation;
+  if (conjugation === undefined) return null;
+  const base = findPureThreeCycle(conjugation.baseAnalysis);
+  const shifted = findPureThreeCycle(result.analysis);
+  return (
+    <section
+      className="cycle-teaching__conjugation"
+      aria-label="Conjugation result"
+    >
+      <h3>Conjugation</h3>
+      <p>Setup: {conjugation.setupSequence}</p>
+      <p>Expanded: {conjugation.conjugatedSequence}</p>
+      <p>Base position: {formatCycle(base)}</p>
+      <p>Shifted position: {formatCycle(shifted)}</p>
+      <p
+        className={
+          conjugation.preservesThreeCycle ? 'is-preserved' : 'is-not-preserved'
+        }
+      >
+        {conjugation.preservesThreeCycle
+          ? 'Pure 3-cycle preserved'
+          : 'The base sequence is not preserved as a pure 3-cycle'}
+      </p>
+    </section>
+  );
+}
+
+function findPureThreeCycle(
+  analysis: SequenceAnalysisResponseDto['analysis'],
+): readonly [string, string, string] | undefined {
+  for (const kind of ['corner', 'edge'] as const) {
+    const group = kind === 'corner' ? analysis.corners : analysis.edges;
+    const other = kind === 'corner' ? analysis.edges : analysis.corners;
+    if (
+      group.cycles.length === 1 &&
+      group.threeCycles.length === 1 &&
+      other.identity
+    ) {
+      return normalizeTeachingCycle(group.threeCycles[0]!, kind);
+    }
+  }
+  return undefined;
+}
+
+function formatCycle(cycle: readonly string[] | undefined): string {
+  return cycle === undefined ? 'not a pure 3-cycle' : cycle.join(' → ');
 }
 
 function formatOrientations(

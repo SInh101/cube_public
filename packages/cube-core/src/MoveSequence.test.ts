@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { Cube } from './Cube.js';
 import {
+  conjugateSequence,
   InvalidMoveSequenceError,
   invertSequence,
   MoveSequence,
@@ -46,5 +47,14 @@ describe('MoveSequence', () => {
     for (const move of sequence) cube.applyMove(move);
     for (const move of invertSequence(sequence)) cube.applyMove(move);
     expect(cube.getState()).toEqual(Cube.solved().getState());
+  });
+
+  it("setup Xと手順AをX A X'へ展開する", () => {
+    expect(
+      conjugateSequence(
+        parseSequence('U R'),
+        parseSequence("R' D R"),
+      ).toString(),
+    ).toBe("U R R' D R R' U'");
   });
 });

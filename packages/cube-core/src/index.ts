@@ -18,6 +18,7 @@ export type {
   PermutationEntry,
 } from './PermutationAnalysis.js';
 export {
+  conjugateSequence,
   InvalidMoveSequenceError,
   invertSequence,
   MoveSequence,

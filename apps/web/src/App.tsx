@@ -284,7 +284,7 @@ export function App() {
   }, [clearCommutatorLesson, clearCycleLesson]);
 
   const analyzeSequence = useCallback(
-    async (sequence: string): Promise<void> => {
+    async (sequence: string, conjugate = ''): Promise<void> => {
       if (cubeId === null || isAnimating) return;
       setIsCycleAnalysisLoading(true);
       setCycleAnalysisError(undefined);
@@ -295,7 +295,10 @@ export function App() {
           {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ sequence }),
+            body: JSON.stringify({
+              sequence,
+              ...(conjugate.trim() === '' ? {} : { conjugate }),
+            }),
           },
         );
         if (!response.ok) {
@@ -576,7 +579,9 @@ export function App() {
                     disabled={isAnimating}
                     playbackDisabled={!isCyclePlaybackReady}
                     errorMessage={cycleAnalysisError}
-                    onAnalyze={(sequence) => void analyzeSequence(sequence)}
+                    onAnalyze={(sequence, conjugate) =>
+                      void analyzeSequence(sequence, conjugate)
+                    }
                     onClear={() => {
                       pause();
                       clearCycleLesson();

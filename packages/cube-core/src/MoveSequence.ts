@@ -40,6 +40,14 @@ export function invertSequence(sequence: MoveSequence): MoveSequence {
   return new MoveSequence([...sequence].reverse().map(invertMove));
 }
 
+/** setup Xと手順Aから共役 X A X' を構成する。 */
+export function conjugateSequence(
+  setup: MoveSequence,
+  sequence: MoveSequence,
+): MoveSequence {
+  return new MoveSequence([...setup, ...sequence, ...invertSequence(setup)]);
+}
+
 export class InvalidMoveSequenceError extends Error {
   constructor(
     readonly token: string,

@@ -8,6 +8,7 @@ import { InvalidMoveSequenceError } from '@rubiks-learning/cube-core';
 
 import {
   analyzeCubeSequence,
+  ConjugateInputError,
   CubeNotFoundError,
 } from '../../application/index.js';
 
@@ -37,14 +38,15 @@ export async function handleSequenceAnalysisRequest(
     return errorResponse(
       400,
       'REQUEST_NOT_CORRECT',
-      'Request body must contain only a string sequence',
+      'Request body must contain a string sequence and optional string conjugate',
     );
   }
 
   try {
-    return Response.json(await analyzeCubeSequence(cubeId, body.sequence), {
-      status: 200,
-    });
+    return Response.json(
+      await analyzeCubeSequence(cubeId, body.sequence, body.conjugate),
+      { status: 200 },
+    );
   } catch (error: unknown) {
     if (error instanceof InvalidMoveSequenceError) {
       return errorResponse(
@@ -55,6 +57,19 @@ export async function handleSequenceAnalysisRequest(
           {
             field: 'sequence',
             reason: `token ${error.tokenIndex + 1} is unsupported: ${error.token}`,
+          },
+        ],
+      );
+    }
+    if (error instanceof ConjugateInputError) {
+      return errorResponse(
+        400,
+        'SEQUENCE_NOT_CORRECT',
+        'conjugate contains an unsupported Move',
+        [
+          {
+            field: 'conjugate',
+            reason: `token ${error.inputError.tokenIndex + 1} is unsupported: ${error.inputError.token}`,
           },
         ],
       );
@@ -70,10 +85,13 @@ function isRequestDto(body: unknown): body is AnalyzeSequenceRequestDto {
   if (typeof body !== 'object' || body === null || Array.isArray(body))
     return false;
   const keys = Object.keys(body);
+  if (!keys.every((key) => key === 'sequence' || key === 'conjugate'))
+    return false;
+  const candidate = body as Record<string, unknown>;
   return (
-    keys.length === 1 &&
-    keys[0] === 'sequence' &&
-    typeof (body as Record<string, unknown>).sequence === 'string'
+    typeof candidate.sequence === 'string' &&
+    (candidate.conjugate === undefined ||
+      typeof candidate.conjugate === 'string')
   );
 }
 

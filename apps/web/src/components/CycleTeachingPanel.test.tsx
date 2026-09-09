@@ -72,6 +72,31 @@ describe('CycleTeachingPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close analysis' }));
     expect(onClear).toHaveBeenCalledOnce();
   });
+
+  it('共役操作を解析へ渡し、移動前後と3-cycle保存判定を表示する', () => {
+    const onAnalyze = vi.fn();
+    const baseResult = fixture();
+    const result: SequenceAnalysisResponseDto = {
+      ...baseResult,
+      conjugation: {
+        setupSequence: 'U',
+        inverseSetupSequence: "U'",
+        baseSequence: baseResult.sequence,
+        conjugatedSequence: `U ${baseResult.sequence} U'`,
+        baseAnalysis: baseResult.analysis,
+        preservesThreeCycle: true,
+      },
+    };
+    renderPanel({ result, onAnalyze });
+    fireEvent.change(screen.getByLabelText('Conjugate setup (X)'), {
+      target: { value: 'U' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Analyze sequence' }));
+    expect(onAnalyze).toHaveBeenCalledWith("R' D R U2 R' D' R U2", 'U');
+    expect(screen.getByText(/Base position:/)).toBeTruthy();
+    expect(screen.getByText(/Shifted position:/)).toBeTruthy();
+    expect(screen.getByText('Pure 3-cycle preserved')).toBeTruthy();
+  });
 });
 
 function renderPanel(overrides: Partial<CycleTeachingPanelProps> = {}): void {

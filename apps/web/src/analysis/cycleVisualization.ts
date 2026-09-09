@@ -190,7 +190,7 @@ const POSITION_PRIORITY = {
 } as const;
 
 /** Coreの内部cycle方向を、教材で読むsticker移動方向へ反転して始点を固定する。 */
-function normalizeTeachingCycle(
+export function normalizeTeachingCycle(
   labels: readonly [string, string, string],
   kind: AnalyzedCubieKindDto,
 ): readonly [string, string, string] {

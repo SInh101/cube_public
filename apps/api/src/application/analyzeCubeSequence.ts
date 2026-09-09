@@ -1,4 +1,5 @@
 import type {
+  CubePermutationAnalysisDto,
   OrientationChangeDto,
   PermutationEntryDto,
   PieceAnalysisDto,
@@ -6,7 +7,12 @@ import type {
 } from '@rubiks-learning/api-contract';
 import {
   analyzePermutation,
+  conjugateSequence,
+  invertSequence,
   parseSequence,
+  InvalidMoveSequenceError,
+  type Cube,
+  type MoveSequence,
   type CubieKind,
   type OrientationChange,
   type PermutationAnalysis,
@@ -15,36 +21,102 @@ import {
 
 import { cubeRepository } from '../repository/sharedCubeRepository.js';
 import { CubeNotFoundError } from './CubeNotFoundError.js';
+import { ConjugateInputError } from './ConjugateInputError.js';
 
 /** 保存済みCubeを変更せず、指定sequence後のpermutationを解析する。 */
 export async function analyzeCubeSequence(
   cubeId: string,
   sequenceSource: string,
+  conjugateSource?: string,
 ): Promise<SequenceAnalysisResponseDto> {
   const sequence = parseSequence(sequenceSource);
+  let setup: MoveSequence | undefined;
+  try {
+    setup =
+      conjugateSource === undefined || conjugateSource.trim() === ''
+        ? undefined
+        : parseSequence(conjugateSource);
+  } catch (error: unknown) {
+    if (error instanceof InvalidMoveSequenceError) {
+      throw new ConjugateInputError(error);
+    }
+    throw error;
+  }
   const cube = await cubeRepository.findById(cubeId);
   if (cube === undefined) throw new CubeNotFoundError(cubeId);
 
   const before = cube.getState();
-  const simulated = cube.clone();
-  for (const move of sequence) simulated.applyMove(move);
+  const effectiveSequence =
+    setup === undefined ? sequence : conjugateSequence(setup, sequence);
+  const simulated = simulate(cube, effectiveSequence);
   const resultState = simulated.getState();
-  const analysis = analyzePermutation(before, resultState);
-  const corners = toPieceAnalysis(analysis, 'corner');
-  const edges = toPieceAnalysis(analysis, 'edge');
+  const analysis = toCubeAnalysis(analyzePermutation(before, resultState));
+  const baseAnalysis =
+    setup === undefined
+      ? undefined
+      : toCubeAnalysis(
+          analyzePermutation(before, simulate(cube, sequence).getState()),
+        );
 
   return {
     cubeId,
     state: before,
-    sequence: sequence.toString(),
-    moves: sequence.moves,
+    sequence: effectiveSequence.toString(),
+    moves: effectiveSequence.moves,
     resultState,
-    analysis: {
-      identity: corners.identity && edges.identity,
-      corners,
-      edges,
-    },
+    analysis,
+    ...(setup === undefined || baseAnalysis === undefined
+      ? {}
+      : {
+          conjugation: {
+            setupSequence: setup.toString(),
+            inverseSetupSequence: invertSequence(setup).toString(),
+            baseSequence: sequence.toString(),
+            conjugatedSequence: effectiveSequence.toString(),
+            baseAnalysis,
+            preservesThreeCycle:
+              pureThreeCycleKind(baseAnalysis) !== undefined &&
+              pureThreeCycleKind(baseAnalysis) === pureThreeCycleKind(analysis),
+          },
+        }),
   };
+}
+
+function simulate(cube: Cube, sequence: MoveSequence): Cube {
+  const simulated = cube.clone();
+  for (const move of sequence) simulated.applyMove(move);
+  return simulated;
+}
+
+function toCubeAnalysis(
+  analysis: PermutationAnalysis,
+): CubePermutationAnalysisDto {
+  const corners = toPieceAnalysis(analysis, 'corner');
+  const edges = toPieceAnalysis(analysis, 'edge');
+  return {
+    identity: corners.identity && edges.identity,
+    corners,
+    edges,
+  };
+}
+
+function pureThreeCycleKind(
+  analysis: CubePermutationAnalysisDto,
+): 'corner' | 'edge' | undefined {
+  if (isOnlyThreeCycle(analysis.corners) && analysis.edges.identity)
+    return 'corner';
+  if (isOnlyThreeCycle(analysis.edges) && analysis.corners.identity)
+    return 'edge';
+  return undefined;
+}
+
+function isOnlyThreeCycle(analysis: PieceAnalysisDto): boolean {
+  if (analysis.cycles.length !== 1 || analysis.cycles[0]?.length !== 3)
+    return false;
+  const cycle = new Set(analysis.cycles[0]);
+  return analysis.orientationChanges.every(({ fromLabel }) =>
+    cycle.has(fromLabel),
+  );
 }
 
 function toPieceAnalysis(

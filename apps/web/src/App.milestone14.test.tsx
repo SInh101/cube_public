@@ -81,7 +81,7 @@ vi.mock('./components', () => ({
     result?: SequenceAnalysisResponseDto;
     currentIndex: number;
     playbackDisabled?: boolean;
-    onAnalyze: (sequence: string) => void;
+    onAnalyze: (sequence: string, conjugate: string) => void;
     onClear: () => void;
     onDisplayModeChange: (mode: 'highlight' | 'labels' | 'stickers') => void;
     onNext: () => void;
@@ -92,8 +92,11 @@ vi.mock('./components', () => ({
     <div>
       <output aria-label="Cycle ready">{String(result !== undefined)}</output>
       <output aria-label="Cycle index">{currentIndex}</output>
-      <button type="button" onClick={() => onAnalyze('R U F')}>
+      <button type="button" onClick={() => onAnalyze('R U F', '')}>
         Analyze sequence
+      </button>
+      <button type="button" onClick={() => onAnalyze('R U F', 'U')}>
+        Analyze conjugated
       </button>
       {result !== undefined && (
         <button type="button" onClick={onClear}>
@@ -312,6 +315,19 @@ describe('Milestone 14 cycle teaching integration', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cycle next' }));
     await waitFor(() => expect(moveBodies(fetchMock)).toHaveLength(1));
   });
+  it('共役欄をanalysis APIのconjugateへ渡す', async () => {
+    const fetchMock = createFetchMock();
+    vi.stubGlobal('fetch', fetchMock);
+    render(<App />);
+    fireEvent.click(await screen.findByRole('tab', { name: 'Analysis' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Analyze conjugated' }));
+    await waitFor(() =>
+      expect(analysisBodies(fetchMock)).toContainEqual({
+        sequence: 'R U F',
+        conjugate: 'U',
+      }),
+    );
+  });
 });
 
 async function renderAnalyzedApp() {
@@ -367,6 +383,20 @@ function moveBodies(
   return fetchMock.mock.calls
     .filter(([input]) => String(input).endsWith('/moves'))
     .map(([, init]) => JSON.parse(String(init?.body)) as { move: string });
+}
+
+function analysisBodies(
+  fetchMock: ReturnType<typeof createFetchMock>,
+): { sequence: string; conjugate?: string }[] {
+  return fetchMock.mock.calls
+    .filter(([input]) => String(input).endsWith('/analyses'))
+    .map(
+      ([, init]) =>
+        JSON.parse(String(init?.body)) as {
+          sequence: string;
+          conjugate?: string;
+        },
+    );
 }
 
 function createFetchMock() {
