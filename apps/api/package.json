@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "build": "tsc --noEmit",
+    "build": "npm run build --workspace @rubiks-learning/cube-core && tsc --noEmit",
     "dev": "tsx watch src/local/startLocalServer.ts",
     "typecheck": "tsc --noEmit --pretty false"
   },
