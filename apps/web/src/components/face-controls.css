@@ -15,7 +15,8 @@
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
-  padding-right: 0.5rem;
+  box-sizing: border-box;
+  padding: 0.25rem 0.75rem 0.75rem 0.25rem;
   scrollbar-gutter: stable;
 }
 
@@ -93,7 +94,7 @@
 
 .face-control-panel {
   display: grid;
-  grid-template-columns: repeat(4, minmax(9rem, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-template-areas:
     '. u . .'
     'l f r b'
@@ -123,7 +124,10 @@
 
 .face-control {
   display: grid;
-  grid-template-columns: 2rem minmax(4.5rem, 1fr) 2rem;
+  grid-template-columns: minmax(1.75rem, 2rem) minmax(0, 1fr) minmax(
+      1.75rem,
+      2rem
+    );
   align-items: center;
   gap: 0.35rem;
   box-sizing: border-box;
@@ -192,7 +196,7 @@
   outline: none;
 }
 
-@media (max-width: 82rem) {
+@media (max-width: 90rem) {
   .cube-workspace {
     grid-template-columns: 1fr;
     height: auto;
@@ -203,7 +207,7 @@
   .cube-controls {
     max-height: none;
     overflow-y: visible;
-    padding-right: 0;
+    padding: 0;
   }
 
   .cube-reset-control {

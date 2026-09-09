@@ -19,13 +19,13 @@ describe('desktop workspace layout', () => {
 
   it('狭い画面では一列のpage scrollへ戻す', () => {
     expect(styles).toMatch(
-      /@media \(max-width:\s*82rem\)[\s\S]*\.cube-controls\s*\{[^}]*overflow-y:\s*visible/u,
+      /@media \(max-width:\s*90rem\)[\s\S]*\.cube-controls\s*\{[^}]*overflow-y:\s*visible/u,
     );
   });
 
   it('desktopではpage全体のscrollを発生させない', () => {
     expect(globalStyles).toMatch(
-      /@media \(min-width:\s*82\.001rem\)[\s\S]*body\s*\{[^}]*overflow:\s*hidden/u,
+      /@media \(min-width:\s*90\.001rem\)[\s\S]*body\s*\{[^}]*overflow:\s*hidden/u,
     );
     expect(globalStyles).toMatch(/main\s*\{[^}]*height:\s*100dvh/su);
   });
@@ -34,6 +34,16 @@ describe('desktop workspace layout', () => {
     expect(styles).toMatch(/\.cube-controls\s*\{[^}]*overflow-x:\s*hidden/su);
     expect(globalStyles).toMatch(
       /main\s*\{[^}]*box-sizing:\s*border-box;[^}]*width:\s*100%/su,
+    );
+  });
+
+  it('広い画面では右カラム幅を広く取り、操作カードをtrack内へ縮める', () => {
+    expect(globalStyles).toMatch(/main\s*\{[^}]*max-width:\s*96rem/su);
+    expect(styles).toMatch(
+      /\.face-control-panel\s*\{[^}]*grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/su,
+    );
+    expect(styles).toMatch(
+      /\.cube-controls\s*\{[^}]*box-sizing:\s*border-box/su,
     );
   });
   it('keeps each face card inside a single-column control panel', () => {

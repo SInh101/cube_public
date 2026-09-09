@@ -38,7 +38,7 @@
 ## `apps/web/src/components/face-controls.css` / `apps/web/src/styles.css`
 
 - 役割: 2列表示と1列表示の安全な境界を管理する。
-- コード要約: 右カラムの必要幅を考慮して82rem以下で1列へ移行する。広い画面では右カラムだけを縦scrollとし、横overflowを防ぐ。mainはpaddingを含めてviewport幅へ収める。
+- コード要約: 右カラムの必要幅を考慮して90rem以下で1列へ移行し、広い画面ではmainを最大96remまで使う。面操作カードのgrid trackと内部セルは利用可能幅へ縮小できる。右カラムには枠・影用の内側余白を確保し、横方向の見切れを防ぐ。
 
 ## テストファイル
 

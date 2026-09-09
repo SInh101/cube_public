@@ -26,6 +26,7 @@
   font: inherit;
 }
 .cycle-teaching button {
+  min-width: 0;
   padding: 0.5rem 0.65rem;
   border: 0;
   border-radius: 0.5rem;
@@ -34,6 +35,7 @@
   font: inherit;
   font-weight: 700;
   cursor: pointer;
+  overflow-wrap: anywhere;
 }
 .cycle-teaching button:disabled {
   color: #94a3b8;

@@ -11,12 +11,12 @@ body {
 main {
   box-sizing: border-box;
   width: 100%;
-  max-width: 82rem;
+  max-width: 96rem;
   margin: 0 auto;
   padding: 2rem;
 }
 
-@media (min-width: 82.001rem) {
+@media (min-width: 90.001rem) {
   html,
   body,
   #root {

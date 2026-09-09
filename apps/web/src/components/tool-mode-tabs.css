@@ -36,6 +36,12 @@
   min-width: 0;
 }
 
+.tool-mode-panel > * {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .analysis-manual-tools {
   display: grid;
   gap: 0.8rem;

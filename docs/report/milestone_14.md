@@ -15,7 +15,7 @@
 - Practice / Analysisの上位タブ分離
 - 全モード共通の速度設定
 - Analysis内で教材を優先し、Playbackと手動操作盤を下段へ配置
-- 右カラムが横overflowする前のレスポンシブ1列化
+- 最大96remのデスクトップ幅、90remでの1列化、縮小可能な操作カードによる見切れ防止
 - Close analysisによる3-cycle表示とhighlightの明示的解除
 
 ## 自力実装
@@ -30,7 +30,7 @@
 
 M14専用のview model、component、App統合テストに加え、全Milestoneの回帰テストを実行した。
 
-- Vitest: 39ファイル、336件成功、todo 0件
+- Vitest: 39ファイル、337件成功、todo 0件
 - TypeScript: 全workspace成功
 - ESLint: 成功
 - Prettier check: 成功

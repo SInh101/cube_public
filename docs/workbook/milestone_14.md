@@ -36,4 +36,4 @@ REST DTOのposition labelは教材上の表示に使い、同じpermutation entr
 6. Next / Previous / Play all / Reverse allを試す
 7. Close analysisで解析結果、highlight、markerが消えることを確認する
 
-画面幅が82rem以下、つまり2列表示で右カラムに横scrollが必要になり得る範囲では、CubeViewと操作カラムを1列表示へ切り替える。
+画面幅が90rem以下、つまり2列表示で右カラムに横scrollやカードの見切れが生じ得る範囲では、CubeViewと操作カラムを1列表示へ切り替える。広い画面ではmainを最大96remまで使い、右カラムの枠・影・操作カードを収める。
