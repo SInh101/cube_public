@@ -31,6 +31,7 @@ import {
   type CycleSelection,
 } from './analysis/cycleVisualization';
 import './components/face-controls.css';
+import { ToolModeTabs, type ToolMode } from './components/ToolModeTabs';
 import { usePlayback } from './playback/usePlayback';
 
 type LoadStatus = 'loading' | 'ready' | 'error';
@@ -77,6 +78,7 @@ export function App() {
   const [stickerCycleIndex, setStickerCycleIndex] = useState(0);
   const [isCycleAnalysisLoading, setIsCycleAnalysisLoading] = useState(false);
   const [cycleAnalysisError, setCycleAnalysisError] = useState<string>();
+  const [toolMode, setToolMode] = useState<ToolMode>('practice');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -440,18 +442,21 @@ export function App() {
               preview={facePreview}
               onAnimationComplete={handleAnimationComplete}
               highlightedCubieIds={
-                cycleVisualization?.cubieIds ?? changedCubieIds
+                toolMode === 'analysis'
+                  ? (cycleVisualization?.cubieIds ?? changedCubieIds)
+                  : []
               }
               dimUnhighlighted={
-                cycleVisualization !== undefined || commutator !== undefined
+                toolMode === 'analysis' &&
+                (cycleVisualization !== undefined || commutator !== undefined)
               }
               cubieMarkers={
-                cycleDisplayMode === 'labels'
+                toolMode === 'analysis' && cycleDisplayMode === 'labels'
                   ? cycleVisualization?.markers
                   : undefined
               }
               stickerMarkers={
-                cycleDisplayMode === 'stickers'
+                toolMode === 'analysis' && cycleDisplayMode === 'stickers'
                   ? cycleStickerMarkers
                   : undefined
               }
@@ -461,114 +466,196 @@ export function App() {
                 value={animationDurationMs}
                 onChange={setAnimationDurationMs}
               />
-              <FaceControlPanel
-                state={cubeState}
-                onMove={(move) => {
-                  clearTeachingLessons();
-                  void applyMove(move).catch(() => undefined);
-                }}
-                onPreviewChange={setFacePreview}
-                disabled={isAnimating}
-              />
-              <button
-                className="cube-reset-control"
-                type="button"
-                disabled={isAnimating}
-                onClick={reset}
-              >
-                Reset cube
-              </button>
-              <MoveSequenceControl
-                sequenceInput={sequenceInput}
-                preparedMoves={preparedMoves}
-                isLoading={isSequenceLoading}
-                disabled={isAnimating}
-                errorMessage={sequenceError}
-                onSequenceInputChange={(value) => {
-                  setSequenceInput(value);
-                  setSequenceError(undefined);
-                }}
-                onPrepare={() => void validateMoveSequence()}
-                onApplyMove={(move) => {
-                  clearTeachingLessons();
-                  void applyMove(move).catch(() => undefined);
+              <ToolModeTabs
+                value={toolMode}
+                onChange={(mode) => {
+                  pause();
+                  setFacePreview(null);
+                  setToolMode(mode);
                 }}
               />
-              <PlaybackControls
-                currentIndex={playbackState.currentIndex}
-                moveCount={playbackState.moves.length}
-                status={playbackState.status}
-                direction={playbackState.direction}
-                disabled={isAnimating}
-                onPlay={play}
-                onPause={pause}
-                onNext={next}
-                onPrevious={previous}
-                onReversePlay={reversePlay}
-                onReset={reset}
-              />
-              <PresetPanel
-                apiBaseUrl={API_BASE_URL}
-                disabled={isAnimating || playbackState.status === 'playing'}
-                onPlay={(preset) => void preparePresetPlayback(preset, false)}
-                onReversePlay={(preset) =>
-                  void preparePresetPlayback(preset, true)
-                }
-              />
-              <CommutatorTeachingPanel
-                definition={commutator}
-                activePart={activeCommutatorPart}
-                isLoading={isCommutatorLoading}
-                disabled={isAnimating || playbackState.status === 'playing'}
-                playDisabled={
-                  !isCommutatorPlaybackReady || playbackState.currentIndex !== 0
-                }
-                playNextDisabled={nextCommutatorPartEnd === undefined}
-                errorMessage={commutatorError}
-                onPrepare={(a, b) => void prepareCommutator(a, b)}
-                onPlay={() => {
-                  if (commutator !== undefined) {
-                    startPlayback(commutator.moves);
-                  }
-                }}
-                onPlayNextPart={() => {
-                  if (nextCommutatorPartEnd !== undefined) {
-                    playUntil(nextCommutatorPartEnd);
-                  }
-                }}
-              />
-              <CycleTeachingPanel
-                result={cycleAnalysis}
-                selection={cycleSelection}
-                displayMode={cycleDisplayMode}
-                stickerCycles={cycleVisualization?.stickerCycles}
-                stickerCycleIndex={stickerCycleIndex}
-                currentIndex={playbackState.currentIndex}
-                moveCount={playbackState.moves.length}
-                status={playbackState.status}
-                direction={playbackState.direction}
-                isLoading={isCycleAnalysisLoading}
-                disabled={isAnimating}
-                playbackDisabled={!isCyclePlaybackReady}
-                errorMessage={cycleAnalysisError}
-                onAnalyze={(sequence) => void analyzeSequence(sequence)}
-                onSelectCycle={(kind, index) => {
-                  setCycleSelection({ kind, index });
-                  setStickerCycleIndex(0);
-                }}
-                onDisplayModeChange={setCycleDisplayMode}
-                onStickerCycleIndexChange={setStickerCycleIndex}
-                onNext={next}
-                onPrevious={previous}
-                onPlay={play}
-                onReversePlay={reversePlay}
-              />
+              {toolMode === 'practice' ? (
+                <section
+                  id="tool-panel-practice"
+                  className="tool-mode-panel"
+                  role="tabpanel"
+                  aria-labelledby="tool-mode-practice"
+                >
+                  <ManualCubeControls
+                    state={cubeState}
+                    disabled={isAnimating}
+                    onMove={(move) => {
+                      clearTeachingLessons();
+                      void applyMove(move).catch(() => undefined);
+                    }}
+                    onPreviewChange={setFacePreview}
+                    onReset={reset}
+                  />
+                  <MoveSequenceControl
+                    sequenceInput={sequenceInput}
+                    preparedMoves={preparedMoves}
+                    isLoading={isSequenceLoading}
+                    disabled={isAnimating}
+                    errorMessage={sequenceError}
+                    onSequenceInputChange={(value) => {
+                      setSequenceInput(value);
+                      setSequenceError(undefined);
+                    }}
+                    onPrepare={() => void validateMoveSequence()}
+                    onApplyMove={(move) => {
+                      clearTeachingLessons();
+                      void applyMove(move).catch(() => undefined);
+                    }}
+                  />
+                  <PlaybackControls
+                    currentIndex={playbackState.currentIndex}
+                    moveCount={playbackState.moves.length}
+                    status={playbackState.status}
+                    direction={playbackState.direction}
+                    disabled={isAnimating}
+                    onPlay={play}
+                    onPause={pause}
+                    onNext={next}
+                    onPrevious={previous}
+                    onReversePlay={reversePlay}
+                    onReset={reset}
+                  />
+                  <PresetPanel
+                    apiBaseUrl={API_BASE_URL}
+                    disabled={isAnimating || playbackState.status === 'playing'}
+                    onPlay={(preset) =>
+                      void preparePresetPlayback(preset, false)
+                    }
+                    onReversePlay={(preset) =>
+                      void preparePresetPlayback(preset, true)
+                    }
+                  />
+                </section>
+              ) : (
+                <section
+                  id="tool-panel-analysis"
+                  className="tool-mode-panel"
+                  role="tabpanel"
+                  aria-labelledby="tool-mode-analysis"
+                >
+                  <CommutatorTeachingPanel
+                    definition={commutator}
+                    activePart={activeCommutatorPart}
+                    isLoading={isCommutatorLoading}
+                    disabled={isAnimating || playbackState.status === 'playing'}
+                    playDisabled={
+                      !isCommutatorPlaybackReady ||
+                      playbackState.currentIndex !== 0
+                    }
+                    playNextDisabled={nextCommutatorPartEnd === undefined}
+                    errorMessage={commutatorError}
+                    onPrepare={(a, b) => void prepareCommutator(a, b)}
+                    onPlay={() => {
+                      if (commutator !== undefined) {
+                        startPlayback(commutator.moves);
+                      }
+                    }}
+                    onPlayNextPart={() => {
+                      if (nextCommutatorPartEnd !== undefined) {
+                        playUntil(nextCommutatorPartEnd);
+                      }
+                    }}
+                  />
+                  <CycleTeachingPanel
+                    result={cycleAnalysis}
+                    selection={cycleSelection}
+                    displayMode={cycleDisplayMode}
+                    stickerCycles={cycleVisualization?.stickerCycles}
+                    stickerCycleIndex={stickerCycleIndex}
+                    currentIndex={playbackState.currentIndex}
+                    moveCount={playbackState.moves.length}
+                    status={playbackState.status}
+                    direction={playbackState.direction}
+                    isLoading={isCycleAnalysisLoading}
+                    disabled={isAnimating}
+                    playbackDisabled={!isCyclePlaybackReady}
+                    errorMessage={cycleAnalysisError}
+                    onAnalyze={(sequence) => void analyzeSequence(sequence)}
+                    onSelectCycle={(kind, index) => {
+                      setCycleSelection({ kind, index });
+                      setStickerCycleIndex(0);
+                    }}
+                    onDisplayModeChange={setCycleDisplayMode}
+                    onStickerCycleIndexChange={setStickerCycleIndex}
+                    onNext={next}
+                    onPrevious={previous}
+                    onPlay={play}
+                    onReversePlay={reversePlay}
+                  />
+                  <div className="analysis-manual-tools">
+                    <h2>Playback and manual controls</h2>
+                    <PlaybackControls
+                      currentIndex={playbackState.currentIndex}
+                      moveCount={playbackState.moves.length}
+                      status={playbackState.status}
+                      direction={playbackState.direction}
+                      disabled={isAnimating}
+                      onPlay={play}
+                      onPause={pause}
+                      onNext={next}
+                      onPrevious={previous}
+                      onReversePlay={reversePlay}
+                      onReset={reset}
+                    />
+                    <ManualCubeControls
+                      state={cubeState}
+                      disabled={isAnimating}
+                      onMove={(move) => {
+                        clearTeachingLessons();
+                        void applyMove(move).catch(() => undefined);
+                      }}
+                      onPreviewChange={setFacePreview}
+                      onReset={reset}
+                    />
+                  </div>
+                </section>
+              )}
             </div>
           </div>
           {moveError && <p role="alert">Error applying move.</p>}
         </>
       )}
     </main>
+  );
+}
+
+interface ManualCubeControlsProps {
+  readonly state: CubeStateResponseDto['state'];
+  readonly disabled: boolean;
+  readonly onMove: (move: CubeMove) => void;
+  readonly onPreviewChange: (preview: FacePreview | null) => void;
+  readonly onReset: () => void;
+}
+
+function ManualCubeControls({
+  state,
+  disabled,
+  onMove,
+  onPreviewChange,
+  onReset,
+}: ManualCubeControlsProps) {
+  return (
+    <>
+      <FaceControlPanel
+        state={state}
+        onMove={onMove}
+        onPreviewChange={onPreviewChange}
+        disabled={disabled}
+      />
+      <button
+        className="cube-reset-control"
+        type="button"
+        disabled={disabled}
+        onClick={onReset}
+      >
+        Reset cube
+      </button>
+    </>
   );
 }
 

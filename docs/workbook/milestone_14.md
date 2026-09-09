@@ -20,6 +20,8 @@ Milestone 13が返す順列解析を教材UIへ接続し、3-cycleの対象・�
 
 REST DTOのposition labelは教材上の表示に使い、同じpermutation entryの安定Cubie IDは3D対象の追跡に使う。再生処理は既存の`usePlayback`へ集約し、M14専用の別state machineは作らない。
 
+右カラムは上位のPractice / Analysisタブに分ける。速度設定は全モード共通としてタブより上へ置く。AnalysisはCommutatorと3-cycle教材を優先し、Playbackと手動操作盤は下段へ置く。将来は同じ上位navigationへTutorialを追加できる構造にする。
+
 ## 自力実装部分
 
 0件。Milestone 10以降の運用ルールに従い、実装・テストはAgent担当とする。

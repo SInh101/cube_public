@@ -17,11 +17,11 @@ import { App } from './App';
 
 vi.mock('./components', () => ({
   DEFAULT_ANIMATION_DURATION_MS: 240,
-  AnimationSpeedControl: () => null,
-  FaceControlPanel: () => null,
+  AnimationSpeedControl: () => <div data-testid="animation-speed" />,
+  FaceControlPanel: () => <div data-testid="manual-controls" />,
   MoveSequenceControl: () => null,
   PlaybackControls: () => null,
-  PresetPanel: () => null,
+  PresetPanel: () => <div data-testid="preset-panel" />,
   CommutatorTeachingPanel: () => null,
   findChangedCubieIds: () => [],
   CubeView: ({
@@ -173,6 +173,30 @@ afterEach(() => {
 });
 
 describe('Milestone 14 cycle teaching integration', () => {
+  it('Tool mode: 速度を上部に保ち、通常操作と解析教材を分離する', async () => {
+    vi.stubGlobal('fetch', createFetchMock());
+    render(<App />);
+    const practiceTab = await screen.findByRole('tab', { name: 'Practice' });
+    const speed = screen.getByTestId('animation-speed');
+    expect(speed.compareDocumentPosition(practiceTab)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(screen.getByTestId('preset-panel')).toBeTruthy();
+    expect(screen.queryByLabelText('Cycle ready')).toBeNull();
+  });
+
+  it('Tool mode: Analysisでは教材を手動操作盤より上に置く', async () => {
+    vi.stubGlobal('fetch', createFetchMock());
+    render(<App />);
+    fireEvent.click(await screen.findByRole('tab', { name: 'Analysis' }));
+    const cyclePanel = screen.getByLabelText('Cycle ready');
+    const manualControls = screen.getByTestId('manual-controls');
+    expect(cyclePanel.compareDocumentPosition(manualControls)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(screen.queryByTestId('preset-panel')).toBeNull();
+  });
+
   it('M14-UI-01: 対象3 pieceのCubie IDを強調する', async () => {
     await renderAnalyzedApp();
     expect(screen.getByLabelText('Highlighted cubies').textContent).toBe(
@@ -277,6 +301,7 @@ async function renderAnalyzedApp() {
   const fetchMock = createFetchMock();
   vi.stubGlobal('fetch', fetchMock);
   render(<App />);
+  fireEvent.click(await screen.findByRole('tab', { name: 'Analysis' }));
   fireEvent.click(
     await screen.findByRole('button', { name: 'Analyze sequence' }),
   );

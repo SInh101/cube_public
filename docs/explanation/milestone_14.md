@@ -23,7 +23,17 @@
 ## `apps/web/src/App.tsx`
 
 - 役割: analysis REST境界、教材UI、CubeView、既存playbackを統合する。
-- コード要約: 解析結果から初期cycleを選択し、movesを`usePlayback`へ設定する。解析結果とplayback queueが一致するまで再生を止め、更新競合を防ぐ。別の操作体系を開始した場合は古い教材表示を消す。
+- コード要約: 解析結果から初期cycleを選択し、movesを`usePlayback`へ設定する。解析結果とplayback queueが一致するまで再生を止め、更新競合を防ぐ。Practice / Analysisを切り替え、Analysisでは教材、共通Playback、手動操作盤の順に配置する。タブ切替時は再生をpauseするが、Cube状態と解析結果は保持する。
+
+## `apps/web/src/components/ToolModeTabs.tsx`
+
+- 役割: 通常操作と解析教材を切り替える上位navigationを提供する。
+- コード要約: WAI-ARIAのtab / tabpanel関係を使い、PracticeとAnalysisを選択する。独立した`ToolMode`へ将来Tutorialを追加できる。
+
+## `apps/web/src/components/tool-mode-tabs.css`
+
+- 役割: 上位タブとモード内パネル、Analysis下段の手動操作領域を視覚的に区切る。
+- コード要約: 選択tabを強調し、教材と低優先度操作盤の間へseparatorを置く。
 
 ## テストファイル
 
@@ -33,4 +43,4 @@
 
 ## 後続への配慮
 
-解析はCoreをFrontendへ直接持ち込まずREST DTOだけに依存する。3D表示は安定Cubie ID、再生は共通`usePlayback`を利用するため、将来の操作方式追加でも解析・描画・再生を独立して交換できる。
+解析はCoreをFrontendへ直接持ち込まずREST DTOだけに依存する。3D表示は安定Cubie ID、再生は共通`usePlayback`を利用するため、将来の操作方式追加でも解析・描画・再生を独立して交換できる。Tutorialは上位モードとして追加でき、共有CubeViewと速度設定を再利用できる。

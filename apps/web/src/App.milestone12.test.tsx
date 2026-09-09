@@ -123,6 +123,7 @@ describe('Milestone 12 commutator teaching integration', () => {
     const fetchMock = createFetchMock();
     vi.stubGlobal('fetch', fetchMock);
     render(<App />);
+    await openAnalysis();
 
     fireEvent.click(
       await screen.findByRole('button', { name: 'Prepare commutator' }),
@@ -151,6 +152,7 @@ describe('Milestone 12 commutator teaching integration', () => {
     const fetchMock = createFetchMock();
     vi.stubGlobal('fetch', fetchMock);
     render(<App />);
+    await openAnalysis();
 
     fireEvent.click(
       await screen.findByRole('button', { name: 'Prepare commutator' }),
@@ -179,6 +181,7 @@ describe('Milestone 12 commutator teaching integration', () => {
   it('M12-RG-01: 同じ交換子を再準備すると先頭部分へ戻る', async () => {
     vi.stubGlobal('fetch', createFetchMock());
     render(<App />);
+    await openAnalysis();
 
     const prepareButton = await screen.findByRole('button', {
       name: 'Prepare commutator',
@@ -221,6 +224,7 @@ describe('Milestone 12 commutator teaching integration', () => {
     const fetchMock = createFetchMock();
     vi.stubGlobal('fetch', fetchMock);
     render(<App />);
+    await openAnalysis();
 
     fireEvent.click(
       await screen.findByRole('button', { name: 'Prepare commutator' }),
@@ -250,6 +254,10 @@ function moveRequestCount(
   return fetchMock.mock.calls.filter(([input]) =>
     String(input).endsWith('/moves'),
   ).length;
+}
+
+async function openAnalysis(): Promise<void> {
+  fireEvent.click(await screen.findByRole('tab', { name: 'Analysis' }));
 }
 
 function createFetchMock() {

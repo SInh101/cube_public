@@ -26,6 +26,9 @@
 - Play allとReverse allはanimation完了を待って順に送る
 - animation完了前にstepを更新しない
 - analysis APIの呼び出し自体はMove APIを呼ばない
+- PracticeとAnalysisを上位tabで分離する
+- 速度設定はtabより前、Analysisの手動操作盤は教材より後に配置する
+- PresetはPracticeだけに表示する
 
 ## 回帰ゲート
 

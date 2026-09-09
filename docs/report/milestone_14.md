@@ -12,6 +12,9 @@
 - Next / Previous / Play all / Reverse all
 - animation完了単位のstep同期
 - playback queue切替時の競合防止
+- Practice / Analysisの上位タブ分離
+- 全モード共通の速度設定
+- Analysis内で教材を優先し、Playbackと手動操作盤を下段へ配置
 
 ## 自力実装
 
@@ -25,7 +28,7 @@
 
 M14専用のview model、component、App統合テストに加え、全Milestoneの回帰テストを実行した。
 
-- Vitest: 38ファイル、329件成功、todo 0件
+- Vitest: 39ファイル、333件成功、todo 0件
 - TypeScript: 全workspace成功
 - ESLint: 成功
 - Prettier check: 成功
